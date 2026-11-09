@@ -202,6 +202,13 @@
         <option value="Mario Jose Ynojoza Castillo">Mario Jose Ynojoza Castillo</option>
       </select>
 
+      <label for="sucursal">Selecciona la Sucursal:</label>
+      <select id="sucursal">
+        <option value="">-- Seleccionar Sucursal --</option>
+        <option value="HyperMarket SLWA C.A. (Principal)">HyperMarket SLWA C.A. (Principal)</option>
+        <option value="HyperMarket SLWA C.A. II">HyperMarket SLWA C.A. II</option>
+      </select>
+
       <label for="turno">Selecciona tu Turno:</label>
       <select id="turno" onchange="verificarVentanaTiempo()">
         <option value="">-- Seleccionar Turno --</option>
@@ -214,7 +221,7 @@
         <button id="btnSalida" class="btn-out" onclick="marcarAsistencia('SALIDA')" disabled>Salida</button>
       </div>
 
-      <div id="status">Seleccione su nombre y turno para verificar disponibilidad.</div>
+      <div id="status">Seleccione su nombre, sucursal y turno para verificar disponibilidad.</div>
 
       <div class="admin-section">
         <button class="admin-btn" onclick="solicitarDesbloqueo()">🔓 ¿Llegaste tarde? Desbloqueo Admin</button>
@@ -226,9 +233,12 @@
   // URL de tu Apps Script
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsPQpVZ_UjwI1R-ZtxbToS49On2XZXJAGVdbLCSzY1cQH8axhkBxDzwxwWQYXthUEq/exec";
 
-  // COORDENADAS EXACTAS DEL LUGAR DE TRABAJO (Sustituir con lat/lng reales)
-  const LOCAL_LAT = 10.123456; 
-  const LOCAL_LNG = -68.123456;
+  // COORDENADAS DE LAS DOS SUCURSALES
+  const LOCACIONES = {
+    "HyperMarket SLWA C.A. (Principal)": { lat: 10.243544950163466, lng: -68.76970601509083 },
+    "HyperMarket SLWA C.A. II": { lat: 10.2483362545119, lng: -68.76544580796221 }
+  };
+
   const RADIO_MAXIMO_METROS = 10; // Límite estricto de 10 metros
   const PIN_ADMIN = "1984"; // PIN para supervisor
 
@@ -329,8 +339,14 @@
 
   function marcarAsistencia(accion) {
     const empleado = document.getElementById('empleado').value;
+    const sucursalSeleccionada = document.getElementById('sucursal').value;
     const turno = document.getElementById('turno').value;
     const statusDiv = document.getElementById('status');
+
+    if (!sucursalSeleccionada) {
+      alert("Por favor, seleccione la sucursal en la que se encuentra.");
+      return;
+    }
 
     if (!navigator.geolocation) {
       alert("La geolocalización no está soportada en este dispositivo.");
@@ -338,18 +354,20 @@
     }
 
     statusDiv.style.color = "var(--slwa-green-dark)";
-    statusDiv.innerText = "Verificando posición GPS (precisión alta)...";
+    statusDiv.innerText = "Verificando posición GPS con la sucursal seleccionada...";
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const latDevice = position.coords.latitude;
         const lonDevice = position.coords.longitude;
         
-        const distanciaMetros = calcularDistancia(latDevice, lonDevice, LOCAL_LAT, LOCAL_LNG);
+        // Obtener coordenadas de la sucursal elegida
+        const sucursalCoords = LOCACIONES[sucursalSeleccionada];
+        const distanciaMetros = calcularDistancia(latDevice, lonDevice, sucursalCoords.lat, sucursalCoords.lng);
 
         if (distanciaMetros > RADIO_MAXIMO_METROS) {
           statusDiv.style.color = "var(--danger-color)";
-          statusDiv.innerText = `❌ Estás fuera del radio permitido. Distancia: ${Math.round(distanciaMetros)}m (Máx: ${RADIO_MAXIMO_METROS}m).`;
+          statusDiv.innerText = `❌ Fuera del radio de la sucursal seleccionada. Estás a ${Math.round(distanciaMetros)}m (Máx: ${RADIO_MAXIMO_METROS}m).`;
           return;
         }
 
@@ -357,6 +375,7 @@
 
         const payload = {
           empleado: empleado,
+          sucursal: sucursalSeleccionada,
           turno: turno,
           accion: accion,
           estado: estadoRegistro,
@@ -375,8 +394,9 @@
         })
         .then(() => {
           statusDiv.style.color = "var(--slwa-green-medium)";
-          statusDiv.innerText = `¡${accion} registrada correctamente (${estadoRegistro})!`;
+          statusDiv.innerText = `¡${accion} registrada en ${sucursalSeleccionada} (${estadoRegistro})!`;
           document.getElementById('empleado').value = "";
+          document.getElementById('sucursal').value = "";
           document.getElementById('turno').value = "";
           document.getElementById('btnEntrada').disabled = true;
           document.getElementById('btnSalida').disabled = true;
