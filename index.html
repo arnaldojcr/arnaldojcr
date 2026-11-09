@@ -6,29 +6,37 @@
   <title>Control de Asistencia - Hypermarket SLWA C.A.</title>
   <style>
     :root {
-      --primary: #003366; /* Azul corporativo Hypermarket */
-      --secondary: #ff7f00; /* Naranja comercial */
-      --bg-color: #f4f6f9;
+      /* Paleta Hypermarket SLWA C.A. */
+      --slwa-green-dark: #1B4D2E;
+      --slwa-green-medium: #3C8038;
+      --slwa-green-light: #75A438;
+      
+      --slwa-gold: #C59B27;
+      --slwa-gold-light: #E5C558;
+      
+      /* Colores de apoyo UI */
+      --slwa-bg: #F9FBF9;
+      --slwa-text: #222222;
       --card-bg: #ffffff;
-      --text-color: #333333;
+      --danger-color: #c0392b;
     }
 
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      background-color: var(--slwa-bg);
+      color: var(--slwa-text);
     }
 
-    /* Banner Superior */
+    /* Banner Superior Corporativo */
     .banner {
-      background: linear-gradient(135deg, var(--primary), #002244);
+      background: linear-gradient(135deg, var(--slwa-green-dark), var(--slwa-green-medium));
       color: white;
       text-align: center;
       padding: 22px 15px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      border-bottom: 4px solid var(--secondary);
+      border-bottom: 4px solid var(--slwa-gold);
     }
 
     .banner h1 {
@@ -36,12 +44,14 @@
       font-size: 22px;
       letter-spacing: 0.5px;
       text-transform: uppercase;
+      color: #ffffff;
     }
 
     .banner p {
       margin: 5px 0 0 0;
       font-size: 13px;
-      color: #e0e0e0;
+      color: var(--slwa-gold-light);
+      font-weight: 500;
     }
 
     .container {
@@ -55,12 +65,12 @@
       padding: 25px;
       border-radius: 12px;
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-      border-top: 5px solid var(--primary);
+      border-top: 5px solid var(--slwa-green-dark);
     }
 
     h2 {
       text-align: center;
-      color: var(--primary);
+      color: var(--slwa-green-dark);
       margin-top: 0;
       margin-bottom: 20px;
       font-size: 20px;
@@ -71,7 +81,7 @@
       display: block;
       margin-top: 12px;
       margin-bottom: 6px;
-      color: #444;
+      color: var(--slwa-green-dark);
       font-size: 14px;
     }
 
@@ -83,11 +93,12 @@
       border: 1px solid #ccc;
       font-size: 15px;
       box-sizing: border-box;
-      background-color: #fafafa;
+      background-color: var(--slwa-bg);
+      color: var(--slwa-text);
     }
 
     select:focus, input:focus {
-      border-color: var(--secondary);
+      border-color: var(--slwa-gold);
       outline: none;
       background-color: #fff;
     }
@@ -107,19 +118,29 @@
       border-radius: 8px;
       cursor: pointer;
       color: white;
-      transition: 0.2s;
+      transition: background-color 0.2s;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .btn-in { background-color: #28a745; }
-    .btn-in:hover:not(:disabled) { background-color: #218838; }
+    /* Botón Entrada - Verde Medio SLWA */
+    .btn-in { 
+      background-color: var(--slwa-green-medium); 
+    }
+    .btn-in:hover:not(:disabled) { 
+      background-color: var(--slwa-green-dark); 
+    }
 
-    .btn-out { background-color: #17a2b8; }
-    .btn-out:hover:not(:disabled) { background-color: #138496; }
+    /* Botón Salida - Dorado SLWA */
+    .btn-out { 
+      background-color: var(--slwa-gold); 
+    }
+    .btn-out:hover:not(:disabled) { 
+      background-color: #b08920; 
+    }
 
     button:disabled {
-      background-color: #d6d8db;
-      color: #6c757d;
+      background-color: #e0e0e0;
+      color: #999999;
       cursor: not-allowed;
       box-shadow: none;
     }
@@ -129,30 +150,34 @@
       text-align: center;
       font-weight: bold;
       font-size: 14px;
-      padding: 10px;
+      padding: 12px;
       border-radius: 6px;
-      background-color: #f8f9fa;
+      background-color: var(--slwa-bg);
+      border: 1px solid #e2e8e2;
     }
 
     .admin-section {
       margin-top: 25px;
       padding-top: 15px;
-      border-top: 1px dashed #ddd;
+      border-top: 1px dashed #ccc;
       text-align: center;
     }
 
     .admin-btn {
-      background-color: #6c757d;
+      background-color: var(--slwa-green-dark);
+      color: white;
       font-size: 12px;
-      padding: 8px 12px;
+      padding: 8px 14px;
       width: auto;
     }
-    .admin-btn:hover { background-color: #5a6268; }
+    .admin-btn:hover { 
+      background-color: var(--slwa-green-medium); 
+    }
   </style>
 </head>
 <body>
 
-  <!-- Banner Institucional -->
+  <!-- Banner Institucional con Paleta SLWA -->
   <div class="banner">
     <h1>Hypermarket SLWA C.A.</h1>
     <p>Sistema de Control de Asistencia y Geocercas</p>
@@ -229,13 +254,14 @@
     if (!empleado || !turno) {
       btnEntrada.disabled = true;
       btnSalida.disabled = true;
+      statusDiv.style.color = "var(--slwa-text)";
       statusDiv.innerText = "Seleccione su nombre y turno.";
       return;
     }
 
     if (estadoForzadoTarde) {
       btnEntrada.disabled = false;
-      statusDiv.style.color = "#d9534f";
+      statusDiv.style.color = "var(--slwa-gold)";
       statusDiv.innerText = "⚠️ Acceso habilitado por el Administrador (Llegada Tarde).";
       return;
     }
@@ -277,7 +303,99 @@
     btnSalida.disabled = !salidaPermitida;
 
     if (esTarde) {
-      statusDiv.style.color = "#d9534f";
+      statusDiv.style.color = "var(--danger-color)";
       statusDiv.innerText = "❌ Horario de entrada vencido. Llegada tarde. Solicite habilitación al administrador.";
     } else if (!entradaPermitida && !salidaPermitida) {
-      statusDiv.style.color =
+      statusDiv.style.color = "var(--slwa-text)";
+      statusDiv.innerText = "⏳ Fuera de horario permitido (Los botones se abren 10 minutos antes).";
+    } else {
+      statusDiv.style.color = "var(--slwa-green-medium)";
+      statusDiv.innerText = "✅ Botones habilitados en horario correcto.";
+    }
+  }
+
+  function solicitarDesbloqueo() {
+    const pin = prompt("Ingrese el PIN de Administrador para habilitar la entrada tarde:");
+    if (pin === PIN_ADMIN) {
+      estadoForzadoTarde = true;
+      verificarVentanaTiempo();
+      alert("¡Acceso desbloqueado con éxito!");
+    } else if (pin !== null) {
+      alert("PIN incorrecto.");
+    }
+  }
+
+  function marcarAsistencia(accion) {
+    const empleado = document.getElementById('empleado').value;
+    const turno = document.getElementById('turno').value;
+    const statusDiv = document.getElementById('status');
+
+    if (!navigator.geolocation) {
+      alert("La geolocalización no está soportada en este dispositivo.");
+      return;
+    }
+
+    statusDiv.style.color = "var(--slwa-green-dark)";
+    statusDiv.innerText = "Verificando posición GPS (precisión alta)...";
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latDevice = position.coords.latitude;
+        const lonDevice = position.coords.longitude;
+        
+        const distanciaMetros = calcularDistancia(latDevice, lonDevice, LOCAL_LAT, LOCAL_LNG);
+
+        if (distanciaMetros > RADIO_MAXIMO_METROS) {
+          statusDiv.style.color = "var(--danger-color)";
+          statusDiv.innerText = `❌ Estás fuera del radio permitido. Distancia: ${Math.round(distanciaMetros)}m (Máx: ${RADIO_MAXIMO_METROS}m).`;
+          return;
+        }
+
+        let estadoRegistro = estadoForzadoTarde ? "Tarde (Autorizado)" : "A tiempo";
+
+        const payload = {
+          empleado: empleado,
+          turno: turno,
+          accion: accion,
+          estado: estadoRegistro,
+          distancia: distanciaMetros,
+          latitud: latDevice,
+          longitud: lonDevice
+        };
+
+        statusDiv.innerText = "Enviando datos al sistema...";
+
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+        .then(() => {
+          statusDiv.style.color = "var(--slwa-green-medium)";
+          statusDiv.innerText = `¡${accion} registrada correctamente (${estadoRegistro})!`;
+          document.getElementById('empleado').value = "";
+          document.getElementById('turno').value = "";
+          document.getElementById('btnEntrada').disabled = true;
+          document.getElementById('btnSalida').disabled = true;
+          estadoForzadoTarde = false;
+        })
+        .catch(error => {
+          statusDiv.style.color = "var(--danger-color)";
+          statusDiv.innerText = "Error de conexión al guardar el registro.";
+          console.error(error);
+        });
+      },
+      (error) => {
+        statusDiv.style.color = "var(--danger-color)";
+        statusDiv.innerText = "Debe activar el GPS y permitir el acceso a la ubicación en su navegador.";
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
+  }
+
+  setInterval(verificarVentanaTiempo, 60000);
+</script>
+
+</body>
+</html>
