@@ -3,69 +3,207 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Asistencia - Hypermarket SLWA</title>
+  <title>Control de Asistencia - Hypermarket SLWA C.A.</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; background-color: #f4f6f9; }
-    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #333; margin-bottom: 20px; }
-    label { font-weight: bold; display: block; margin-top: 12px; margin-bottom: 6px; color: #555; }
-    select, input { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
-    .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-    button { flex: 1; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; transition: 0.2s; }
+    :root {
+      --primary: #003366; /* Azul corporativo Hypermarket */
+      --secondary: #ff7f00; /* Naranja comercial */
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    /* Banner Superior */
+    .banner {
+      background: linear-gradient(135deg, var(--primary), #002244);
+      color: white;
+      text-align: center;
+      padding: 22px 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      border-bottom: 4px solid var(--secondary);
+    }
+
+    .banner h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .banner p {
+      margin: 5px 0 0 0;
+      font-size: 13px;
+      color: #e0e0e0;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+      border-top: 5px solid var(--primary);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      color: #444;
+      font-size: 14px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      box-sizing: border-box;
+      background-color: #fafafa;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--secondary);
+      outline: none;
+      background-color: #fff;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
     .btn-in { background-color: #28a745; }
+    .btn-in:hover:not(:disabled) { background-color: #218838; }
+
     .btn-out { background-color: #17a2b8; }
-    button:disabled { background-color: #ccc; cursor: not-allowed; }
-    #status { margin-top: 15px; text-align: center; font-weight: bold; font-size: 14px; }
-    .admin-section { margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd; text-align: center; }
-    .admin-btn { background-color: #6c757d; font-size: 13px; padding: 8px; width: auto; }
+    .btn-out:hover:not(:disabled) { background-color: #138496; }
+
+    button:disabled {
+      background-color: #d6d8db;
+      color: #6c757d;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #status {
+      margin-top: 18px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: #f8f9fa;
+    }
+
+    .admin-section {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 1px dashed #ddd;
+      text-align: center;
+    }
+
+    .admin-btn {
+      background-color: #6c757d;
+      font-size: 12px;
+      padding: 8px 12px;
+      width: auto;
+    }
+    .admin-btn:hover { background-color: #5a6268; }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>Control de Asistencia</h2>
-  
-  <label for="empleado">Selecciona tu Nombre:</label>
-  <select id="empleado" onchange="verificarVentanaTiempo()">
-    <option value="">-- Seleccionar Empleado --</option>
-    <option value="Jesus Rafael Marcano Perez">Jesus Rafael Marcano Perez</option>
-    <option value="Mario Jose Ynojoza Castillo">Mario Jose Ynojoza Castillo</option>
-    <option value="Gabriel Antonio Almeron Chavez">Gabriel Antonio Almeron Chavez</option>
-    <option value="Carlos Jose Gregorio Colmenarez Talavera">Carlos Jose Gregorio Colmenarez Talavera</option>
-    <option value="Jose Miguel Juarez Castillo">Jose Miguel Juarez Castillo</option>
-    <option value="Jeancarlo Abraham Rangel Cedeño">Jeancarlo Abraham Rangel Cedeño</option>
-    <option value="Eduardo Jose Vargas Cardenas">Eduardo Jose Vargas Cardenas</option>
-    <option value="Diego Rinaldy Materan Sanchez">Diego Rinaldy Materan Sanchez</option>
-  </select>
-
-  <label for="turno">Selecciona tu Turno:</label>
-  <select id="turno" onchange="verificarVentanaTiempo()">
-    <option value="">-- Seleccionar Turno --</option>
-    <option value="Turno 01">Turno 01 (07:00 am - 03:00 pm)</option>
-    <option value="Turno 02">Turno 02 (03:00 pm - 10:00 pm)</option>
-  </select>
-
-  <div class="btn-group">
-    <button id="btnEntrada" class="btn-in" onclick="marcarAsistencia('ENTRADA')" disabled>Entrada</button>
-    <button id="btnSalida" class="btn-out" onclick="marcarAsistencia('SALIDA')" disabled>Salida</button>
+  <!-- Banner Institucional -->
+  <div class="banner">
+    <h1>Hypermarket SLWA C.A.</h1>
+    <p>Sistema de Control de Asistencia y Geocercas</p>
   </div>
 
-  <div id="status">Seleccione su nombre y turno para verificar disponibilidad.</div>
+  <div class="container">
+    <div class="card">
+      <h2>Registro de Personal</h2>
+      
+      <label for="empleado">Selecciona tu Nombre:</label>
+      <select id="empleado" onchange="verificarVentanaTiempo()">
+        <option value="">-- Seleccionar Empleado --</option>
+        <option value="Jesus Rafael Marcano Perez">Jesus Rafael Marcano Perez</option>
+        <option value="Mario Jose Ynojoza Castillo">Mario Jose Ynojoza Castillo</option>
+        <option value="Gabriel Antonio Almeron Chavez">Gabriel Antonio Almeron Chavez</option>
+        <option value="Carlos Jose Gregorio Colmenarez Talavera">Carlos Jose Gregorio Colmenarez Talavera</option>
+        <option value="Jose Miguel Juarez Castillo">Jose Miguel Juarez Castillo</option>
+        <option value="Jeancarlo Abraham Rangel Cedeño">Jeancarlo Abraham Rangel Cedeño</option>
+        <option value="Eduardo Jose Vargas Cardenas">Eduardo Jose Vargas Cardenas</option>
+        <option value="Diego Rinaldy Materan Sanchez">Diego Rinaldy Materan Sanchez</option>
+      </select>
 
-  <div class="admin-section">
-    <button class="admin-btn" onclick="solicitarDesbloqueo()">🔓 ¿Llegaste tarde? Desbloqueo Admin</button>
+      <label for="turno">Selecciona tu Turno:</label>
+      <select id="turno" onchange="verificarVentanaTiempo()">
+        <option value="">-- Seleccionar Turno --</option>
+        <option value="Turno 01">Turno 01 (07:00 am - 03:00 pm)</option>
+        <option value="Turno 02">Turno 02 (03:00 pm - 10:00 pm)</option>
+      </select>
+
+      <div class="btn-group">
+        <button id="btnEntrada" class="btn-in" onclick="marcarAsistencia('ENTRADA')" disabled>Entrada</button>
+        <button id="btnSalida" class="btn-out" onclick="marcarAsistencia('SALIDA')" disabled>Salida</button>
+      </div>
+
+      <div id="status">Seleccione su nombre y turno para verificar disponibilidad.</div>
+
+      <div class="admin-section">
+        <button class="admin-btn" onclick="solicitarDesbloqueo()">🔓 ¿Llegaste tarde? Desbloqueo Admin</button>
+      </div>
+    </div>
   </div>
-</div>
 
 <script>
   // URL de tu Apps Script
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsPQpVZ_UjwI1R-ZtxbToS49On2XZXJAGVdbLCSzY1cQH8axhkBxDzwxwWQYXthUEq/exec";
 
-  // COORDENADAS EXACTAS DEL LUGAR DE TRABAJO (Modifica aquí con latitud y longitud reales)
+  // COORDENADAS EXACTAS DEL LUGAR DE TRABAJO
   const LOCAL_LAT = 10.123456; 
   const LOCAL_LNG = -68.123456;
   const RADIO_MAXIMO_METROS = 10; // Límite estricto de 10 metros
-  const PIN_ADMIN = "1984"; // PIN para que el supervisor desbloquee si hay retraso
+  const PIN_ADMIN = "1984"; // PIN para supervisor
 
   let estadoForzadoTarde = false;
 
@@ -97,7 +235,7 @@
 
     if (estadoForzadoTarde) {
       btnEntrada.disabled = false;
-      statusDiv.style.color = "orange";
+      statusDiv.style.color = "#d9534f";
       statusDiv.innerText = "⚠️ Acceso habilitado por el Administrador (Llegada Tarde).";
       return;
     }
@@ -107,33 +245,29 @@
     const minutos = ahora.getMinutes();
     const tiempoMinutosActual = horas * 60 + minutos;
 
-    // Definición de minutos de turnos
-    // Turno 1: 07:00 (420 min) a 15:00 (900 min). Entrada permitida de 06:50 (410) a 07:00 (420). Salida de 14:50 (890) a 15:30 (930).
-    // Turno 2: 15:00 (900 min) a 22:00 (1320 min). Entrada permitida de 14:50 (890) a 15:00 (900). Salida de 21:50 (1310) a 22:30 (1350).
-
     let entradaPermitida = false;
     let salidaPermitida = false;
     let esTarde = false;
 
     if (turno === "Turno 01") {
-      // Ventana de entrada: 06:50 a 07:00
+      // Ventana de entrada: 06:50 a 07:00 (410 a 420 min)
       if (tiempoMinutosActual >= 410 && tiempoMinutosActual <= 420) {
         entradaPermitida = true;
       } else if (tiempoMinutosActual > 420 && tiempoMinutosActual < 900) {
         esTarde = true;
       }
-      // Ventana de salida: 14:50 a 15:30
+      // Ventana de salida: 14:50 a 15:30 (890 a 930 min)
       if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 930) {
         salidaPermitida = true;
       }
     } else if (turno === "Turno 02") {
-      // Ventana de entrada: 14:50 a 15:00
+      // Ventana de entrada: 14:50 a 15:00 (890 a 900 min)
       if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 900) {
         entradaPermitida = true;
       } else if (tiempoMinutosActual > 900 && tiempoMinutosActual < 1320) {
         esTarde = true;
       }
-      // Ventana de salida: 21:50 a 22:30
+      // Ventana de salida: 21:50 a 22:30 (1310 a 1350 min)
       if (tiempoMinutosActual >= 1310 && tiempoMinutosActual <= 1350) {
         salidaPermitida = true;
       }
@@ -143,101 +277,7 @@
     btnSalida.disabled = !salidaPermitida;
 
     if (esTarde) {
-      statusDiv.style.color = "red";
-      statusDiv.innerText = "❌ Horario de entrada vencido. Llegada tarde detectada. Solicite habilitación al administrador.";
+      statusDiv.style.color = "#d9534f";
+      statusDiv.innerText = "❌ Horario de entrada vencido. Llegada tarde. Solicite habilitación al administrador.";
     } else if (!entradaPermitida && !salidaPermitida) {
-      statusDiv.style.color = "#555";
-      statusDiv.innerText = "⏳ Fuera de horario permitido (Los botones se abren 10 minutos antes).";
-    } else {
-      statusDiv.style.color = "green";
-      statusDiv.innerText = "✅ Botones habilitados en horario correcto.";
-    }
-  }
-
-  function solicitarDesbloqueo() {
-    const pin = prompt("Ingrese el PIN de Administrador para habilitar la entrada tarde:");
-    if (pin === PIN_ADMIN) {
-      estadoForzadoTarde = true;
-      verificarVentanaTiempo();
-      alert("¡Acceso desbloqueado con éxito!");
-    } else if (pin !== null) {
-      alert("PIN incorrecto.");
-    }
-  }
-
-  function marcarAsistencia(accion) {
-    const empleado = document.getElementById('empleado').value;
-    const turno = document.getElementById('turno').value;
-    const statusDiv = document.getElementById('status');
-
-    if (!navigator.geolocation) {
-      alert("La geolocalización no está soportada en este dispositivo.");
-      return;
-    }
-
-    statusDiv.style.color = "#0056b3";
-    statusDiv.innerText = "Verificando posición GPS (precisión alta)...";
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const latDevice = position.coords.latitude;
-        const lonDevice = position.coords.longitude;
-        
-        // Calcular distancia al punto de trabajo
-        const distanciaMetros = calcularDistancia(latDevice, lonDevice, LOCAL_LAT, LOCAL_LNG);
-
-        if (distanciaMetros > RADIO_MAXIMO_METROS) {
-          statusDiv.style.color = "red";
-          statusDiv.innerText = `❌ Estás fuera del radio permitido. Distancia actual: ${Math.round(distanciaMetros)}m (Máximo permitido: ${RADIO_MAXIMO_METROS}m).`;
-          return;
-        }
-
-        let estadoRegistro = estadoForzadoTarde ? "Tarde (Autorizado)" : "A tiempo";
-
-        const payload = {
-          empleado: empleado,
-          turno: turno,
-          accion: accion,
-          estado: estadoRegistro,
-          distancia: distanciaMetros,
-          latitud: latDevice,
-          longitud: lonDevice
-        };
-
-        statusDiv.innerText = "Enviando datos al sistema...";
-
-        fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        })
-        .then(() => {
-          statusDiv.style.color = "green";
-          statusDiv.innerText = `¡${accion} registrada correctamente (${estadoRegistro})!`;
-          document.getElementById('empleado').value = "";
-          document.getElementById('turno').value = "";
-          document.getElementById('btnEntrada').disabled = true;
-          document.getElementById('btnSalida').disabled = true;
-          estadoForzadoTarde = false;
-        })
-        .catch(error => {
-          statusDiv.style.color = "red";
-          statusDiv.innerText = "Error de conexión al guardar el registro.";
-          console.error(error);
-        });
-      },
-      (error) => {
-        statusDiv.style.color = "red";
-        statusDiv.innerText = "Debe activar el GPS y permitir el acceso a la ubicación en su navegador.";
-      },
-      { enableHighAccuracy: true, timeout: 15000 }
-    );
-  }
-
-  // Comprobar reloj cada minuto de forma automática
-  setInterval(verificarVentanaTiempo, 60000);
-</script>
-
-</body>
-</html>
+      statusDiv.style.color =
