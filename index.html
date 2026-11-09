@@ -203,7 +203,7 @@
       </select>
 
       <label for="sucursal">Selecciona la Sucursal:</label>
-      <select id="sucursal">
+      <select id="sucursal" onchange="verificarVentanaTiempo()">
         <option value="">-- Seleccionar Sucursal --</option>
         <option value="HyperMarket SLWA C.A. (Principal)">HyperMarket SLWA C.A. (Principal)</option>
         <option value="HyperMarket SLWA C.A. II">HyperMarket SLWA C.A. II</option>
@@ -260,16 +260,17 @@
 
   function verificarVentanaTiempo() {
     const empleado = document.getElementById('empleado').value;
+    const sucursal = document.getElementById('sucursal').value;
     const turno = document.getElementById('turno').value;
     const btnEntrada = document.getElementById('btnEntrada');
     const btnSalida = document.getElementById('btnSalida');
     const statusDiv = document.getElementById('status');
 
-    if (!empleado || !turno) {
+    if (!empleado || !sucursal || !turno) {
       btnEntrada.disabled = true;
       btnSalida.disabled = true;
       statusDiv.style.color = "var(--slwa-text)";
-      statusDiv.innerText = "Seleccione su nombre y turno.";
+      statusDiv.innerText = "Seleccione su nombre, sucursal y turno.";
       return;
     }
 
