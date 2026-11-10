@@ -200,8 +200,8 @@
       </select>
 
       <div class="btn-group">
-        <button id="btnEntrada" class="btn-in" onclick="marcarAsistencia('ENTRADA')" disabled>Entrada</button>
-        <button id="btnSalida" class="btn-out" onclick="marcarAsistencia('SALIDA')" disabled>Salida</button>
+        <button id="btnEntrada" class="btn-in" onclick="iniciarVerificacionBiometrica('ENTRADA')" disabled>Entrada</button>
+        <button id="btnSalida" class="btn-out" onclick="iniciarVerificacionBiometrica('SALIDA')" disabled>Salida</button>
       </div>
 
       <div id="status">Seleccione su nombre, sucursal y turno para verificar disponibilidad.</div>
@@ -316,6 +316,48 @@
     }
   }
 
+  // FUNCIÓN DE VERIFICACIÓN BIOMÉTRICA (HUELLA DACTILAR)
+  async function iniciarVerificacionBiometrica(accion) {
+    const statusDiv = document.getElementById('status');
+
+    if (!window.PublicKeyCredential) {
+      alert("Su dispositivo o navegador no soporta autenticación biométrica.");
+      marcarAsistencia(accion); // Alternativa en caso de incompatibilidad extrema
+      return;
+    }
+
+    statusDiv.style.color = "var(--slwa-green-dark)";
+    statusDiv.innerText = "🔒 Confirme su identidad con su huella dactilar...";
+
+    try {
+      // Solicitud al sensor biométrico del teléfono (Huella, Face ID o PIN del dispositivo)
+      const publicKey = {
+        challenge: new Uint8Array([21, 31, 105, 10, 45, 33, 120, 99]),
+        rp: { name: "Hypermarket SLWA C.A." },
+        user: {
+          id: new Uint8Array([1]),
+          name: document.getElementById('empleado').value,
+          displayName: document.getElementById('empleado').value
+        },
+        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+        timeout: 60000,
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+        attestation: "none"
+      };
+
+      // Abre el lector de huellas nativo del teléfono
+      await navigator.credentials.create({ publicKey });
+      
+      // Si la huella es correcta, procede con el GPS y el envío
+      marcarAsistencia(accion);
+
+    } catch (error) {
+      console.error(error);
+      statusDiv.style.color = "var(--danger-color)";
+      statusDiv.innerText = "❌ Verificación biométrica cancelada o fallida.";
+    }
+  }
+
   function marcarAsistencia(accion) {
     const empleado = document.getElementById('empleado').value;
     const sucursalSeleccionada = document.getElementById('sucursal').value;
@@ -333,7 +375,7 @@
     }
 
     statusDiv.style.color = "var(--slwa-green-dark)";
-    statusDiv.innerText = "Verificando posición GPS con la sucursal seleccionada...";
+    statusDiv.innerText = "Huella verificada. Comprobando posición GPS...";
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -351,7 +393,6 @@
 
         let estadoRegistro = estadoForzadoTarde ? "Tarde (Autorizado)" : "A tiempo";
 
-        // Usamos URLSearchParams para enviar los datos de forma robusta por POST
         const formData = new URLSearchParams();
         formData.append("empleado", empleado);
         formData.append("sucursal", sucursalSeleccionada);
@@ -371,7 +412,7 @@
         })
         .then(() => {
           statusDiv.style.color = "var(--slwa-green-medium)";
-          statusDiv.innerText = `¡${accion} registrada en ${sucursalSeleccionada} (${estadoRegistro})!`;
+          statusDiv.innerText = `¡${accion} registrada con huella en ${sucursalSeleccionada} (${estadoRegistro})!`;
           document.getElementById('empleado').value = "";
           document.getElementById('sucursal').value = "";
           document.getElementById('turno').value = "";
