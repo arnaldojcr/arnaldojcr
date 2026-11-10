@@ -342,11 +342,11 @@
 
   function marcarAsistencia(accion) {
     const empleado = document.getElementById('empleado').value;
-    const sucursalSeleccionada = document.getElementById('sucursal').value;
+    const sucursal = document.getElementById('sucursal').value;
     const turno = document.getElementById('turno').value;
     const statusDiv = document.getElementById('status');
 
-    if (!sucursalSeleccionada) {
+    if (!sucursal) {
       alert("Por favor, seleccione la sucursal en la que se encuentra.");
       return;
     }
@@ -365,7 +365,7 @@
         const lonDevice = position.coords.longitude;
         
         // Obtener coordenadas de la sucursal elegida
-        const sucursalCoords = LOCACIONES[sucursalSeleccionada];
+        const sucursalCoords = LOCACIONES[sucursal];
         const distanciaMetros = calcularDistancia(latDevice, lonDevice, sucursalCoords.lat, sucursalCoords.lng);
 
         if (distanciaMetros > RADIO_MAXIMO_METROS) {
@@ -378,7 +378,7 @@
 
         const payload = {
           empleado: empleado,
-          sucursal: sucursalSeleccionada,
+          sucursal: sucursal,
           turno: turno,
           accion: accion,
           estado: estadoRegistro,
@@ -397,7 +397,7 @@
         })
         .then(() => {
           statusDiv.style.color = "var(--slwa-green-medium)";
-          statusDiv.innerText = `¡${accion} registrada en ${sucursalSeleccionada} (${estadoRegistro})!`;
+          statusDiv.innerText = `¡${accion} registrada en ${sucursal} (${estadoRegistro})!`;
           document.getElementById('empleado').value = "";
           document.getElementById('sucursal').value = "";
           document.getElementById('turno').value = "";
