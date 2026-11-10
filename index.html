@@ -154,6 +154,7 @@
       font-size: 12px;
       padding: 8px 14px;
       width: auto;
+      margin: 5px;
     }
     .admin-btn:hover { background-color: var(--slwa-green-medium); }
   </style>
@@ -184,6 +185,9 @@
         <option value="Mario Jose Ynojoza Castillo">Mario Jose Ynojoza Castillo</option>
       </select>
 
+      <label for="pinEmpleado">Código / PIN Personal:</label>
+      <input type="password" id="pinEmpleado" placeholder="Ingrese su PIN de 4 dígitos" maxlength="4" oninput="verificarCampos()">
+
       <label for="sucursal">Selecciona la Sucursal:</label>
       <select id="sucursal" onchange="verificarCampos()">
         <option value="">-- Seleccionar Sucursal --</option>
@@ -204,16 +208,31 @@
         <button id="btnSalida" class="btn-out" onclick="iniciarVerificacionBiometrica('SALIDA')" disabled>Salida</button>
       </div>
 
-      <div id="status">Seleccione su nombre, sucursal y turno para verificar disponibilidad.</div>
+      <div id="status">Seleccione su nombre e ingrese su PIN personal.</div>
 
       <div class="admin-section">
-        <button class="admin-btn" onclick="solicitarDesbloqueo()">🔓 ¿Llegaste tarde? Desbloqueo Admin</button>
+        <button class="admin-btn" onclick="solicitarDesbloqueo()">🔓 Llegada Tarde (Admin)</button>
+        <button class="admin-btn" onclick="reiniciarDispositivoAdmin()">📱 Resetear Dispositivo (Admin)</button>
       </div>
     </div>
   </div>
 
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4l4OWT7MmSWp952rJIh_J4dCHY0-0KX1b2CG-gJe_cCcSWmk0ROP4-SeDI2ZaLXo5/exec";
+
+  // PINs personales únicos por empleado
+  const PIN_EMPLEADOS = {
+    "Carlos Jose Gregorio Colmenarez Talavera": "1011",
+    "Diego Rinaldy Materan Sanchez": "1022",
+    "Eduardo Jose Vargas Cardenas": "1033",
+    "Ernesto Daniel Lopez Bartolome": "1044",
+    "Gabriel Alejandro Vargas Montoya": "1055",
+    "Gabriel Antonio Almeron Chavez": "1066",
+    "Jeancarlo Abraham Rangel Cedeño": "1077",
+    "Jesus Rafael Marcano Perez": "1088",
+    "Jose Miguel Juarez Castillo": "1099",
+    "Mario Jose Ynojoza Castillo": "1100"
+  };
 
   const LOCACIONES = {
     "HyperMarket SLWA C.A. (Principal)": { lat: 10.243544950163466, lng: -68.76970601509083 },
@@ -240,17 +259,39 @@
 
   function verificarCampos() {
     const empleado = document.getElementById('empleado').value;
+    const pinIngresado = document.getElementById('pinEmpleado').value;
     const sucursal = document.getElementById('sucursal').value;
     const turno = document.getElementById('turno').value;
     const btnEntrada = document.getElementById('btnEntrada');
     const btnSalida = document.getElementById('btnSalida');
     const statusDiv = document.getElementById('status');
 
-    if (!empleado || !sucursal || !turno) {
+    if (!empleado || !PIN_EMPLEADOS[empleado] || pinIngresado !== PIN_EMPLEADOS[empleado] || !sucursal || !turno) {
       btnEntrada.disabled = true;
       btnSalida.disabled = true;
-      statusDiv.style.color = "var(--slwa-text)";
-      statusDiv.innerText = "Seleccione su nombre, sucursal y turno.";
+      if (empleado && pinIngresado.length === 4 && pinIngresado !== PIN_EMPLEADOS[empleado]) {
+        statusDiv.style.color = "var(--danger-color)";
+        statusDiv.innerText = "❌ PIN personal incorrecto.";
+      } else {
+        statusDiv.style.color = "var(--slwa-text)";
+        statusDiv.innerText = "Seleccione su nombre, ingrese su PIN, sucursal y turno.";
+      }
+      return;
+    }
+
+    // VALIDACIÓN DE DISPOSITIVO ÚNICO (DEVICE BINDING)
+    const dispositivoGuardado = localStorage.getItem("slwa_device_" + empleado);
+    const idDispositivoActual = obtenerIdDispositivoUnico();
+
+    if (!dispositivoGuardado) {
+      // Primera vez que este empleado usa este teléfono: vinculamos el dispositivo automáticamente
+      localStorage.setItem("slwa_device_" + empleado, idDispositivoActual);
+    } else if (dispositivoGuardado !== idDispositivoActual) {
+      // El empleado está intentando marcar desde el teléfono de otra persona
+      btnEntrada.disabled = true;
+      btnSalida.disabled = true;
+      statusDiv.style.color = "var(--danger-color)";
+      statusDiv.innerText = "🚫 Este empleado ya está vinculado a otro teléfono celular. No puede marcar desde este dispositivo.";
       return;
     }
 
@@ -295,14 +336,24 @@
 
     if (esTarde) {
       statusDiv.style.color = "var(--danger-color)";
-      statusDiv.innerText = "❌ Horario de entrada vencido. Llegada tarde. Solicite habilitación al administrador.";
+      statusDiv.innerText = "❌ Horario de entrada vencido. Soliciite desbloqueo de administrador.";
     } else if (!entradaPermitida && !salidaPermitida) {
       statusDiv.style.color = "var(--slwa-text)";
       statusDiv.innerText = "⏳ Fuera de horario permitido (Los botones se abren 10 minutos antes).";
     } else {
       statusDiv.style.color = "var(--slwa-green-medium)";
-      statusDiv.innerText = "✅ Botones habilitados en horario correcto.";
+      statusDiv.innerText = "✅ Dispositivo verificado y botones habilitados.";
     }
+  }
+
+  // Genera o recupera un identificador de hardware único para el navegador del teléfono
+  function obtenerIdDispositivoUnico() {
+    let deviceId = localStorage.getItem("slwa_unique_device_id");
+    if (!deviceId) {
+      deviceId = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+      localStorage.setItem("slwa_unique_device_id", deviceId);
+    }
+    return deviceId;
   }
 
   function solicitarDesbloqueo() {
@@ -316,21 +367,32 @@
     }
   }
 
-  // FUNCIÓN DE VERIFICACIÓN BIOMÉTRICA (HUELLA DACTILAR)
+  // Función para que el admin pueda desvincular un teléfono si el empleado cambia de equipo
+  function reiniciarDispositivoAdmin() {
+    const pin = prompt("Ingrese el PIN de Administrador para desvincular el teléfono de un empleado:");
+    if (pin === PIN_ADMIN) {
+      const empleadoAReset = prompt("Ingrese el nombre exacto del empleado a desvincular:");
+      if (empleadoAReset) {
+        localStorage.removeItem("slwa_device_" + empleadoAReset);
+        alert(`Dispositivo desvinculado con éxito para ${empleadoAReset}. Ahora podrá registrarse desde un nuevo teléfono.`);
+      }
+    } else if (pin !== null) {
+      alert("PIN incorrecto.");
+    }
+  }
+
   async function iniciarVerificacionBiometrica(accion) {
     const statusDiv = document.getElementById('status');
 
     if (!window.PublicKeyCredential) {
-      alert("Su dispositivo o navegador no soporta autenticación biométrica.");
-      marcarAsistencia(accion); // Alternativa en caso de incompatibilidad extrema
+      marcarAsistencia(accion);
       return;
     }
 
     statusDiv.style.color = "var(--slwa-green-dark)";
-    statusDiv.innerText = "🔒 Confirme su identidad con su huella dactilar...";
+    statusDiv.innerText = "🔒 Confirme con su huella dactilar...";
 
     try {
-      // Solicitud al sensor biométrico del teléfono (Huella, Face ID o PIN del dispositivo)
       const publicKey = {
         challenge: new Uint8Array([21, 31, 105, 10, 45, 33, 120, 99]),
         rp: { name: "Hypermarket SLWA C.A." },
@@ -345,10 +407,7 @@
         attestation: "none"
       };
 
-      // Abre el lector de huellas nativo del teléfono
       await navigator.credentials.create({ publicKey });
-      
-      // Si la huella es correcta, procede con el GPS y el envío
       marcarAsistencia(accion);
 
     } catch (error) {
@@ -364,18 +423,13 @@
     const turno = document.getElementById('turno').value;
     const statusDiv = document.getElementById('status');
 
-    if (!sucursalSeleccionada) {
-      alert("Por favor, seleccione la sucursal en la que se encuentra.");
-      return;
-    }
-
     if (!navigator.geolocation) {
       alert("La geolocalización no está soportada en este dispositivo.");
       return;
     }
 
     statusDiv.style.color = "var(--slwa-green-dark)";
-    statusDiv.innerText = "Huella verificada. Comprobando posición GPS...";
+    statusDiv.innerText = "Verificando posición GPS exacta...";
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -412,8 +466,9 @@
         })
         .then(() => {
           statusDiv.style.color = "var(--slwa-green-medium)";
-          statusDiv.innerText = `¡${accion} registrada con huella en ${sucursalSeleccionada} (${estadoRegistro})!`;
+          statusDiv.innerText = `¡${accion} registrada con éxito en ${sucursalSeleccionada}!`;
           document.getElementById('empleado').value = "";
+          document.getElementById('pinEmpleado').value = "";
           document.getElementById('sucursal').value = "";
           document.getElementById('turno').value = "";
           document.getElementById('btnEntrada').disabled = true;
