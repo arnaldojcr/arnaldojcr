@@ -6,15 +6,11 @@
   <title>Control de Asistencia - Hypermarket SLWA C.A.</title>
   <style>
     :root {
-      /* Paleta Hypermarket SLWA C.A. */
       --slwa-green-dark: #1B4D2E;
       --slwa-green-medium: #3C8038;
       --slwa-green-light: #75A438;
-      
       --slwa-gold: #C59B27;
       --slwa-gold-light: #E5C558;
-      
-      /* Colores de apoyo UI */
       --slwa-bg: #F9FBF9;
       --slwa-text: #222222;
       --card-bg: #ffffff;
@@ -29,7 +25,6 @@
       color: var(--slwa-text);
     }
 
-    /* Banner Superior Corporativo */
     .banner {
       background: linear-gradient(135deg, var(--slwa-green-dark), var(--slwa-green-medium));
       color: white;
@@ -122,19 +117,11 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .btn-in { 
-      background-color: var(--slwa-green-medium); 
-    }
-    .btn-in:hover:not(:disabled) { 
-      background-color: var(--slwa-green-dark); 
-    }
+    .btn-in { background-color: var(--slwa-green-medium); }
+    .btn-in:hover:not(:disabled) { background-color: var(--slwa-green-dark); }
 
-    .btn-out { 
-      background-color: var(--slwa-gold); 
-    }
-    .btn-out:hover:not(:disabled) { 
-      background-color: #b08920; 
-    }
+    .btn-out { background-color: var(--slwa-gold); }
+    .btn-out:hover:not(:disabled) { background-color: #b08920; }
 
     button:disabled {
       background-color: #e0e0e0;
@@ -168,14 +155,11 @@
       padding: 8px 14px;
       width: auto;
     }
-    .admin-btn:hover { 
-      background-color: var(--slwa-green-medium); 
-    }
+    .admin-btn:hover { background-color: var(--slwa-green-medium); }
   </style>
 </head>
 <body>
 
-  <!-- Banner Institucional con Paleta SLWA -->
   <div class="banner">
     <h1>Hypermarket SLWA C.A.</h1>
     <p>Sistema de Control de Asistencia y Geocercas</p>
@@ -229,10 +213,8 @@
   </div>
 
 <script>
-  // URL de tu Apps Script
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXRsD29_-CzpCucGUZjTaKHfVkF-q55uMrcofevpA1rlsLnsrKQ5ftbUEWdE1hMLDw/exec";
 
-  // COORDENADAS DE LAS TRES SUCURSALES
   const LOCACIONES = {
     "HyperMarket SLWA C.A. (Principal)": { lat: 10.243544950163466, lng: -68.76970601509083 },
     "HyperMarket SLWA C.A. II": { lat: 10.2483362545119, lng: -68.76544580796221 },
@@ -369,25 +351,23 @@
 
         let estadoRegistro = estadoForzadoTarde ? "Tarde (Autorizado)" : "A tiempo";
 
-        // OBJETO JSON EXPLÍCITO QUE ENVÍA LA SUCURSAL
-        const payload = {
-          empleado: empleado,
-          sucursal: sucursalSeleccionada,
-          turno: turno,
-          accion: accion,
-          estado: estadoRegistro,
-          distancia: distanciaMetros,
-          latitud: latDevice,
-          longitud: lonDevice
-        };
+        // Usamos URLSearchParams para enviar los datos de forma robusta por POST
+        const formData = new URLSearchParams();
+        formData.append("empleado", empleado);
+        formData.append("sucursal", sucursalSeleccionada);
+        formData.append("turno", turno);
+        formData.append("accion", accion);
+        formData.append("estado", estadoRegistro);
+        formData.append("distancia", distanciaMetros);
+        formData.append("latitud", latDevice);
+        formData.append("longitud", lonDevice);
 
         statusDiv.innerText = "Enviando datos al sistema...";
 
         fetch(SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: formData
         })
         .then(() => {
           statusDiv.style.color = "var(--slwa-green-medium)";
