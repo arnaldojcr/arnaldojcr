@@ -122,7 +122,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* Botón Entrada - Verde Medio SLWA */
     .btn-in { 
       background-color: var(--slwa-green-medium); 
     }
@@ -130,7 +129,6 @@
       background-color: var(--slwa-green-dark); 
     }
 
-    /* Botón Salida - Dorado SLWA */
     .btn-out { 
       background-color: var(--slwa-gold); 
     }
@@ -188,7 +186,7 @@
       <h2>Registro de Personal</h2>
       
       <label for="empleado">Selecciona tu Nombre:</label>
-      <select id="empleado" onchange="verificarVentanaTiempo()">
+      <select id="empleado" onchange="verificarCampos()">
         <option value="">-- Seleccionar Empleado --</option>
         <option value="Carlos Jose Gregorio Colmenarez Talavera">Carlos Jose Gregorio Colmenarez Talavera</option>
         <option value="Diego Rinaldy Materan Sanchez">Diego Rinaldy Materan Sanchez</option>
@@ -203,7 +201,7 @@
       </select>
 
       <label for="sucursal">Selecciona la Sucursal:</label>
-      <select id="sucursal" onchange="verificarVentanaTiempo()">
+      <select id="sucursal" onchange="verificarCampos()">
         <option value="">-- Seleccionar Sucursal --</option>
         <option value="HyperMarket SLWA C.A. (Principal)">HyperMarket SLWA C.A. (Principal)</option>
         <option value="HyperMarket SLWA C.A. II">HyperMarket SLWA C.A. II</option>
@@ -211,7 +209,7 @@
       </select>
 
       <label for="turno">Selecciona tu Turno:</label>
-      <select id="turno" onchange="verificarVentanaTiempo()">
+      <select id="turno" onchange="verificarCampos()">
         <option value="">-- Seleccionar Turno --</option>
         <option value="Turno 01">Turno 01 (07:00 am - 03:00 pm)</option>
         <option value="Turno 02">Turno 02 (03:00 pm - 10:00 pm)</option>
@@ -232,7 +230,7 @@
 
 <script>
   // URL de tu Apps Script
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXRsD29_-CzpCucGUZjTaKHfVkF-q55uMrcofevpA1rlsLnsrKQ5ftbUEWdE1hMLDw/exec";
+  const SCRIPT_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
 
   // COORDENADAS DE LAS TRES SUCURSALES
   const LOCACIONES = {
@@ -241,13 +239,13 @@
     "HyperMarket SLWA C.A. III": { lat: 10.248189357346705, lng: -68.76978399165277 }
   };
 
-  const RADIO_MAXIMO_METROS = 10; // Límite estricto de 10 metros
-  const PIN_ADMIN = "1984"; // PIN para supervisor
+  const RADIO_MAXIMO_METROS = 10; 
+  const PIN_ADMIN = "1984"; 
 
   let estadoForzadoTarde = false;
 
   function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // Radio de la Tierra en metros
+    const R = 6371000;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
@@ -258,7 +256,7 @@
     return R * c;
   }
 
-  function verificarVentanaTiempo() {
+  function verificarCampos() {
     const empleado = document.getElementById('empleado').value;
     const sucursal = document.getElementById('sucursal').value;
     const turno = document.getElementById('turno').value;
@@ -291,24 +289,20 @@
     let esTarde = false;
 
     if (turno === "Turno 01") {
-      // Ventana de entrada: 06:50 a 07:00 (410 a 420 min)
       if (tiempoMinutosActual >= 410 && tiempoMinutosActual <= 420) {
         entradaPermitida = true;
       } else if (tiempoMinutosActual > 420 && tiempoMinutosActual < 900) {
         esTarde = true;
       }
-      // Ventana de salida: 14:50 a 15:30 (890 a 930 min)
       if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 930) {
         salidaPermitida = true;
       }
     } else if (turno === "Turno 02") {
-      // Ventana de entrada: 14:50 a 15:00 (890 a 900 min)
       if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 900) {
         entradaPermitida = true;
       } else if (tiempoMinutosActual > 900 && tiempoMinutosActual < 1320) {
         esTarde = true;
       }
-      // Ventana de salida: 21:50 a 22:30 (1310 a 1350 min)
       if (tiempoMinutosActual >= 1310 && tiempoMinutosActual <= 1350) {
         salidaPermitida = true;
       }
@@ -333,7 +327,7 @@
     const pin = prompt("Ingrese el PIN de Administrador para habilitar la entrada tarde:");
     if (pin === PIN_ADMIN) {
       estadoForzadoTarde = true;
-      verificarVentanaTiempo();
+      verificarCampos();
       alert("¡Acceso desbloqueado con éxito!");
     } else if (pin !== null) {
       alert("PIN incorrecto.");
@@ -342,11 +336,11 @@
 
   function marcarAsistencia(accion) {
     const empleado = document.getElementById('empleado').value;
-    const sucursal = document.getElementById('sucursal').value;
+    const sucursalSeleccionada = document.getElementById('sucursal').value;
     const turno = document.getElementById('turno').value;
     const statusDiv = document.getElementById('status');
 
-    if (!sucursal) {
+    if (!sucursalSeleccionada) {
       alert("Por favor, seleccione la sucursal en la que se encuentra.");
       return;
     }
@@ -364,21 +358,21 @@
         const latDevice = position.coords.latitude;
         const lonDevice = position.coords.longitude;
         
-        // Obtener coordenadas de la sucursal elegida
-        const sucursalCoords = LOCACIONES[sucursal];
+        const sucursalCoords = LOCACIONES[sucursalSeleccionada];
         const distanciaMetros = calcularDistancia(latDevice, lonDevice, sucursalCoords.lat, sucursalCoords.lng);
 
         if (distanciaMetros > RADIO_MAXIMO_METROS) {
           statusDiv.style.color = "var(--danger-color)";
-          statusDiv.innerText = `❌ Fuera del radio de la sucursal seleccionada. Estás a ${Math.round(distanciaMetros)}m (Máx: ${RADIO_MAXIMO_METROS}m).`;
+          statusDiv.innerText = `❌ Fuera del radio de la sucursal. Estás a ${Math.round(distanciaMetros)}m (Máx: ${RADIO_MAXIMO_METROS}m).`;
           return;
         }
 
         let estadoRegistro = estadoForzadoTarde ? "Tarde (Autorizado)" : "A tiempo";
 
+        // OBJETO JSON EXPLÍCITO QUE ENVÍA LA SUCURSAL
         const payload = {
           empleado: empleado,
-          sucursal: sucursal,
+          sucursal: sucursalSeleccionada,
           turno: turno,
           accion: accion,
           estado: estadoRegistro,
@@ -397,7 +391,7 @@
         })
         .then(() => {
           statusDiv.style.color = "var(--slwa-green-medium)";
-          statusDiv.innerText = `¡${accion} registrada en ${sucursal} (${estadoRegistro})!`;
+          statusDiv.innerText = `¡${accion} registrada en ${sucursalSeleccionada} (${estadoRegistro})!`;
           document.getElementById('empleado').value = "";
           document.getElementById('sucursal').value = "";
           document.getElementById('turno').value = "";
@@ -419,7 +413,7 @@
     );
   }
 
-  setInterval(verificarVentanaTiempo, 60000);
+  setInterval(verificarCampos, 60000);
 </script>
 
 </body>
