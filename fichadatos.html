@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HyperMarket SLWA, C.A. - Ficha del Trabajador</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    :root {
+      --hm-dark-green: #1B4D2E;
+      --hm-med-green: #3C8038;
+      --hm-light-green: #75A438;
+      --hm-gold: #C59B27;
+      --hm-light-gold: #E5C558;
+    }
+
+    body {
+      background-color: #f3f6f4;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #1f2937;
+    }
+
+    .bg-hm-dark { background-color: var(--hm-dark-green); }
+    .bg-hm-med { background-color: var(--hm-med-green); }
+    .bg-hm-light { background-color: var(--hm-light-green); }
+    .bg-hm-gold { background-color: var(--hm-gold); }
+    .bg-hm-light-gold { background-color: var(--hm-light-gold); }
+
+    .text-hm-dark { color: var(--hm-dark-green); }
+    .text-hm-med { color: var(--hm-med-green); }
+    .text-hm-gold { color: var(--hm-gold); }
+    .text-hm-light-gold { color: var(--hm-light-gold); }
+
+    .border-hm-dark { border-color: var(--hm-dark-green); }
+    .border-hm-med { border-color: var(--hm-med-green); }
+    .border-hm-gold { border-color: var(--hm-gold); }
+
+    .input-hm {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 0.92rem;
+      transition: all 0.2s ease;
+      background-color: #ffffff;
+    }
+
+    .input-hm:focus {
+      outline: none;
+      border-color: var(--hm-med-green);
+      box-shadow: 0 0 0 3px rgba(60, 128, 56, 0.18);
+    }
+
+    .input-hm[readonly],
+    .input-hm:disabled {
+      background-color: #eef2ef;
+      color: #4b5563;
+      cursor: not-allowed;
+      border-color: #d1d5db;
+    }
+
+    .section-card {
+      background: #ffffff;
+      border-radius: 0.85rem;
+      box-shadow: 0 2px 10px rgba(27, 77, 46, 0.06);
+      border-top: 4px solid var(--hm-dark-green);
+      overflow: hidden;
+    }
+
+    .section-header {
+      background: linear-gradient(90deg, rgba(27,77,46,0.06) 0%, rgba(117,164,56,0.04) 100%);
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .label-hm {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.3rem;
+    }
+
+    .required-star {
+      color: #dc2626;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Barra Superior Corporativa (Sin botones ni accesos externos) -->
+  <header class="bg-hm-dark text-white shadow-lg border-b-4 border-hm-gold sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-hm-gold flex items-center justify-center text-hm-dark font-black text-xl shadow-md">
+          HM
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">
+            HyperMarket SLWA, C.A.
+          </h1>
+          <p class="text-xs text-hm-light-gold font-medium">
+            Ficha de Recolección de Datos del Trabajador &bull; Control de Expediente Laboral
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra de Búsqueda Rápida para Actualizar Empleados -->
+  <section class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-hm-dark/10 text-hm-dark">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <div>
+          <p class="text-xs font-bold text-hm-dark uppercase tracking-wider">Consultar / Actualizar Mis Datos</p>
+          <p class="text-[11px] text-gray-500">Ingrese su ID Único (Ej: EMP-0001) o Cédula (Ej: V-12.345.678)</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 flex-1 max-w-xl">
+        <input type="text" id="searchQuery" placeholder="EMP-0001 o V-00.000.000"
+          class="input-hm text-sm font-medium"
+          onkeydown="if(event.key==='Enter'){event.preventDefault(); searchEmployee();}" />
+        <button type="button" onclick="searchEmployee()"
+          class="px-4 py-2 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-sm font-semibold transition flex items-center gap-2 whitespace-nowrap cursor-pointer">
+          <i class="fa-solid fa-search"></i> Buscar
+        </button>
+        <button type="button" onclick="resetToNewEmployee()"
+          class="px-3.5 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-700 text-sm font-semibold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+          <i class="fa-solid fa-user-plus text-hm-med"></i> Nuevo
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notificaciones / Alertas -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+  <!-- Contenedor Principal del Formulario -->
+  <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-1">
+    <form id="employeeForm" class="space-y-6" novalidate>
+
+      <!-- Encabezado de Estado e ID Único -->
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="px-3.5 py-2 rounded-lg bg-hm-dark text-white">
+            <span class="block text-[10px] uppercase tracking-wider text-hm-light-gold font-bold">ID Único del Trabajador</span>
+            <span id="displayEmployeeId" class="text-lg font-black font-mono tracking-wide">EMP-0001</span>
+            <input type="hidden" id="employeeId" name="ID_Unico" value="EMP-0001" />
+          </div>
+          <div>
+            <span id="modeBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-hm-dark">
+              <i class="fa-solid fa-circle-plus"></i> Nuevo Registro
+            </span>
+            <p id="lastUpdatedInfo" class="text-xs text-gray-500 mt-1">Complete sus datos personales y laborales en el formulario.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs text-gray-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg">
+          <i class="fa-solid fa-wand-magic-sparkles text-hm-gold"></i>
+          <span>Formato automático: <strong>Título</strong>, <strong>V-00.000.000</strong>, <strong>dd/mm/aaaa</strong> y <strong>04XX-000.0000</strong></span>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 1: DATOS DE IDENTIFICACIÓN -->
+      <div class="section-card">
+        <div class="section-header">
+          <i class="fa-solid fa-id-card text-hm-med text-lg"></i>
+          <h2 class="font-bold text-hm-dark text-base">1. Datos de Identificación del Trabajador (Art. 59 LOTTT)</h2>
+        </div>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="lg:col-span-2">
+            <label class="label-hm">Nombres Completos <span class="required-star">*</span></label>
+            <input type="text" id="nombres" name="Nombres" required placeholder="Ej: Carlos Jose Gregorio"
+              class="input-hm format-title" />
+          </div>
+          <div class="lg:col-span-2">
+            <label class="label-hm">Apellidos Completos <span class="required-star">*</span></label>
+            <input type="text" id="apellidos" name="Apellidos" required placeholder="Ej: Colmenarez Talavera"
+              class="input-hm format-title" />
+          </div>
+
+          <div>
+            <label class="label-hm">Cédula de Identidad <span class="required-star">*</span></label>
+            <div class="flex gap-1.5">
+              <select id="tipoCedula" name="Tipo_CI" class="input-hm !w-20 font-bold text-center" onchange="formatCedulaInput()">
+                <option value="V">V-</option>
+                <option value="E">E-</option>
+              </select>
+              <input type="text" id="cedula" name="Cedula" required placeholder="V-00.000.000" maxlength="12"
+                class="input-hm font-mono font-semibold" oninput="formatCedulaInput()" />
+            </div>
+          </div>
+
+          <div>
+            <label class="label-hm">RIF Vigente</label>
+            <input type="text" id="rif" name="RIF" placeholder="V-00000000-0" maxlength="12"
+              class="input-hm font-mono uppercase" oninput="formatRifInput(this)" />
+          </div>
+
+          <div>
+            <label class="label-hm">Fecha de Nacimiento <span class="required-star">*</span></label>
+            <input type="text" id="fechaNacimiento" name="Fecha_Nacimiento" required placeholder="dd/mm/aaaa" maxlength="10"
+              class="input-hm font-mono" oninput="formatDateInput(this, true)" />
+          </div>
+
+          <div>
+            <label class="label-hm">Edad (Años)</label>
+            <input type="text" id="edad" name="Edad" readonly placeholder="Automático" class="input-hm font-semibold text-center" />
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="label-hm">Nacionalidad <span class="required-star">*</span></label>
+            <input type="text" id="nacionalidad" name="Nacionalidad" required value="Venezolana"
+              class="input-hm format-title" />
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="label-hm">Estado Civil (Art. 77 CRBV) <span class="required-star">*</span></label>
+            <select id="estadoCivil" name="Estado_Civil" required class="input-hm">
+              <option value="Soltero/a">Soltero/a</option>
+              <option value="Casado/a">Casado/a</option>
+              <option value="Unión Estable de Hecho">Unión Estable de Hecho</option>
+              <option value="Divorciado/a">Divorciado/a</option>
+              <option value="Viudo/a">Viudo/a</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: UBICACIÓN Y CONTACTO -->
+      <div class="section-card">
+        <div class="section-header">
+          <i class="fa-solid fa-location-dot text-hm-med text-lg"></i>
+          <h2 class="font-bold text-hm-dark text-base">2. Ubicación y Contacto (Art. 59 LOTTT)</h2>
+        </div>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-3">
+            <label class="label-hm">Domicilio y Residencia Habitual (Dirección Exacta) <span class="required-star">*</span></label>
+            <input type="text" id="direccion" name="Direccion" required
+              placeholder="Ej: Sector Centro, Calle Principal, Casa Nro. 12"
+              class="input-hm format-title" />
+          </div>
+
+          <div>
+            <label class="label-hm">Estado <span class="required-star">*</span></label>
+            <input type="text" id="estado" name="Estado" required value="Yaracuy" class="input-hm format-title" />
+          </div>
+
+          <div>
+            <label class="label-hm">Municipio <span class="required-star">*</span></label>
+            <input type="text" id="municipio" name="Municipio" required value="La Trinidad" class="input-hm format-title" />
+          </div>
+
+          <div>
+            <label class="label-hm">Parroquia <span class="required-star">*</span></label>
+            <input type="text" id="parroquia" name="Parroquia" required value="Boraure" class="input-hm format-title" />
+          </div>
+
+          <div>
+            <label class="label-hm">Teléfono Móvil <span class="required-star">*</span></label>
+            <input type="text" id="telefonoMovil" name="Telefono_Movil" required placeholder="04XX-000.0000" maxlength="13"
+              class="input-hm font-mono" oninput="formatPhoneInput(this)" />
+          </div>
+
+          <div>
+            <label class="label-hm">Teléfono de Habitación</label>
+            <input type="text" id="telefonoHabitacion" name="Telefono_Habitacion" placeholder="0254-000.0000" maxlength="13"
+              class="input-hm font-mono" oninput="formatPhoneInput(this)" />
+          </div>
+
+          <div>
+            <label class="label-hm">Correo Electrónico Personal</label>
+            <input type="email" id="correo" name="Correo" placeholder="correo@ejemplo.com"
+              class="input-hm lowercase" oninput="this.value = this.value.toLowerCase()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: CARGA FAMILIAR -->
+      <div class="section-card">
+        <div class="section-header justify-between">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-children text-hm-med text-lg"></i>
+            <h2 class="font-bold text-hm-dark text-base">3. Carga Familiar (Beneficios Sociales y Guarderías)</h2>
+          </div>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="w-full sm:w-72">
+              <label class="label-hm">¿Tiene hijos menores de 18 años o con discapacidad?</label>
+              <select id="tieneHijos" name="Tiene_Hijos" class="input-hm" onchange="toggleChildrenSection()">
+                <option value="No">No</option>
+                <option value="Sí">Sí</option>
+              </select>
+            </div>
+
+            <button type="button" id="btnAddChild" onclick="addChildRow()"
+              class="hidden px-3.5 py-2 rounded-lg bg-hm-med hover:bg-hm-dark text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer">
+              <i class="fa-solid fa-plus"></i> Agregar Hijo/a
+            </button>
+          </div>
+
+          <div id="childrenContainer" class="hidden space-y-3 pt-2 border-t border-gray-100"></div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 4: CONTACTO DE EMERGENCIA -->
+      <div class="section-card">
+        <div class="section-header">
+          <i class="fa-solid fa-truck-medical text-hm-med text-lg"></i>
+          <h2 class="font-bold text-hm-dark text-base">4. Contacto de Emergencia</h2>
+        </div>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="label-hm">Nombre y Apellido <span class="required-star">*</span></label>
+            <input type="text" id="emergenciaNombre" name="Emergencia_Nombre" required placeholder="Ej: Maria Perez"
+              class="input-hm format-title" />
+          </div>
+          <div>
+            <label class="label-hm">Parentesco <span class="required-star">*</span></label>
+            <input type="text" id="emergenciaParentesco" name="Emergencia_Parentesco" required placeholder="Ej: Madre / Esposa"
+              class="input-hm format-title" />
+          </div>
+          <div>
+            <label class="label-hm">Teléfono de Emergencia <span class="required-star">*</span></label>
+            <input type="text" id="emergenciaTelefono" name="Emergencia_Telefono" required placeholder="04XX-000.0000" maxlength="13"
+              class="input-hm font-mono" oninput="formatPhoneInput(this)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 5: DATOS BANCARIOS -->
+      <div class="section-card">
+        <div class="section-header">
+          <i class="fa-solid fa-building-columns text-hm-med text-lg"></i>
+          <h2 class="font-bold text-hm-dark text-base">5. Datos Bancarios (Pago de Nómina y Prestaciones)</h2>
+        </div>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="label-hm">Entidad Bancaria (Venezuela) <span class="required-star">*</span></label>
+            <select id="banco" name="Banco" required class="input-hm">
+              <option value="">Seleccione un banco...</option>
+              <option value="0102 - Banco de Venezuela">0102 - Banco de Venezuela</option>
+              <option value="0104 - Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
+              <option value="0105 - Banco Mercantil">0105 - Banco Mercantil</option>
+              <option value="0108 - Banco Provincial (BBVA)">0108 - Banco Provincial (BBVA)</option>
+              <option value="0114 - Bancaribe">0114 - Bancaribe</option>
+              <option value="0115 - Banco Exterior">0115 - Banco Exterior</option>
+              <option value="0128 - Banco Caroní">0128 - Banco Caroní</option>
+              <option value="0134 - Banesco Banco Universal">0134 - Banesco Banco Universal</option>
+              <option value="0137 - Banco Sofitasa">0137 - Banco Sofitasa</option>
+              <option value="0138 - Banco Plaza">0138 - Banco Plaza</option>
+              <option value="0146 - Bangente">0146 - Bangente</option>
+              <option value="0151 - BFC Banco Fondo Común">0151 - BFC Banco Fondo Común</option>
+              <option value="0156 - 100% Banco">0156 - 100% Banco</option>
+              <option value="0157 - DelSur Banco Universal">0157 - DelSur Banco Universal</option>
+              <option value="0163 - Banco del Tesoro">0163 - Banco del Tesoro</option>
+              <option value="0166 - Banco Agrícola de Venezuela">0166 - Banco Agrícola de Venezuela</option>
+              <option value="0168 - Bancrecer">0168 - Bancrecer</option>
+              <option value="0169 - Mi Banco">0169 - Mi Banco</option>
+              <option value="0171 - Banco Activo">0171 - Banco Activo</option>
+              <option value="0172 - Bancamiga Banco Universal">0172 - Bancamiga Banco Universal</option>
+              <option value="0173 - Banco Internacional de Desarrollo">0173 - Banco Internacional de Desarrollo</option>
+              <option value="0174 - Banplus">0174 - Banplus</option>
+              <option value="0175 - Banco Bicentenario del Pueblo">0175 - Banco Bicentenario del Pueblo</option>
+              <option value="0177 - BANFANB">0177 - BANFANB</option>
+              <option value="0178 - N58 Banco Digital">0178 - N58 Banco Digital</option>
+              <option value="0191 - BNC Banco Nacional de Crédito">0191 - BNC Banco Nacional de Crédito</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="label-hm">Número de Cuenta (20 Dígitos)</label>
+            <input type="text" id="cuentaCorriente" name="Cuenta_Corriente" placeholder="00000000000000000000" maxlength="20"
+              class="input-hm font-mono" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 20)" />
+          </div>
+
+          <div>
+            <label class="label-hm">Teléfono Pago Móvil <span class="required-star">*</span></label>
+            <input type="text" id="pagoMovil" name="Pago_Movil" required placeholder="04XX-000.0000" maxlength="13"
+              class="input-hm font-mono" oninput="formatPhoneInput(this)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 6: INFORMACIÓN MÉDICO-LABORAL -->
+      <div class="section-card">
+        <div class="section-header">
+          <i class="fa-solid fa-heart-pulse text-hm-med text-lg"></i>
+          <h2 class="font-bold text-hm-dark text-base">6. Información Médico-Laboral (Cumplimiento LOPCYMAT)</h2>
+        </div>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="label-hm">Tipo de Sangre</label>
+            <select id="tipoSangre" name="Tipo_Sangre" class="input-hm font-semibold">
+              <option value="No Sabe">No Sabe</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-3">
+            <label class="label-hm">Alergias Severas o Condiciones Crónicas</label>
+            <input type="text" id="alergias" name="Alergias_Condiciones" placeholder="Ninguna / Especifique"
+              class="input-hm format-title" />
+          </div>
+
+          <div>
+            <label class="label-hm">¿Certificado de Salud Vigente?</label>
+            <select id="certificadoSalud" name="Certificado_Salud" class="input-hm" onchange="toggleHealthCertDate()">
+              <option value="No">No</option>
+              <option value="Sí">Sí</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="label-hm">Fecha Vencimiento Certificado</label>
+            <input type="text" id="vencimientoSalud" name="Vencimiento_Salud" placeholder="dd/mm/aaaa" maxlength="10"
+              disabled class="input-hm font-mono" oninput="formatDateInput(this, false)" />
+          </div>
+
+          <div>
+            <label class="label-hm">¿Curso Manipulación de Alimentos?</label>
+            <select id="manipulacionAlimentos" name="Manipulacion_Alimentos" class="input-hm">
+              <option value="No">No</option>
+              <option value="Sí">Sí</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="label-hm">¿Discapacidad Certificada CONAPDIS?</label>
+            <select id="discapacidadConapdis" name="Discapacidad_CONAPDIS" class="input-hm" onchange="toggleConapdisField()">
+              <option value="No">No</option>
+              <option value="Sí">Sí</option>
+            </select>
+          </div>
+
+          <div id="conapdisNumberWrapper" class="hidden lg:col-span-4">
+            <label class="label-hm">Número de Carnet / Certificado CONAPDIS</label>
+            <input type="text" id="numeroConapdis" name="Numero_CONAPDIS" placeholder="Ej: D-000000"
+              class="input-hm font-mono uppercase" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 7: DATOS DE CONTRATACIÓN (EXCLUSIVO RECURSOS HUMANOS) -->
+      <div class="section-card border-t-4 border-hm-gold" id="hrSectionCard">
+        <div class="section-header flex-wrap justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-briefcase text-hm-med text-lg"></i>
+            <h2 class="font-bold text-hm-dark text-base">7. Datos de Contratación (Recursos Humanos)</h2>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span id="hrLockBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+              <i class="fa-solid fa-lock"></i> Solo Lectura (Exclusivo RRHH)
+            </span>
+            <button type="button" id="btnToggleHrLock" onclick="handleHrLockButton()"
+              class="px-3 py-1.5 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm">
+              <i class="fa-solid fa-key text-hm-light-gold"></i>
+              <span id="btnToggleHrLockText">Desbloquear RRHH</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="px-5 pt-4">
+          <div id="hrNoticeBanner" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-gray-100 border border-gray-200 text-xs text-gray-600">
+            <i class="fa-solid fa-shield-halved text-hm-dark text-sm"></i>
+            <span><strong>Aviso:</strong> Sección de uso exclusivo de Recursos Humanos — Solo lectura para el trabajador. Los datos contractuales asignados se conservan automáticamente.</span>
+          </div>
+        </div>
+
+        <div id="hrFieldsGrid" class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="lg:col-span-2">
+            <label class="label-hm">Sucursal <span class="required-star">*</span></label>
+            <select id="sucursal" name="Sucursal" disabled class="input-hm hr-field">
+              <option value="HyperMarket SLWA C.A. (Principal)">HyperMarket SLWA C.A. (Principal)</option>
+              <option value="HyperMarket SLWA C.A. II">HyperMarket SLWA C.A. II</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="label-hm">Jornada / Turno <span class="required-star">*</span></label>
+            <select id="horario" name="Horario" disabled class="input-hm hr-field">
+              <option value="Turno 01 (07:00 am - 03:00 pm)">Turno 01 (07:00 am - 03:00 pm)</option>
+              <option value="Turno 02 (02:00 pm - 10:00 pm)">Turno 02 (02:00 pm - 10:00 pm)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="label-hm">Fecha de Ingreso <span class="required-star">*</span></label>
+            <input type="text" id="fechaIngreso" name="Fecha_Ingreso" placeholder="dd/mm/aaaa" maxlength="10"
+              disabled class="input-hm font-mono hr-field" oninput="formatDateInput(this, false)" />
+          </div>
+
+          <div>
+            <label class="label-hm">Cargo <span class="required-star">*</span></label>
+            <input type="text" id="cargo" name="Cargo" placeholder="Asignado por RRHH"
+              disabled class="input-hm format-title hr-field" />
+          </div>
+
+          <div>
+            <label class="label-hm">Área / Departamento <span class="required-star">*</span></label>
+            <select id="departamento" name="Departamento" disabled class="input-hm hr-field">
+              <option value="Caja y Atención al Cliente">Caja y Atención al Cliente</option>
+              <option value="Fruver (Frutas y Verduras)">Fruver (Frutas y Verduras)</option>
+              <option value="Charcutería y Carnicería">Charcutería y Carnicería</option>
+              <option value="Pasillo y Reposición">Pasillo y Reposición</option>
+              <option value="Almacén y Recepción">Almacén y Recepción</option>
+              <option value="Administración y Gerencia">Administración y Gerencia</option>
+              <option value="Mantenimiento y Seguridad">Mantenimiento y Seguridad</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="label-hm">Tipo de Contrato <span class="required-star">*</span></label>
+            <select id="tipoContrato" name="Tipo_Contrato" disabled class="input-hm hr-field">
+              <option value="Tiempo Indeterminado">Tiempo Indeterminado</option>
+              <option value="Tiempo Determinado">Tiempo Determinado</option>
+              <option value="Para una Obra Determinada">Para una Obra Determinada</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="label-hm">Salario Base Inicial (Bs.)</label>
+            <input type="text" id="salarioBase" name="Salario_Base_Bs" placeholder="0,00"
+              disabled class="input-hm font-mono text-right hr-field" oninput="formatCurrencyInput(this)" />
+          </div>
+
+          <div>
+            <label class="label-hm">N° Inscripción IVSS</label>
+            <input type="text" id="numeroIvss" name="Numero_IVSS" placeholder="Asignado por RRHH"
+              disabled class="input-hm font-mono uppercase hr-field" />
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="label-hm">N° Registro FAOV (BANAVIH)</label>
+            <input type="text" id="numeroFaov" name="Numero_FAOV" placeholder="Asignado por RRHH"
+              disabled class="input-hm font-mono uppercase hr-field" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 8: DECLARACIÓN JURADA -->
+      <div class="section-card border-t-4 border-hm-gold">
+        <div class="section-header">
+          <i class="fa-solid fa-file-signature text-hm-gold text-lg"></i>
+          <h2 class="font-bold text-hm-dark text-base">8. Declaración Jurada y Consentimiento (Art. 28 y 60 CRBV)</h2>
+        </div>
+        <div class="p-5 space-y-4">
+          <p class="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3.5 rounded-lg border border-gray-200">
+            Yo, <strong id="declNombre" class="text-hm-dark">______________________________</strong>, titular de la Cédula de Identidad N° <strong id="declCedula" class="text-hm-dark">______________</strong>, declaro bajo fe de juramento que todos los datos aquí suministrados son verdaderos y verificables. De conformidad con el Artículo 28 de la Constitución de la República Bolivariana de Venezuela, autorizo voluntariamente a <strong>HyperMarket SLWA, C.A.</strong> al uso de mis datos personales de forma confidencial y exclusiva para fines de la relación laboral, el control de mi expediente del trabajador y los reportes obligatorios ante los entes gubernamentales (IVSS, INPSASEL, BANAVIH, Mintra). Asimismo, tengo conocimiento de mi derecho a revisar, rectificar o actualizar esta información cuando lo considere necesario.
+          </p>
+
+          <label class="flex items-start gap-3 cursor-pointer select-none">
+            <input type="checkbox" id="declaracionAceptada" required
+              class="mt-1 w-4 h-4 accent-[#1B4D2E] rounded cursor-pointer" />
+            <span class="text-sm font-semibold text-gray-800">
+              Confirmo la veracidad de los datos y acepto el registro en el expediente laboral de HyperMarket SLWA, C.A. <span class="required-star">*</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex flex-wrap items-center justify-end gap-3 pt-2 pb-10">
+        <button type="button" onclick="resetToNewEmployee()"
+          class="px-5 py-3 rounded-xl border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-bold text-sm transition cursor-pointer">
+          Limpiar Formulario
+        </button>
+
+        <button type="submit" id="btnSubmit"
+          class="px-7 py-3 rounded-xl bg-hm-dark hover:bg-hm-med text-white font-bold text-sm shadow-lg flex items-center gap-2.5 transition cursor-pointer">
+          <i class="fa-solid fa-floppy-disk text-hm-light-gold"></i>
+          <span id="btnSubmitText">Guardar Ficha del Trabajador</span>
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <footer class="bg-hm-dark text-white text-xs py-4 border-t-2 border-hm-gold">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-gray-200">
+      <p>&copy; HyperMarket SLWA, C.A. - Departamento de Recursos Humanos.</p>
+      <p class="text-hm-light-gold font-medium">Portal de Registro y Actualización de Expedientes</p>
+    </div>
+  </footer>
+
+  <!-- Modal de Autenticación PIN Recursos Humanos -->
+  <div id="hrPinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border-t-4 border-hm-gold overflow-hidden">
+      <div class="bg-hm-dark text-white px-5 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-shield-halved text-hm-light-gold text-lg"></i>
+          <h3 class="font-bold text-sm">Acceso Exclusivo Recursos Humanos</h3>
+        </div>
+        <button type="button" onclick="closeHrPinModal()" class="text-white/70 hover:text-white cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-4">
+        <p class="text-xs text-gray-600 leading-relaxed">
+          Ingrese la clave / PIN de autorización de Recursos Humanos para habilitar la edición del <strong>Apartado 7 (Datos de Contratación)</strong>.
+        </p>
+        <div>
+          <label class="label-hm">PIN de Recursos Humanos</label>
+          <input type="password" id="hrPinInput" placeholder="Ingrese PIN (Ej: SLWA2026)"
+            class="input-hm font-mono text-center tracking-widest text-base"
+            onkeydown="if(event.key==='Enter'){event.preventDefault(); verifyHrPin();}" />
+          <p id="hrPinError" class="hidden text-xs text-red-600 font-semibold mt-1.5">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i> PIN incorrecto. Verifique e intente nuevamente.
+          </p>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeHrPinModal()"
+            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-xs font-bold hover:bg-gray-100 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" onclick="verifyHrPin()"
+            class="px-4 py-2 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-unlock"></i> Desbloquear Sección
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // CONFIGURACIÓN DE CONEXIÓN A GOOGLE APPS SCRIPT
+    // =========================================================================
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4l4OWT7MmSWp952rJIh_J4dCHY0-0KX1b2CG-gJe_cCcSWmk0ROP4-SeDI2ZaLXo5/exec";
+    const LOCAL_CACHE_KEY = "hm_slwa_personal_cache_v1";
+    const HR_ACCESS_PINS = ["SLWA2026", "2026"];
+
+    let isEditingExisting = false;
+    let isHrUnlocked = false;
+    let preservedHrData = null;
+
+    // -------------------------------------------------------------------------
+    // INICIALIZACIÓN
+    // -------------------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      setupTitleCaseListeners();
+      setHrSectionLocked(true);
+      assignNextUniqueId();
+
+      document.getElementById("nombres").addEventListener("input", updateDeclarationPreview);
+      document.getElementById("apellidos").addEventListener("input", updateDeclarationPreview);
+      document.getElementById("cedula").addEventListener("input", updateDeclarationPreview);
+    });
+
+    // -------------------------------------------------------------------------
+    // CONTROL DE BLOQUEO / DESBLOQUEO EXCLUSIVO RECURSOS HUMANOS (SECCIÓN 7)
+    // -------------------------------------------------------------------------
+    function setHrSectionLocked(locked) {
+      isHrUnlocked = !locked;
+      const fields = document.querySelectorAll(".hr-field");
+      fields.forEach(el => {
+        el.disabled = locked;
+      });
+
+      const badge = document.getElementById("hrLockBadge");
+      const btnText = document.getElementById("btnToggleHrLockText");
+      const btn = document.getElementById("btnToggleHrLock");
+      const notice = document.getElementById("hrNoticeBanner");
+
+      if (locked) {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300";
+        badge.innerHTML = `<i class="fa-solid fa-lock"></i> Solo Lectura (Exclusivo RRHH)`;
+        btn.className = "px-3 py-1.5 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm";
+        btnText.innerText = "Desbloquear RRHH";
+        notice.className = "flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-gray-100 border border-gray-200 text-xs text-gray-600";
+        notice.innerHTML = `<i class="fa-solid fa-shield-halved text-hm-dark text-sm"></i><span><strong>Aviso:</strong> Sección de uso exclusivo de Recursos Humanos — Solo lectura para el trabajador. Los datos contractuales asignados se conservan automáticamente.</span>`;
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-hm-dark border border-emerald-300";
+        badge.innerHTML = `<i class="fa-solid fa-lock-open"></i> Modo Edición RRHH Activo`;
+        btn.className = "px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm";
+        btnText.innerText = "Bloquear RRHH";
+        notice.className = "flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-hm-dark";
+        notice.innerHTML = `<i class="fa-solid fa-user-shield text-hm-med text-sm"></i><span><strong>Acceso Autorizado:</strong> Puede asignar o modificar Sucursal, Turno, Cargo, Contrato y datos laborales. Recuerde bloquear al finalizar.</span>`;
+      }
+    }
+
+    function handleHrLockButton() {
+      if (isHrUnlocked) {
+        setHrSectionLocked(true);
+        showToast("Sección de Recursos Humanos bloqueada nuevamente.", "info");
+      } else {
+        openHrPinModal();
+      }
+    }
+
+    function openHrPinModal() {
+      const modal = document.getElementById("hrPinModal");
+      const input = document.getElementById("hrPinInput");
+      const err = document.getElementById("hrPinError");
+      err.classList.add("hidden");
+      input.value = "";
+      modal.classList.remove("hidden");
+      setTimeout(() => input.focus(), 50);
+    }
+
+    function closeHrPinModal() {
+      document.getElementById("hrPinModal").classList.add("hidden");
+    }
+
+    function verifyHrPin() {
+      const val = document.getElementById("hrPinInput").value.trim().toUpperCase();
+      if (HR_ACCESS_PINS.includes(val)) {
+        closeHrPinModal();
+        setHrSectionLocked(false);
+        showToast("Acceso de Recursos Humanos concedido.", "success");
+      } else {
+        document.getElementById("hrPinError").classList.remove("hidden");
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 1. FORMATO TITLE CASE: Primera letra en Mayúscula, resto minúscula
+    // -------------------------------------------------------------------------
+    function toTitleCase(str) {
+      if (!str) return "";
+      return str
+        .toLowerCase()
+        .replace(/(^|[\s\-/])([a-záéíóúüñ])/g, (match, sep, char) => sep + char.toUpperCase());
+    }
+
+    function setupTitleCaseListeners() {
+      document.addEventListener("input", (e) => {
+        if (e.target && e.target.classList && e.target.classList.contains("format-title")) {
+          const start = e.target.selectionStart;
+          const end = e.target.selectionEnd;
+          e.target.value = toTitleCase(e.target.value);
+          if (typeof start === "number" && typeof end === "number") {
+            e.target.setSelectionRange(start, end);
+          }
+          updateDeclarationPreview();
+        }
+      });
+    }
+
+    function updateDeclarationPreview() {
+      const n = toTitleCase(document.getElementById("nombres").value.trim());
+      const a = toTitleCase(document.getElementById("apellidos").value.trim());
+      const ci = document.getElementById("cedula").value.trim();
+      const fullName = [n, a].filter(Boolean).join(" ");
+      document.getElementById("declNombre").innerText = fullName || "______________________________";
+      document.getElementById("declCedula").innerText = ci || "______________";
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. FORMATO CÉDULA: V-00.000.000
+    // -------------------------------------------------------------------------
+    function formatCedulaInput() {
+      const prefix = document.getElementById("tipoCedula").value || "V";
+      const input = document.getElementById("cedula");
+      let digits = input.value.replace(/\D/g, "").slice(0, 8);
+
+      if (!digits) {
+        input.value = "";
+        updateDeclarationPreview();
+        return;
+      }
+
+      const formattedNumber = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      input.value = `${prefix}-${formattedNumber}`;
+      updateDeclarationPreview();
+    }
+
+    // -------------------------------------------------------------------------
+    // FORMATO RIF: V-00000000-0
+    // -------------------------------------------------------------------------
+    function formatRifInput(input) {
+      let clean = input.value.toUpperCase().replace(/[^VEJPG0-9]/g, "");
+      if (!clean) {
+        input.value = "";
+        return;
+      }
+      let letter = "V";
+      let nums = "";
+      if (/^[VEJPG]/.test(clean)) {
+        letter = clean[0];
+        nums = clean.slice(1).replace(/\D/g, "");
+      } else {
+        nums = clean.replace(/\D/g, "");
+      }
+      nums = nums.slice(0, 9);
+      if (nums.length <= 8) {
+        input.value = `${letter}-${nums}`;
+      } else {
+        input.value = `${letter}-${nums.slice(0, 8)}-${nums.slice(8)}`;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. FORMATO FECHAS: dd/mm/aaaa y cálculo automático de edad
+    // -------------------------------------------------------------------------
+    function formatDateInput(input, calculateAgeFlag) {
+      let digits = input.value.replace(/\D/g, "").slice(0, 8);
+      let formatted = digits;
+
+      if (digits.length >= 5) {
+        formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+      } else if (digits.length >= 3) {
+        formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      }
+
+      input.value = formatted;
+
+      if (calculateAgeFlag) {
+        const ageField = document.getElementById("edad");
+        if (formatted.length === 10) {
+          const [dd, mm, yyyy] = formatted.split("/").map(Number);
+          const birthDate = new Date(yyyy, mm - 1, dd);
+          const today = new Date();
+          if (
+            birthDate &&
+            birthDate.getFullYear() === yyyy &&
+            birthDate.getMonth() === mm - 1 &&
+            birthDate.getDate() === dd &&
+            yyyy > 1920 &&
+            birthDate <= today
+          ) {
+            let age = today.getFullYear() - yyyy;
+            const mDiff = today.getMonth() - (mm - 1);
+            if (mDiff < 0 || (mDiff === 0 && today.getDate() < dd)) {
+              age--;
+            }
+            ageField.value = age >= 0 ? age : "";
+          } else {
+            ageField.value = "";
+          }
+        } else {
+          ageField.value = "";
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. FORMATO TELÉFONOS: 04XX-000.0000
+    // -------------------------------------------------------------------------
+    function formatPhoneInput(input) {
+      let digits = input.value.replace(/\D/g, "").slice(0, 11);
+      if (!digits) {
+        input.value = "";
+        return;
+      }
+      if (digits.length <= 4) {
+        input.value = digits;
+      } else if (digits.length <= 7) {
+        input.value = `${digits.slice(0, 4)}-${digits.slice(4)}`;
+      } else {
+        input.value = `${digits.slice(0, 4)}-${digits.slice(4, 7)}.${digits.slice(7)}`;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // FORMATO MONEDA SALARIO (Bs.)
+    // -------------------------------------------------------------------------
+    function formatCurrencyInput(input) {
+      let digits = input.value.replace(/\D/g, "");
+      if (!digits) {
+        input.value = "";
+        return;
+      }
+      let num = (parseInt(digits, 10) / 100).toFixed(2);
+      let parts = num.split(".");
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      input.value = parts.join(",");
+    }
+
+    // -------------------------------------------------------------------------
+    // SECCIONES DINÁMICAS (CARGA FAMILIAR, SALUD, CONAPDIS)
+    // -------------------------------------------------------------------------
+    function toggleChildrenSection() {
+      const hasChildren = document.getElementById("tieneHijos").value === "Sí";
+      const btnAdd = document.getElementById("btnAddChild");
+      const container = document.getElementById("childrenContainer");
+
+      if (hasChildren) {
+        btnAdd.classList.remove("hidden");
+        container.classList.remove("hidden");
+        if (container.children.length === 0) {
+          addChildRow();
+        }
+      } else {
+        btnAdd.classList.add("hidden");
+        container.classList.add("hidden");
+        container.innerHTML = "";
+      }
+    }
+
+    function addChildRow(data = { nombre: "", cedula: "", fechaNac: "" }) {
+      const container = document.getElementById("childrenContainer");
+      const index = container.children.length + 1;
+      const row = document.createElement("div");
+      row.className = "child-row grid grid-cols-1 md:grid-cols-12 gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200 items-end";
+      row.innerHTML = `
+        <div class="md:col-span-5">
+          <label class="label-hm">Nombre y Apellido del Hijo/a #${index}</label>
+          <input type="text" class="input-hm format-title child-name" placeholder="Nombres y Apellidos" value="${data.nombre || ""}" />
+        </div>
+        <div class="md:col-span-3">
+          <label class="label-hm">Cédula (Si aplica)</label>
+          <input type="text" class="input-hm font-mono child-ci" placeholder="V-00.000.000" maxlength="12" value="${data.cedula || ""}"
+            oninput="formatChildCedula(this)" />
+        </div>
+        <div class="md:col-span-3">
+          <label class="label-hm">Fecha Nacimiento</label>
+          <input type="text" class="input-hm font-mono child-dob" placeholder="dd/mm/aaaa" maxlength="10" value="${data.fechaNac || ""}"
+            oninput="formatDateInput(this, false)" />
+        </div>
+        <div class="md:col-span-1 flex justify-end">
+          <button type="button" onclick="this.closest('.child-row').remove()"
+            class="p-2.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition cursor-pointer" title="Eliminar fila">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      `;
+      container.appendChild(row);
+    }
+
+    function formatChildCedula(input) {
+      let digits = input.value.replace(/\D/g, "").slice(0, 8);
+      if (!digits) {
+        input.value = "";
+        return;
+      }
+      input.value = "V-" + digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function toggleHealthCertDate() {
+      const hasCert = document.getElementById("certificadoSalud").value === "Sí";
+      const dateInput = document.getElementById("vencimientoSalud");
+      dateInput.disabled = !hasCert;
+      if (!hasCert) dateInput.value = "";
+    }
+
+    function toggleConapdisField() {
+      const hasConapdis = document.getElementById("discapacidadConapdis").value === "Sí";
+      const wrapper = document.getElementById("conapdisNumberWrapper");
+      if (hasConapdis) {
+        wrapper.classList.remove("hidden");
+      } else {
+        wrapper.classList.add("hidden");
+        document.getElementById("numeroConapdis").value = "";
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // GESTIÓN DE ID ÚNICO Y CACHÉ LOCAL
+    // -------------------------------------------------------------------------
+    function getLocalCache() {
+      try {
+        return JSON.parse(localStorage.getItem(LOCAL_CACHE_KEY) || "[]");
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRecordToLocalCache(record) {
+      const list = getLocalCache();
+      const idx = list.findIndex(
+        (item) =>
+          item.ID_Unico === record.ID_Unico ||
+          (record.Cedula && item.Cedula === record.Cedula)
+      );
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...record };
+      } else {
+        list.push(record);
+      }
+      localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(list));
+    }
+
+    function computeLocalNextId() {
+      const list = getLocalCache();
+      let maxNum = 0;
+      list.forEach((item) => {
+        const m = String(item.ID_Unico || "").match(/EMP-(\d+)/i);
+        if (m) {
+          const n = parseInt(m[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      });
+      return "EMP-" + String(maxNum + 1).padStart(4, "0");
+    }
+
+    async function assignNextUniqueId() {
+      const localId = computeLocalNextId();
+      setEmployeeIdDisplay(localId);
+
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?action=nextId`);
+        const json = await res.json();
+        if (json && json.status === "ok" && json.nextId) {
+          setEmployeeIdDisplay(json.nextId);
+        }
+      } catch (err) {
+        // Mantiene ID calculado localmente si no hay respuesta inmediata
+      }
+    }
+
+    function setEmployeeIdDisplay(idVal) {
+      document.getElementById("displayEmployeeId").innerText = idVal;
+      document.getElementById("employeeId").value = idVal;
+    }
+
+    // -------------------------------------------------------------------------
+    // ENVÍO Y ACTUALIZACIÓN DE DATOS
+    // -------------------------------------------------------------------------
+    document.getElementById("employeeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nombres = document.getElementById("nombres").value.trim();
+      const apellidos = document.getElementById("apellidos").value.trim();
+      const cedula = document.getElementById("cedula").value.trim();
+      const fechaNac = document.getElementById("fechaNacimiento").value.trim();
+      const telMovil = document.getElementById("telefonoMovil").value.trim();
+      const banco = document.getElementById("banco").value;
+      const pagoMovil = document.getElementById("pagoMovil").value.trim();
+
+      if (!nombres || !apellidos || cedula.length < 8 || fechaNac.length !== 10 || telMovil.length < 13 || !banco || pagoMovil.length < 13) {
+        showToast("Por favor complete correctamente los campos obligatorios con el formato indicado.", "error");
+        return;
+      }
+
+      if (!document.getElementById("declaracionAceptada").checked) {
+        showToast("Debe aceptar la Declaración Jurada para continuar.", "error");
+        document.getElementById("declaracionAceptada").focus();
+        return;
+      }
+
+      if (isHrUnlocked) {
+        if (!document.getElementById("fechaIngreso").value.trim() || !document.getElementById("cargo").value.trim()) {
+          showToast("Complete Fecha de Ingreso y Cargo en la sección de Recursos Humanos.", "error");
+          return;
+        }
+      }
+
+      const btnSubmit = document.getElementById("btnSubmit");
+      const btnText = document.getElementById("btnSubmitText");
+      btnSubmit.disabled = true;
+      btnText.innerText = "Guardando información...";
+
+      const childrenRows = document.querySelectorAll("#childrenContainer .child-row");
+      const childrenList = [];
+      childrenRows.forEach((row, idx) => {
+        const cName = toTitleCase(row.querySelector(".child-name").value.trim());
+        const cCi = row.querySelector(".child-ci").value.trim();
+        const cDob = row.querySelector(".child-dob").value.trim();
+        if (cName) {
+          childrenList.push(`${idx + 1}. ${cName}${cCi ? " (CI: " + cCi + ")" : ""}${cDob ? " - Nac: " + cDob : ""}`);
+        }
+      });
+
+      const currentHrValues = {
+        Sucursal: isHrUnlocked
+          ? document.getElementById("sucursal").value
+          : (preservedHrData && preservedHrData.Sucursal !== undefined ? preservedHrData.Sucursal : document.getElementById("sucursal").value),
+        Fecha_Ingreso: isHrUnlocked
+          ? document.getElementById("fechaIngreso").value.trim()
+          : (preservedHrData && preservedHrData.Fecha_Ingreso !== undefined ? preservedHrData.Fecha_Ingreso : document.getElementById("fechaIngreso").value.trim()),
+        Cargo: isHrUnlocked
+          ? toTitleCase(document.getElementById("cargo").value.trim())
+          : (preservedHrData && preservedHrData.Cargo !== undefined ? preservedHrData.Cargo : toTitleCase(document.getElementById("cargo").value.trim())),
+        Departamento: isHrUnlocked
+          ? document.getElementById("departamento").value
+          : (preservedHrData && preservedHrData.Departamento !== undefined ? preservedHrData.Departamento : document.getElementById("departamento").value),
+        Horario: isHrUnlocked
+          ? document.getElementById("horario").value
+          : (preservedHrData && preservedHrData.Horario !== undefined ? preservedHrData.Horario : document.getElementById("horario").value),
+        Tipo_Contrato: isHrUnlocked
+          ? document.getElementById("tipoContrato").value
+          : (preservedHrData && preservedHrData.Tipo_Contrato !== undefined ? preservedHrData.Tipo_Contrato : document.getElementById("tipoContrato").value),
+        Salario_Base_Bs: isHrUnlocked
+          ? document.getElementById("salarioBase").value.trim()
+          : (preservedHrData && preservedHrData.Salario_Base_Bs !== undefined ? preservedHrData.Salario_Base_Bs : document.getElementById("salarioBase").value.trim()),
+        Numero_IVSS: isHrUnlocked
+          ? document.getElementById("numeroIvss").value.trim().toUpperCase()
+          : (preservedHrData && preservedHrData.Numero_IVSS !== undefined ? preservedHrData.Numero_IVSS : document.getElementById("numeroIvss").value.trim().toUpperCase()),
+        Numero_FAOV: isHrUnlocked
+          ? document.getElementById("numeroFaov").value.trim().toUpperCase()
+          : (preservedHrData && preservedHrData.Numero_FAOV !== undefined ? preservedHrData.Numero_FAOV : document.getElementById("numeroFaov").value.trim().toUpperCase())
+      };
+
+      const payload = {
+        ID_Unico: document.getElementById("employeeId").value.trim(),
+        Nombres: toTitleCase(document.getElementById("nombres").value.trim()),
+        Apellidos: toTitleCase(document.getElementById("apellidos").value.trim()),
+        Tipo_CI: document.getElementById("tipoCedula").value,
+        Cedula: document.getElementById("cedula").value.trim(),
+        RIF: document.getElementById("rif").value.trim().toUpperCase(),
+        Fecha_Nacimiento: document.getElementById("fechaNacimiento").value.trim(),
+        Edad: document.getElementById("edad").value.trim(),
+        Nacionalidad: toTitleCase(document.getElementById("nacionalidad").value.trim()),
+        Estado_Civil: document.getElementById("estadoCivil").value,
+        Direccion: toTitleCase(document.getElementById("direccion").value.trim()),
+        Estado: toTitleCase(document.getElementById("estado").value.trim()),
+        Municipio: toTitleCase(document.getElementById("municipio").value.trim()),
+        Parroquia: toTitleCase(document.getElementById("parroquia").value.trim()),
+        Telefono_Movil: document.getElementById("telefonoMovil").value.trim(),
+        Telefono_Habitacion: document.getElementById("telefonoHabitacion").value.trim(),
+        Correo: document.getElementById("correo").value.trim().toLowerCase(),
+        Tiene_Hijos: document.getElementById("tieneHijos").value,
+        Cantidad_Hijos: document.getElementById("tieneHijos").value === "Sí" ? String(childrenList.length) : "0",
+        Detalle_Hijos: document.getElementById("tieneHijos").value === "Sí" ? childrenList.join(" | ") : "",
+        Emergencia_Nombre: toTitleCase(document.getElementById("emergenciaNombre").value.trim()),
+        Emergencia_Parentesco: toTitleCase(document.getElementById("emergenciaParentesco").value.trim()),
+        Emergencia_Telefono: document.getElementById("emergenciaTelefono").value.trim(),
+        Banco: document.getElementById("banco").value,
+        Cuenta_Corriente: document.getElementById("cuentaCorriente").value.trim(),
+        Pago_Movil: document.getElementById("pagoMovil").value.trim(),
+        Tipo_Sangre: document.getElementById("tipoSangre").value,
+        Alergias_Condiciones: toTitleCase(document.getElementById("alergias").value.trim() || "Ninguna"),
+        Certificado_Salud: document.getElementById("certificadoSalud").value,
+        Vencimiento_Salud: document.getElementById("certificadoSalud").value === "Sí" ? document.getElementById("vencimientoSalud").value.trim() : "",
+        Manipulacion_Alimentos: document.getElementById("manipulacionAlimentos").value,
+        Discapacidad_CONAPDIS: document.getElementById("discapacidadConapdis").value,
+        Numero_CONAPDIS: document.getElementById("discapacidadConapdis").value === "Sí" ? document.getElementById("numeroConapdis").value.trim().toUpperCase() : "",
+        Sucursal: currentHrValues.Sucursal,
+        Fecha_Ingreso: currentHrValues.Fecha_Ingreso,
+        Cargo: currentHrValues.Cargo,
+        Departamento: currentHrValues.Departamento,
+        Horario: currentHrValues.Horario,
+        Tipo_Contrato: currentHrValues.Tipo_Contrato,
+        Salario_Base_Bs: currentHrValues.Salario_Base_Bs,
+        Numero_IVSS: currentHrValues.Numero_IVSS,
+        Numero_FAOV: currentHrValues.Numero_FAOV
+      };
+
+      saveRecordToLocalCache(payload);
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        showToast(
+          isEditingExisting
+            ? `Expediente ${payload.ID_Unico} actualizado exitosamente.`
+            : `Trabajador registrado con éxito. Su ID Único es: ${payload.ID_Unico}`,
+          "success"
+        );
+        resetToNewEmployee();
+      } catch (err) {
+        showToast("Error de conexión al enviar los datos. Verifique su internet e intente nuevamente.", "error");
+      } finally {
+        btnSubmit.disabled = false;
+        btnText.innerText = isEditingExisting ? "Actualizar Datos del Trabajador" : "Guardar Ficha del Trabajador";
+      }
+    });
+
+    // -------------------------------------------------------------------------
+    // BÚSQUEDA DE EMPLEADO POR ID ÚNICO O CÉDULA PARA ACTUALIZAR
+    // -------------------------------------------------------------------------
+    async function searchEmployee() {
+      const rawQuery = document.getElementById("searchQuery").value.trim();
+      if (!rawQuery) {
+        showToast("Ingrese un ID Único (Ej: EMP-0001) o Cédula para buscar.", "error");
+        return;
+      }
+
+      const qLower = rawQuery.toLowerCase();
+      const qDigits = rawQuery.replace(/\D/g, "");
+
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?action=search&q=${encodeURIComponent(rawQuery)}`);
+        const json = await res.json();
+        if (json && json.status === "ok" && json.record) {
+          saveRecordToLocalCache(json.record);
+          loadEmployeeIntoForm(json.record);
+          showToast(`Expediente ${json.record.ID_Unico} cargado correctamente.`, "success");
+          return;
+        }
+      } catch (err) {
+        // Si falla la red, busca en caché local
+      }
+
+      const localList = getLocalCache();
+      const foundLocal = localList.find((item) => {
+        const idMatch = String(item.ID_Unico || "").toLowerCase() === qLower;
+        const ciMatch = String(item.Cedula || "").toLowerCase() === qLower;
+        const digitsMatch = qDigits && String(item.Cedula || "").replace(/\D/g, "") === qDigits;
+        return idMatch || ciMatch || digitsMatch;
+      });
+
+      if (foundLocal) {
+        loadEmployeeIntoForm(foundLocal);
+        showToast(`Expediente ${foundLocal.ID_Unico} cargado.`, "success");
+      } else {
+        showToast("No se encontró ningún trabajador con ese ID Único o Cédula.", "error");
+      }
+    }
+
+    function loadEmployeeIntoForm(rec) {
+      isEditingExisting = true;
+      setHrSectionLocked(true);
+      setEmployeeIdDisplay(rec.ID_Unico || "EMP-0001");
+
+      const modeBadge = document.getElementById("modeBadge");
+      modeBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900";
+      modeBadge.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Actualizando Expediente`;
+
+      document.getElementById("lastUpdatedInfo").innerText = `Editando expediente de ${rec.Nombres || ""} ${rec.Apellidos || ""}`;
+      document.getElementById("btnSubmitText").innerText = "Actualizar Datos del Trabajador";
+
+      document.getElementById("nombres").value = toTitleCase(rec.Nombres || "");
+      document.getElementById("apellidos").value = toTitleCase(rec.Apellidos || "");
+      document.getElementById("tipoCedula").value = rec.Tipo_CI || "V";
+      document.getElementById("cedula").value = rec.Cedula || "";
+      formatCedulaInput();
+
+      document.getElementById("rif").value = rec.RIF || "";
+      document.getElementById("fechaNacimiento").value = rec.Fecha_Nacimiento || "";
+      formatDateInput(document.getElementById("fechaNacimiento"), true);
+      if (rec.Edad && !document.getElementById("edad").value) {
+        document.getElementById("edad").value = rec.Edad;
+      }
+
+      document.getElementById("nacionalidad").value = toTitleCase(rec.Nacionalidad || "Venezolana");
+      document.getElementById("estadoCivil").value = rec.Estado_Civil || "Soltero/a";
+      document.getElementById("direccion").value = toTitleCase(rec.Direccion || "");
+      document.getElementById("estado").value = toTitleCase(rec.Estado || "");
+      document.getElementById("municipio").value = toTitleCase(rec.Municipio || "");
+      document.getElementById("parroquia").value = toTitleCase(rec.Parroquia || "");
+      document.getElementById("telefonoMovil").value = rec.Telefono_Movil || "";
+      document.getElementById("telefonoHabitacion").value = rec.Telefono_Habitacion || "";
+      document.getElementById("correo").value = (rec.Correo || "").toLowerCase();
+
+      document.getElementById("tieneHijos").value = rec.Tiene_Hijos || "No";
+      const container = document.getElementById("childrenContainer");
+      container.innerHTML = "";
+      toggleChildrenSection();
+
+      if (rec.Tiene_Hijos === "Sí" && rec.Detalle_Hijos) {
+        container.innerHTML = "";
+        const items = String(rec.Detalle_Hijos).split("|");
+        items.forEach((raw) => {
+          const clean = raw.replace(/^\s*\d+\.\s*/, "").trim();
+          const ciMatch = clean.match(/\(CI:\s*([^)]+)\)/i);
+          const dobMatch = clean.match(/Nac:\s*(\d{2}\/\d{2}\/\d{4})/i);
+          const nameOnly = clean
+            .replace(/\(CI:[^)]+\)/i, "")
+            .replace(/-\s*Nac:\s*\d{2}\/\d{2}\/\d{4}/i, "")
+            .trim();
+          addChildRow({
+            nombre: toTitleCase(nameOnly),
+            cedula: ciMatch ? ciMatch[1].trim() : "",
+            fechaNac: dobMatch ? dobMatch[1].trim() : ""
+          });
+        });
+      }
+
+      document.getElementById("emergenciaNombre").value = toTitleCase(rec.Emergencia_Nombre || "");
+      document.getElementById("emergenciaParentesco").value = toTitleCase(rec.Emergencia_Parentesco || "");
+      document.getElementById("emergenciaTelefono").value = rec.Emergencia_Telefono || "";
+
+      document.getElementById("banco").value = rec.Banco || "";
+      document.getElementById("cuentaCorriente").value = String(rec.Cuenta_Corriente || "").replace(/^'/, "");
+      document.getElementById("pagoMovil").value = rec.Pago_Movil || "";
+
+      document.getElementById("tipoSangre").value = rec.Tipo_Sangre || "No Sabe";
+      document.getElementById("alergias").value = toTitleCase(rec.Alergias_Condiciones || "");
+      document.getElementById("certificadoSalud").value = rec.Certificado_Salud || "No";
+      toggleHealthCertDate();
+      document.getElementById("vencimientoSalud").value = rec.Vencimiento_Salud || "";
+      document.getElementById("manipulacionAlimentos").value = rec.Manipulacion_Alimentos || "No";
+      document.getElementById("discapacidadConapdis").value = rec.Discapacidad_CONAPDIS || "No";
+      toggleConapdisField();
+      document.getElementById("numeroConapdis").value = rec.Numero_CONAPDIS || "";
+
+      // Respaldar y cargar datos exclusivos de Recursos Humanos
+      preservedHrData = {
+        Sucursal: rec.Sucursal || "HyperMarket SLWA C.A. (Principal)",
+        Fecha_Ingreso: rec.Fecha_Ingreso || "",
+        Cargo: toTitleCase(rec.Cargo || ""),
+        Departamento: rec.Departamento || "Caja y Atención al Cliente",
+        Horario: rec.Horario || "Turno 01 (07:00 am - 03:00 pm)",
+        Tipo_Contrato: rec.Tipo_Contrato || "Tiempo Indeterminado",
+        Salario_Base_Bs: rec.Salario_Base_Bs || "",
+        Numero_IVSS: rec.Numero_IVSS || "",
+        Numero_FAOV: rec.Numero_FAOV || ""
+      };
+
+      document.getElementById("sucursal").value = preservedHrData.Sucursal;
+      document.getElementById("fechaIngreso").value = preservedHrData.Fecha_Ingreso;
+      document.getElementById("cargo").value = preservedHrData.Cargo;
+      document.getElementById("departamento").value = preservedHrData.Departamento;
+      document.getElementById("horario").value = preservedHrData.Horario;
+      document.getElementById("tipoContrato").value = preservedHrData.Tipo_Contrato;
+      document.getElementById("salarioBase").value = preservedHrData.Salario_Base_Bs;
+      document.getElementById("numeroIvss").value = preservedHrData.Numero_IVSS;
+      document.getElementById("numeroFaov").value = preservedHrData.Numero_FAOV;
+
+      document.getElementById("declaracionAceptada").checked = false;
+      updateDeclarationPreview();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetToNewEmployee() {
+      isEditingExisting = false;
+      preservedHrData = null;
+      document.getElementById("employeeForm").reset();
+      document.getElementById("searchQuery").value = "";
+      document.getElementById("nacionalidad").value = "Venezolana";
+      document.getElementById("estado").value = "Yaracuy";
+      document.getElementById("municipio").value = "La Trinidad";
+      document.getElementById("parroquia").value = "Boraure";
+      document.getElementById("edad").value = "";
+
+      toggleChildrenSection();
+      toggleHealthCertDate();
+      toggleConapdisField();
+      setHrSectionLocked(true);
+
+      const modeBadge = document.getElementById("modeBadge");
+      modeBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-hm-dark";
+      modeBadge.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Nuevo Registro`;
+
+      document.getElementById("lastUpdatedInfo").innerText = "Complete sus datos personales y laborales en el formulario.";
+      document.getElementById("btnSubmitText").innerText = "Guardar Ficha del Trabajador";
+      updateDeclarationPreview();
+      assignNextUniqueId();
+    }
+
+    // -------------------------------------------------------------------------
+    // NOTIFICACIONES TOAST
+    // -------------------------------------------------------------------------
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+
+      const styles = {
+        success: "bg-[#1B4D2E] text-white border-l-4 border-[#E5C558]",
+        error: "bg-red-700 text-white border-l-4 border-red-300",
+        info: "bg-gray-800 text-white border-l-4 border-[#75A438]"
+      };
+
+      toast.className = `${styles[type] || styles.info} px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2.5 transition-all duration-300`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === "success" ? "fa-circle-check text-[#E5C558]" : type === "error" ? "fa-triangle-exclamation" : "fa-circle-info"} text-base"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 300);
+      }, 4500);
+    }
+  </script>
+</body>
+</html>
