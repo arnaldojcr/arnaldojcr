@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Asistencia - Hypermarket SLWA C.A.</title>
+  <style>
+    :root {
+      --slwa-green-dark: #1B4D2E;
+      --slwa-green-medium: #3C8038;
+      --slwa-green-light: #75A438;
+      --slwa-gold: #C59B27;
+      --slwa-gold-light: #E5C558;
+      --slwa-bg: #F9FBF9;
+      --slwa-text: #222222;
+      --card-bg: #ffffff;
+      --danger-color: #c0392b;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--slwa-bg);
+      color: var(--slwa-text);
+    }
+
+    .banner {
+      background: linear-gradient(135deg, var(--slwa-green-dark), var(--slwa-green-medium));
+      color: white;
+      text-align: center;
+      padding: 22px 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      border-bottom: 4px solid var(--slwa-gold);
+    }
+
+    .banner h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .banner p {
+      margin: 5px 0 0 0;
+      font-size: 13px;
+      color: var(--slwa-gold-light);
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+      border-top: 5px solid var(--slwa-green-dark);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--slwa-green-dark);
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      color: var(--slwa-green-dark);
+      font-size: 14px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      box-sizing: border-box;
+      background-color: var(--slwa-bg);
+      color: var(--slwa-text);
+    }
+
+    select:focus, input:focus {
+      border-color: var(--slwa-gold);
+      outline: none;
+      background-color: #fff;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      transition: background-color 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-in { background-color: var(--slwa-green-medium); }
+    .btn-in:hover:not(:disabled) { background-color: var(--slwa-green-dark); }
+
+    .btn-out { background-color: var(--slwa-gold); }
+    .btn-out:hover:not(:disabled) { background-color: #b08920; }
+
+    button:disabled {
+      background-color: #e0e0e0;
+      color: #999999;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #status {
+      margin-top: 18px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 12px;
+      border-radius: 6px;
+      background-color: var(--slwa-bg);
+      border: 1px solid #e2e8e2;
+    }
+
+    .admin-section {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 1px dashed #ccc;
+      text-align: center;
+    }
+
+    .admin-btn {
+      background-color: var(--slwa-green-dark);
+      color: white;
+      font-size: 12px;
+      padding: 8px 14px;
+      width: auto;
+      margin: 5px;
+    }
+    .admin-btn:hover { background-color: var(--slwa-green-medium); }
+  </style>
+</head>
+<body>
+
+  <div class="banner">
+    <h1>Hypermarket SLWA C.A.</h1>
+    <p>Sistema de Control de Asistencia y Geocercas</p>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Registro de Personal</h2>
+
+      <label for="empleado">Selecciona tu Nombre:</label>
+      <select id="empleado" onchange="alSeleccionarEmpleado()">
+        <option value="">-- Cargando empleados... --</option>
+      </select>
+
+      <label for="pinEmpleado">Código / PIN Personal:</label>
+      <input type="password" id="pinEmpleado" placeholder="Últimos 4 dígitos de su Cédula (o PIN)" maxlength="4" oninput="verificarCampos()">
+
+      <label for="sucursal">Selecciona la Sucursal:</label>
+      <select id="sucursal" onchange="verificarCampos()">
+        <option value="">-- Seleccionar Sucursal --</option>
+        <option value="HyperMarket SLWA C.A. (Principal)">HyperMarket SLWA C.A. (Principal)</option>
+        <option value="HyperMarket SLWA C.A. II">HyperMarket SLWA C.A. II</option>
+        <option value="HyperMarket SLWA C.A. III">HyperMarket SLWA C.A. III</option>
+      </select>
+
+      <label for="turno">Selecciona tu Turno:</label>
+      <select id="turno" onchange="verificarCampos()">
+        <option value="">-- Seleccionar Turno --</option>
+        <option value="Turno 01">Turno 01 (07:00 am - 03:00 pm)</option>
+        <option value="Turno 02">Turno 02 (02:00 pm - 10:00 pm)</option>
+      </select>
+
+      <div class="btn-group">
+        <button id="btnEntrada" class="btn-in" onclick="iniciarVerificacionBiometrica('ENTRADA')" disabled>Entrada</button>
+        <button id="btnSalida" class="btn-out" onclick="iniciarVerificacionBiometrica('SALIDA')" disabled>Salida</button>
+      </div>
+
+      <div id="status">Cargando lista de empleados desde Google Sheets...</div>
+
+      <div class="admin-section">
+        <button class="admin-btn" onclick="solicitarDesbloqueo()">🔓 Llegada Tarde (Admin)</button>
+        <button class="admin-btn" onclick="reiniciarDispositivoAdmin()">📱 Resetear Dispositivo (Admin)</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
+  const CACHE_EMPLEADOS_KEY = "slwa_asistencia_empleados_v1";
+
+  let EMPLEADOS_DATA = {};
+
+  const LOCACIONES = {
+    "HyperMarket SLWA C.A. (Principal)": { lat: 10.243544950163466, lng: -68.76970601509083 },
+    "HyperMarket SLWA C.A. II": { lat: 10.2483362545119, lng: -68.76544580796221 },
+    "HyperMarket SLWA C.A. III": { lat: 10.248189357346705, lng: -68.76978399165277 }
+  };
+
+  const RADIO_MAXIMO_METROS = 10;
+  const PIN_ADMIN = "1984";
+
+  let estadoForzadoTarde = false;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    cargarEmpleadosDesdeSheets();
+  });
+
+  async function cargarEmpleadosDesdeSheets() {
+    const selectEmpleado = document.getElementById("empleado");
+    const statusDiv = document.getElementById("status");
+
+    try {
+      const cached = JSON.parse(localStorage.getItem(CACHE_EMPLEADOS_KEY) || "[]");
+      if (Array.isArray(cached) && cached.length > 0) {
+        poblarSelectEmpleados(cached);
+      }
+    } catch (e) {}
+
+    try {
+      const res = await fetch(`${SCRIPT_URL}?module=asistencia&action=getEmpleados&_t=${Date.now()}`);
+      const rawText = await res.text();
+      let json;
+
+      try {
+        json = JSON.parse(rawText);
+      } catch (parseErr) {
+        throw new Error("El servidor no devolvió JSON. Verifica que la implementación tenga acceso 'Cualquier usuario'.");
+      }
+
+      if (json && json.status === "ok" && Array.isArray(json.empleados)) {
+        localStorage.setItem(CACHE_EMPLEADOS_KEY, JSON.stringify(json.empleados));
+        poblarSelectEmpleados(json.empleados);
+        statusDiv.style.color = "var(--slwa-text)";
+        statusDiv.innerText = json.empleados.length > 0
+          ? "Seleccione su nombre e ingrese su PIN personal (últimos 4 dígitos de su Cédula)."
+          : "La hoja 'Empleados' está conectada pero aún no tiene trabajadores registrados.";
+      } else {
+        throw new Error(json && json.message ? json.message : "Error desconocido al leer empleados.");
+      }
+    } catch (err) {
+      console.error(err);
+      if (Object.keys(EMPLEADOS_DATA).length === 0) {
+        selectEmpleado.innerHTML = `<option value="">-- Error al cargar empleados --</option>`;
+        statusDiv.style.color = "var(--danger-color)";
+        statusDiv.innerText = "❌ " + err.message;
+      } else {
+        statusDiv.style.color = "var(--slwa-text)";
+        statusDiv.innerText = "Seleccione su nombre e ingrese su PIN personal.";
+      }
+    }
+  }
+
+  function poblarSelectEmpleados(lista) {
+    const selectEmpleado = document.getElementById("empleado");
+    const valorActual = selectEmpleado.value;
+    EMPLEADOS_DATA = {};
+
+    selectEmpleado.innerHTML = `<option value="">-- Seleccionar Empleado --</option>`;
+
+    lista.forEach(emp => {
+      if (!emp || !emp.nombre) return;
+      EMPLEADOS_DATA[emp.nombre] = emp;
+      const opt = document.createElement("option");
+      opt.value = emp.nombre;
+      opt.textContent = emp.id ? `${emp.nombre} (${emp.id})` : emp.nombre;
+      selectEmpleado.appendChild(opt);
+    });
+
+    if (valorActual && EMPLEADOS_DATA[valorActual]) {
+      selectEmpleado.value = valorActual;
+    }
+  }
+
+  function alSeleccionarEmpleado() {
+    const nombre = document.getElementById("empleado").value;
+    const emp = EMPLEADOS_DATA[nombre];
+
+    if (emp) {
+      if (emp.sucursal && LOCACIONES[emp.sucursal]) {
+        document.getElementById("sucursal").value = emp.sucursal;
+      }
+      if (emp.horario) {
+        if (emp.horario.indexOf("Turno 01") !== -1) {
+          document.getElementById("turno").value = "Turno 01";
+        } else if (emp.horario.indexOf("Turno 02") !== -1) {
+          document.getElementById("turno").value = "Turno 02";
+        }
+      }
+    }
+    verificarCampos();
+  }
+
+  function calcularDistancia(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function verificarCampos() {
+    const empleado = document.getElementById("empleado").value;
+    const pinIngresado = document.getElementById("pinEmpleado").value.trim();
+    const sucursal = document.getElementById("sucursal").value;
+    const turno = document.getElementById("turno").value;
+    const btnEntrada = document.getElementById("btnEntrada");
+    const btnSalida = document.getElementById("btnSalida");
+    const statusDiv = document.getElementById("status");
+
+    const empInfo = EMPLEADOS_DATA[empleado];
+
+    if (!empleado || !empInfo || !empInfo.pin || pinIngresado !== empInfo.pin || !sucursal || !turno) {
+      btnEntrada.disabled = true;
+      btnSalida.disabled = true;
+      if (empleado && empInfo && pinIngresado.length === 4 && pinIngresado !== empInfo.pin) {
+        statusDiv.style.color = "var(--danger-color)";
+        statusDiv.innerText = "❌ PIN personal incorrecto.";
+      } else {
+        statusDiv.style.color = "var(--slwa-text)";
+        statusDiv.innerText = "Seleccione su nombre, ingrese su PIN, sucursal y turno.";
+      }
+      return;
+    }
+
+    const claveDispositivo = "slwa_device_" + (empInfo.id || empleado);
+    const dispositivoGuardado = localStorage.getItem(claveDispositivo);
+    const idDispositivoActual = obtenerIdDispositivoUnico();
+
+    if (!dispositivoGuardado) {
+      localStorage.setItem(claveDispositivo, idDispositivoActual);
+    } else if (dispositivoGuardado !== idDispositivoActual) {
+      btnEntrada.disabled = true;
+      btnSalida.disabled = true;
+      statusDiv.style.color = "var(--danger-color)";
+      statusDiv.innerText = "🚫 Este empleado ya está vinculado a otro teléfono celular. No puede marcar desde este dispositivo.";
+      return;
+    }
+
+    if (estadoForzadoTarde) {
+      btnEntrada.disabled = false;
+      statusDiv.style.color = "var(--slwa-gold)";
+      statusDiv.innerText = "⚠️ Acceso habilitado por el Administrador (Llegada Tarde).";
+      return;
+    }
+
+    const ahora = new Date();
+    const horas = ahora.getHours();
+    const minutos = ahora.getMinutes();
+    const tiempoMinutosActual = horas * 60 + minutos;
+
+    let entradaPermitida = false;
+    let salidaPermitida = false;
+    let esTarde = false;
+
+    if (turno === "Turno 01") {
+      if (tiempoMinutosActual >= 410 && tiempoMinutosActual <= 420) {
+        entradaPermitida = true;
+      } else if (tiempoMinutosActual > 420 && tiempoMinutosActual < 900) {
+        esTarde = true;
+      }
+      if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 930) {
+        salidaPermitida = true;
+      }
+    } else if (turno === "Turno 02") {
+      if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 900) {
+        entradaPermitida = true;
+      } else if (tiempoMinutosActual > 900 && tiempoMinutosActual < 1320) {
+        esTarde = true;
+      }
+      if (tiempoMinutosActual >= 1310 && tiempoMinutosActual <= 1350) {
+        salidaPermitida = true;
+      }
+    }
+
+    btnEntrada.disabled = !entradaPermitida;
+    btnSalida.disabled = !salidaPermitida;
+
+    if (esTarde) {
+      statusDiv.style.color = "var(--danger-color)";
+      statusDiv.innerText = "❌ Horario de entrada vencido. Solicite desbloqueo de administrador.";
+    } else if (!entradaPermitida && !salidaPermitida) {
+      statusDiv.style.color = "var(--slwa-text)";
+      statusDiv.innerText = "⏳ Fuera de horario permitido (Los botones se abren 10 minutos antes).";
+    } else {
+      statusDiv.style.color = "var(--slwa-green-medium)";
+      statusDiv.innerText = "✅ Dispositivo verificado y botones habilitados.";
+    }
+  }
+
+  function obtenerIdDispositivoUnico() {
+    let deviceId = localStorage.getItem("slwa_unique_device_id");
+    if (!deviceId) {
+      deviceId = "dev_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
+      localStorage.setItem("slwa_unique_device_id", deviceId);
+    }
+    return deviceId;
+  }
+
+  function solicitarDesbloqueo() {
+    const pin = prompt("Ingrese el PIN de Administrador para habilitar la entrada tarde:");
+    if (pin === PIN_ADMIN) {
+      estadoForzadoTarde = true;
+      verificarCampos();
+      alert("¡Acceso desbloqueado con éxito!");
+    } else if (pin !== null) {
+      alert("PIN incorrecto.");
+    }
+  }
+
+  function reiniciarDispositivoAdmin() {
+    const pin = prompt("Ingrese el PIN de Administrador para desvincular el teléfono de un empleado:");
+    if (pin === PIN_ADMIN) {
+      const consulta = prompt("Ingrese el Nombre exacto o ID Único (Ej: EMP-0001) del empleado a desvincular:");
+      if (consulta) {
+        const q = consulta.trim();
+        const empEncontrado = Object.values(EMPLEADOS_DATA).find(
+          e => e.nombre.toLowerCase() === q.toLowerCase() || (e.id && e.id.toLowerCase() === q.toLowerCase())
+        );
+        if (empEncontrado) {
+          localStorage.removeItem("slwa_device_" + (empEncontrado.id || empEncontrado.nombre));
+          localStorage.removeItem("slwa_device_" + empEncontrado.nombre);
+          alert(`Dispositivo desvinculado con éxito para ${empEncontrado.nombre}.`);
+        } else {
+          localStorage.removeItem("slwa_device_" + q);
+          alert(`Se intentó desvincular el registro local para "${q}".`);
+        }
+      }
+    } else if (pin !== null) {
+      alert("PIN incorrecto.");
+    }
+  }
+
+  async function iniciarVerificacionBiometrica(accion) {
+    const statusDiv = document.getElementById("status");
+
+    if (!window.PublicKeyCredential) {
+      marcarAsistencia(accion);
+      return;
+    }
+
+    statusDiv.style.color = "var(--slwa-green-dark)";
+    statusDiv.innerText = "🔒 Confirme con su huella dactilar...";
+
+    try {
+      const publicKey = {
+        challenge: new Uint8Array([21, 31, 105, 10, 45, 33, 120, 99]),
+        rp: { name: "Hypermarket SLWA C.A." },
+        user: {
+          id: new Uint8Array([1]),
+          name: document.getElementById("empleado").value,
+          displayName: document.getElementById("empleado").value
+        },
+        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+        timeout: 60000,
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+        attestation: "none"
+      };
+
+      await navigator.credentials.create({ publicKey });
+      marcarAsistencia(accion);
+    } catch (error) {
+      console.error(error);
+      statusDiv.style.color = "var(--danger-color)";
+      statusDiv.innerText = "❌ Verificación biométrica cancelada o fallida.";
+    }
+  }
+
+  function marcarAsistencia(accion) {
+    const empleado = document.getElementById("empleado").value;
+    const empInfo = EMPLEADOS_DATA[empleado] || {};
+    const sucursalSeleccionada = document.getElementById("sucursal").value;
+    const turno = document.getElementById("turno").value;
+    const statusDiv = document.getElementById("status");
+
+    if (!navigator.geolocation) {
+      alert("La geolocalización no está soportada en este dispositivo.");
+      return;
+    }
+
+    statusDiv.style.color = "var(--slwa-green-dark)";
+    statusDiv.innerText = "Verificando posición GPS exacta...";
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latDevice = position.coords.latitude;
+        const lonDevice = position.coords.longitude;
+
+        const sucursalCoords = LOCACIONES[sucursalSeleccionada];
+        const distanciaMetros = calcularDistancia(latDevice, lonDevice, sucursalCoords.lat, sucursalCoords.lng);
+
+        if (distanciaMetros > RADIO_MAXIMO_METROS) {
+          statusDiv.style.color = "var(--danger-color)";
+          statusDiv.innerText = `❌ Fuera del radio de la sucursal. Estás a ${Math.round(distanciaMetros)}m (Máx: ${RADIO_MAXIMO_METROS}m).`;
+          return;
+        }
+
+        const estadoRegistro = estadoForzadoTarde ? "Tarde (Autorizado)" : "A tiempo";
+
+        const payload = {
+          module: "asistencia",
+          id_unico: empInfo.id || "",
+          empleado: empleado,
+          cedula: empInfo.cedula || "",
+          sucursal: sucursalSeleccionada,
+          turno: turno,
+          accion: accion,
+          estado: estadoRegistro,
+          distancia: Math.round(distanciaMetros * 100) / 100,
+          latitud: latDevice,
+          longitud: lonDevice
+        };
+
+        statusDiv.innerText = "Enviando datos al sistema...";
+
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        })
+        .then(() => {
+          statusDiv.style.color = "var(--slwa-green-medium)";
+          statusDiv.innerText = `¡${accion} registrada con éxito en ${sucursalSeleccionada}!`;
+          document.getElementById("empleado").value = "";
+          document.getElementById("pinEmpleado").value = "";
+          document.getElementById("sucursal").value = "";
+          document.getElementById("turno").value = "";
+          document.getElementById("btnEntrada").disabled = true;
+          document.getElementById("btnSalida").disabled = true;
+          estadoForzadoTarde = false;
+        })
+        .catch(error => {
+          statusDiv.style.color = "var(--danger-color)";
+          statusDiv.innerText = "Error de conexión al guardar el registro.";
+          console.error(error);
+        });
+      },
+      () => {
+        statusDiv.style.color = "var(--danger-color)";
+        statusDiv.innerText = "Debe activar el GPS y permitir el acceso a la ubicación en su navegador.";
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
+  }
+
+  setInterval(verificarCampos, 60000);
+</script>
+
+</body>
+</html>
