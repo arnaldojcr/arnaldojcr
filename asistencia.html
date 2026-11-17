@@ -210,6 +210,8 @@
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
   const CACHE_EMPLEADOS_KEY = "slwa_asistencia_empleados_v1";
+  const DEVICE_OWNER_KEY = "slwa_dispositivo_propietario";
+  const DEVICE_OWNER_NAME_KEY = "slwa_dispositivo_propietario_nombre";
 
   let EMPLEADOS_DATA = {};
 
@@ -219,7 +221,7 @@
     "HyperMarket SLWA C.A. III": { lat: 10.248189357346705, lng: -68.76978399165277 }
   };
 
-  const RADIO_MAXIMO_METROS = 10;
+  const RADIO_MAXIMO_METROS = 20;
   const PIN_ADMIN = "1984";
 
   let estadoForzadoTarde = false;
@@ -227,6 +229,24 @@
   document.addEventListener("DOMContentLoaded", () => {
     cargarEmpleadosDesdeSheets();
   });
+
+  function obtenerFechaHoyClave() {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  function obtenerUltimoMarcajeLocal(empInfo) {
+    const clave = `slwa_marcaje_${empInfo.id || empInfo.nombre}_${obtenerFechaHoyClave()}`;
+    return localStorage.getItem(clave) || "";
+  }
+
+  function guardarUltimoMarcajeLocal(empInfo, accion) {
+    const clave = `slwa_marcaje_${empInfo.id || empInfo.nombre}_${obtenerFechaHoyClave()}`;
+    localStorage.setItem(clave, accion);
+  }
 
   async function cargarEmpleadosDesdeSheets() {
     const selectEmpleado = document.getElementById("empleado");
@@ -349,26 +369,50 @@
       return;
     }
 
-    const claveDispositivo = "slwa_device_" + (empInfo.id || empleado);
-    const dispositivoGuardado = localStorage.getItem(claveDispositivo);
+    // -----------------------------------------------------------------------
+    // REGLA 1: UN SOLO EMPLEADO POR DISPOSITIVO (Local + Google Sheets)
+    // -----------------------------------------------------------------------
     const idDispositivoActual = obtenerIdDispositivoUnico();
+    const identificadorEmpleado = empInfo.id || empleado;
 
-    if (!dispositivoGuardado) {
-      localStorage.setItem(claveDispositivo, idDispositivoActual);
-    } else if (dispositivoGuardado !== idDispositivoActual) {
+    // A) Verificar si este teléfono ya pertenece a otro empleado en localStorage
+    const propietarioLocal = localStorage.getItem(DEVICE_OWNER_KEY);
+    const propietarioLocalNombre = localStorage.getItem(DEVICE_OWNER_NAME_KEY);
+
+    if (propietarioLocal && propietarioLocal !== identificadorEmpleado) {
       btnEntrada.disabled = true;
       btnSalida.disabled = true;
       statusDiv.style.color = "var(--danger-color)";
-      statusDiv.innerText = "🚫 Este empleado ya está vinculado a otro teléfono celular. No puede marcar desde este dispositivo.";
+      statusDiv.innerText = `🚫 Este teléfono ya está vinculado exclusivamente a ${propietarioLocalNombre || propietarioLocal}. No se pueden registrar 2 empleados desde un mismo dispositivo.`;
       return;
     }
 
-    if (estadoForzadoTarde) {
-      btnEntrada.disabled = false;
-      statusDiv.style.color = "var(--slwa-gold)";
-      statusDiv.innerText = "⚠️ Acceso habilitado por el Administrador (Llegada Tarde).";
+    // B) Verificar si en Google Sheets otro empleado ya tiene registrado este mismo Device ID
+    const otroDuenoEnSheets = Object.values(EMPLEADOS_DATA).find(
+      e => e.deviceId && e.deviceId === idDispositivoActual && (e.id || e.nombre) !== identificadorEmpleado
+    );
+    if (otroDuenoEnSheets) {
+      btnEntrada.disabled = true;
+      btnSalida.disabled = true;
+      statusDiv.style.color = "var(--danger-color)";
+      statusDiv.innerText = `🚫 Dispositivo bloqueado: ya está asignado en el sistema a ${otroDuenoEnSheets.nombre}.`;
       return;
     }
+
+    // C) Verificar si este empleado ya tiene otro teléfono vinculado en Google Sheets (ej. intenta usar modo incógnito u otro celular)
+    if (empInfo.deviceId && empInfo.deviceId !== idDispositivoActual) {
+      btnEntrada.disabled = true;
+      btnSalida.disabled = true;
+      statusDiv.style.color = "var(--danger-color)";
+      statusDiv.innerText = "🚫 Este empleado ya está vinculado a otro teléfono celular (o intenta usar modo incógnito).";
+      return;
+    }
+
+    // -----------------------------------------------------------------------
+    // REGLA 2: BLOQUEAR ENTRADA SI YA MARCÓ ENTRADA HOY HASTA QUE MARQUE SALIDA
+    // -----------------------------------------------------------------------
+    const ultimoMarcaje = empInfo.ultimoMarcajeHoy || obtenerUltimoMarcajeLocal(empInfo);
+    const yaMarcoEntrada = (ultimoMarcaje === "ENTRADA");
 
     const ahora = new Date();
     const horas = ahora.getHours();
@@ -397,6 +441,27 @@
       if (tiempoMinutosActual >= 1310 && tiempoMinutosActual <= 1350) {
         salidaPermitida = true;
       }
+    }
+
+    if (estadoForzadoTarde && !yaMarcoEntrada) {
+      btnEntrada.disabled = false;
+      btnSalida.disabled = !salidaPermitida;
+      statusDiv.style.color = "var(--slwa-gold)";
+      statusDiv.innerText = "⚠️ Acceso habilitado por el Administrador (Llegada Tarde).";
+      return;
+    }
+
+    if (yaMarcoEntrada) {
+      btnEntrada.disabled = true;
+      btnSalida.disabled = !salidaPermitida;
+      if (salidaPermitida) {
+        statusDiv.style.color = "var(--slwa-green-medium)";
+        statusDiv.innerText = "✅ Entrada ya registrada. Botón de Salida habilitado.";
+      } else {
+        statusDiv.style.color = "var(--slwa-gold)";
+        statusDiv.innerText = "ℹ️ Ya registró su Entrada hoy. El botón de Entrada permanecerá bloqueado hasta que registre su Salida.";
+      }
+      return;
     }
 
     btnEntrada.disabled = !entradaPermitida;
@@ -434,23 +499,28 @@
     }
   }
 
-  function reiniciarDispositivoAdmin() {
-    const pin = prompt("Ingrese el PIN de Administrador para desvincular el teléfono de un empleado:");
+  async function reiniciarDispositivoAdmin() {
+    const pin = prompt("Ingrese el PIN de Administrador para desvincular un teléfono:");
     if (pin === PIN_ADMIN) {
       const consulta = prompt("Ingrese el Nombre exacto o ID Único (Ej: EMP-0001) del empleado a desvincular:");
       if (consulta) {
         const q = consulta.trim();
-        const empEncontrado = Object.values(EMPLEADOS_DATA).find(
-          e => e.nombre.toLowerCase() === q.toLowerCase() || (e.id && e.id.toLowerCase() === q.toLowerCase())
-        );
-        if (empEncontrado) {
-          localStorage.removeItem("slwa_device_" + (empEncontrado.id || empEncontrado.nombre));
-          localStorage.removeItem("slwa_device_" + empEncontrado.nombre);
-          alert(`Dispositivo desvinculado con éxito para ${empEncontrado.nombre}.`);
-        } else {
-          localStorage.removeItem("slwa_device_" + q);
-          alert(`Se intentó desvincular el registro local para "${q}".`);
+        localStorage.removeItem(DEVICE_OWNER_KEY);
+        localStorage.removeItem(DEVICE_OWNER_NAME_KEY);
+
+        try {
+          const res = await fetch(`${SCRIPT_URL}?action=resetDevice&pin=${encodeURIComponent(pin)}&q=${encodeURIComponent(q)}&_t=${Date.now()}`);
+          const json = await res.json();
+          if (json && json.status === "ok") {
+            await cargarEmpleadosDesdeSheets();
+            alert(json.message);
+          } else {
+            alert("Teléfono local liberado. En Google Sheets: " + (json.message || "No encontrado"));
+          }
+        } catch (err) {
+          alert("Teléfono local liberado. No se pudo verificar en Google Sheets por falta de conexión.");
         }
+        verificarCampos();
       }
     } else if (pin !== null) {
       alert("PIN incorrecto.");
@@ -498,6 +568,7 @@
     const sucursalSeleccionada = document.getElementById("sucursal").value;
     const turno = document.getElementById("turno").value;
     const statusDiv = document.getElementById("status");
+    const idDispositivoActual = obtenerIdDispositivoUnico();
 
     if (!navigator.geolocation) {
       alert("La geolocalización no está soportada en este dispositivo.");
@@ -534,7 +605,8 @@
           estado: estadoRegistro,
           distancia: Math.round(distanciaMetros * 100) / 100,
           latitud: latDevice,
-          longitud: lonDevice
+          longitud: lonDevice,
+          device_id: idDispositivoActual
         };
 
         statusDiv.innerText = "Enviando datos al sistema...";
@@ -546,6 +618,19 @@
           body: JSON.stringify(payload)
         })
         .then(() => {
+          // Vincular este teléfono exclusivamente a este empleado
+          localStorage.setItem(DEVICE_OWNER_KEY, empInfo.id || empleado);
+          localStorage.setItem(DEVICE_OWNER_NAME_KEY, empleado);
+
+          // Actualizar estado de Entrada/Salida inmediatamente en memoria y caché local
+          guardarUltimoMarcajeLocal(empInfo, accion);
+          if (EMPLEADOS_DATA[empleado]) {
+            EMPLEADOS_DATA[empleado].ultimoMarcajeHoy = accion;
+            if (!EMPLEADOS_DATA[empleado].deviceId) {
+              EMPLEADOS_DATA[empleado].deviceId = idDispositivoActual;
+            }
+          }
+
           statusDiv.style.color = "var(--slwa-green-medium)";
           statusDiv.innerText = `¡${accion} registrada con éxito en ${sucursalSeleccionada}!`;
           document.getElementById("empleado").value = "";
