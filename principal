@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HyperMarket SLWA, C.A. - Portal Centralizado</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    :root {
+      --hm-dark-green: #1B4D2E;
+      --hm-med-green: #3C8038;
+      --hm-light-green: #75A438;
+      --hm-gold: #C59B27;
+      --hm-light-gold: #E5C558;
+    }
+
+    body {
+      background-color: #f3f6f4;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #1f2937;
+    }
+
+    .bg-hm-dark { background-color: var(--hm-dark-green); }
+    .bg-hm-med { background-color: var(--hm-med-green); }
+    .bg-hm-light { background-color: var(--hm-light-green); }
+    .bg-hm-gold { background-color: var(--hm-gold); }
+    .bg-hm-light-gold { background-color: var(--hm-light-gold); }
+
+    .text-hm-dark { color: var(--hm-dark-green); }
+    .text-hm-med { color: var(--hm-med-green); }
+    .text-hm-gold { color: var(--hm-gold); }
+    .text-hm-light-gold { color: var(--hm-light-gold); }
+
+    .border-hm-gold { border-color: var(--hm-gold); }
+
+    .module-card {
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 14px rgba(27, 77, 46, 0.08);
+      border-top: 5px solid var(--hm-dark-green);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .module-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(27, 77, 46, 0.14);
+      border-top-color: var(--hm-gold);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Barra Superior Corporativa -->
+  <header class="bg-hm-dark text-white shadow-lg border-b-4 border-hm-gold sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-xl bg-hm-gold flex items-center justify-center text-hm-dark font-black text-2xl shadow-md">
+          HM
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight leading-tight">
+            HyperMarket SLWA, C.A.
+          </h1>
+          <p class="text-xs sm:text-sm text-hm-light-gold font-medium">
+            Portal Centralizado de Gestión Laboral y Operaciones
+          </p>
+        </div>
+      </div>
+
+      <div class="text-right hidden sm:block">
+        <span id="currentDateDisplay" class="block text-xs font-bold text-hm-light-gold uppercase tracking-wider"></span>
+        <span id="currentTimeDisplay" class="block text-sm font-mono font-semibold text-white"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Franja de Bienvenida -->
+  <section class="bg-white border-b border-gray-200 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div>
+        <h2 class="text-base sm:text-lg font-extrabold text-hm-dark flex items-center gap-2">
+          <i class="fa-solid fa-grid-2 text-hm-gold"></i>
+          Accesos a Módulos del Sistema
+        </h2>
+        <p class="text-xs sm:text-sm text-gray-600 mt-0.5">
+          Seleccione el módulo al que desea ingresar. Todos los sistemas están conectados a la base centralizada <strong>HyperMarket_SLWA</strong>.
+        </p>
+      </div>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-hm-dark border border-emerald-200">
+        <i class="fa-solid fa-circle-check text-hm-med"></i> Sistema Operativo
+      </span>
+    </div>
+  </section>
+
+  <!-- Contenedor Principal de Botones / Módulos -->
+  <main class="max-w-6xl mx-auto w-full px-4 py-8 flex-1">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- BOTÓN 1: PANEL DE ASISTENCIA -->
+      <a href="https://arnaldojcr.github.io/arnaldojcr/asistencia.html"
+         class="module-card p-6 flex flex-col justify-between group no-underline">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-hm-med text-2xl group-hover:bg-hm-med group-hover:text-white transition">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-hm-dark">
+              Personal
+            </span>
+          </div>
+          <h3 class="text-lg font-extrabold text-hm-dark mb-2">
+            Panel de Asistencia
+          </h3>
+          <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+            Registro diario de Entrada y Salida del personal con validación de PIN, biometría y geocerca GPS en sucursal.
+          </p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+          <span class="text-xs font-bold text-hm-med group-hover:text-hm-dark transition">
+            Ir al Marcaje
+          </span>
+          <span class="w-9 h-9 rounded-xl bg-hm-med group-hover:bg-hm-dark text-white flex items-center justify-center transition shadow-sm">
+            <i class="fa-solid fa-arrow-right"></i>
+          </span>
+        </div>
+      </a>
+
+      <!-- BOTÓN 2: FORMULARIO (FICHA DEL TRABAJADOR) -->
+      <a href="https://arnaldojcr.github.io/arnaldojcr/hypermarket_slwa.html"
+         class="module-card p-6 flex flex-col justify-between group no-underline">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-hm-dark text-2xl group-hover:bg-hm-dark group-hover:text-white transition">
+              <i class="fa-solid fa-id-card"></i>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-hm-dark">
+              Expediente
+            </span>
+          </div>
+          <h3 class="text-lg font-extrabold text-hm-dark mb-2">
+            Formulario del Trabajador
+          </h3>
+          <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+            Registro de nuevos empleados y actualización de datos personales, bancarios, carga familiar e información médico-laboral.
+          </p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+          <span class="text-xs font-bold text-hm-dark transition">
+            Abrir Formulario
+          </span>
+          <span class="w-9 h-9 rounded-xl bg-hm-dark group-hover:bg-hm-med text-white flex items-center justify-center transition shadow-sm">
+            <i class="fa-solid fa-arrow-right"></i>
+          </span>
+        </div>
+      </a>
+
+      <!-- BOTÓN 3: PANEL DE ADMINISTRADOR -->
+      <a href="https://arnaldojcr.github.io/arnaldojcr/admin.html"
+         class="module-card p-6 flex flex-col justify-between group no-underline"
+         style="border-top-color: var(--hm-gold);">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-hm-gold text-2xl group-hover:bg-hm-gold group-hover:text-white transition">
+              <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+              <i class="fa-solid fa-lock mr-1"></i> Dirección / RRHH
+            </span>
+          </div>
+          <h3 class="text-lg font-extrabold text-hm-dark mb-2">
+            Panel de Administrador
+          </h3>
+          <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+            Control centralizado de reportes de asistencia, gestión de empleados, permisos, cálculo de nómina y configuración general.
+          </p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+          <span class="text-xs font-bold text-amber-700 group-hover:text-hm-dark transition">
+            Ingresar con PIN
+          </span>
+          <span class="w-9 h-9 rounded-xl bg-hm-gold group-hover:bg-hm-dark text-white flex items-center justify-center transition shadow-sm">
+            <i class="fa-solid fa-arrow-right"></i>
+          </span>
+        </div>
+      </a>
+
+      <!-- =================================================================== -->
+      <!-- PARA FUTUROS MÓDULOS (Ej: Documentos), COPIA Y PEGA UNA TARJETA     -->
+      <!-- IGUAL A LAS ANTERIORES JUSTO AQUÍ DEBAJO                            -->
+      <!-- =================================================================== -->
+
+    </div>
+  </main>
+
+  <!-- Pie de Página Corporativo -->
+  <footer class="bg-hm-dark text-white text-xs py-4 border-t-2 border-hm-gold mt-auto">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-gray-200">
+      <p>&copy; <span id="yearNow"></span> HyperMarket SLWA, C.A. - Todos los derechos reservados.</p>
+      <p class="text-hm-light-gold font-medium">Sistema Integrado de Gestión &bull; Recursos Humanos</p>
+    </div>
+  </footer>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("es-VE", {
+        weekday: "long", day: "2-digit", month: "long", year: "numeric"
+      });
+      const timeStr = now.toLocaleTimeString("es-VE", {
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
+      });
+      document.getElementById("currentDateDisplay").innerText = dateStr;
+      document.getElementById("currentTimeDisplay").innerText = timeStr;
+      document.getElementById("yearNow").innerText = now.getFullYear();
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
