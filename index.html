@@ -312,21 +312,25 @@
     let esTarde = false;
 
     if (turno === "Turno 01") {
-      if (tiempoMinutosActual >= 410 && tiempoMinutosActual <= 420) {
+      // Entrada: 6:50 am (410) a 7:10 am (430)
+      if (tiempoMinutosActual >= 410 && tiempoMinutosActual <= 430) {
         entradaPermitida = true;
-      } else if (tiempoMinutosActual > 420 && tiempoMinutosActual < 900) {
+      } else if (tiempoMinutosActual > 430 && tiempoMinutosActual < 890) {
         esTarde = true;
       }
-      if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 930) {
+      // Salida: Desde las 2:50 pm (890) en adelante (libre)
+      if (tiempoMinutosActual >= 890) {
         salidaPermitida = true;
       }
     } else if (turno === "Turno 02") {
-      if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 900) {
+      // Entrada: 1:50 pm (830) a 2:10 pm (850)
+      if (tiempoMinutosActual >= 830 && tiempoMinutosActual <= 850) {
         entradaPermitida = true;
-      } else if (tiempoMinutosActual > 900 && tiempoMinutosActual < 1320) {
+      } else if (tiempoMinutosActual > 850 && tiempoMinutosActual < 1310) {
         esTarde = true;
       }
-      if (tiempoMinutosActual >= 1310 && tiempoMinutosActual <= 1350) {
+      // Salida: Desde las 9:50 pm (1310) en adelante (libre)
+      if (tiempoMinutosActual >= 1310) {
         salidaPermitida = true;
       }
     }
