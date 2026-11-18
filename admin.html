@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Administrador - HyperMarket SLWA, C.A.</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    :root {
+      --hm-dark: #1B4D2E;
+      --hm-med: #3C8038;
+      --hm-light: #75A438;
+      --hm-gold: #C59B27;
+      --hm-light-gold: #E5C558;
+    }
+    body { background: #f3f6f4; font-family: 'Segoe UI', system-ui, sans-serif; color: #1f2937; }
+    .bg-hm-dark { background-color: var(--hm-dark); }
+    .bg-hm-med { background-color: var(--hm-med); }
+    .bg-hm-gold { background-color: var(--hm-gold); }
+    .text-hm-dark { color: var(--hm-dark); }
+    .text-hm-gold { color: var(--hm-gold); }
+    .text-hm-light-gold { color: var(--hm-light-gold); }
+    .border-hm-gold { border-color: var(--hm-gold); }
+
+    .input-hm {
+      width: 100%; padding: 0.5rem 0.7rem; border: 1.5px solid #d1d5db;
+      border-radius: 0.5rem; font-size: 0.875rem; background: #fff;
+    }
+    .input-hm:focus { outline: none; border-color: var(--hm-med); box-shadow: 0 0 0 3px rgba(60,128,56,0.16); }
+
+    .tab-btn.active { background-color: var(--hm-dark); color: #fff; border-bottom: 3px solid var(--hm-gold); }
+    .card-hm { background: #fff; border-radius: 0.85rem; box-shadow: 0 2px 10px rgba(27,77,46,0.06); border-top: 4px solid var(--hm-dark); }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; }
+      .card-hm { box-shadow: none; border: 1px solid #ddd; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- PANTALLA DE ACCESO ADMINISTRADOR -->
+  <div id="loginOverlay" class="fixed inset-0 z-50 bg-[#1B4D2E]/95 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border-t-4 border-[#C59B27] space-y-5">
+      <div class="text-center">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-hm-dark text-[#E5C558] font-black text-2xl flex items-center justify-center shadow">
+          HM
+        </div>
+        <h1 class="text-lg font-extrabold text-hm-dark mt-3">Panel Administrador</h1>
+        <p class="text-xs text-gray-500">HyperMarket SLWA, C.A. &bull; Gestión Centralizada</p>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-700 mb-1">PIN de Administrador</label>
+        <input type="password" id="adminPinLogin" placeholder="Ingrese PIN (Ej: 1984)"
+          class="input-hm text-center font-mono tracking-widest text-base"
+          onkeydown="if(event.key==='Enter') attemptAdminLogin()" />
+        <p id="loginError" class="hidden text-xs text-red-600 font-semibold mt-1.5 text-center"></p>
+      </div>
+      <button type="button" onclick="attemptAdminLogin()" id="btnLogin"
+        class="w-full py-2.5 rounded-xl bg-hm-dark hover:bg-hm-med text-white font-bold text-sm transition cursor-pointer">
+        Ingresar al Panel
+      </button>
+    </div>
+  </div>
+
+  <!-- HEADER CORPORATIVO -->
+  <header class="bg-hm-dark text-white shadow-lg border-b-4 border-hm-gold sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-hm-gold flex items-center justify-center text-hm-dark font-black text-lg">HM</div>
+        <div>
+          <h1 class="text-base sm:text-lg font-extrabold leading-tight">HyperMarket SLWA, C.A. — Administración</h1>
+          <p class="text-[11px] text-hm-light-gold">Control Maestro: Asistencia, Empleados, Permisos, Nómina y Configuración</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="loadAdminData()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-rotate"></i> Sincronizar
+        </button>
+        <button onclick="logoutAdmin()" class="px-3 py-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-right-from-bracket"></i> Salir
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVEGACIÓN DE MÓDULOS -->
+  <nav class="bg-white border-b border-gray-200 shadow-xs sticky top-[68px] z-20 no-print">
+    <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto gap-1 py-1.5">
+      <button onclick="switchTab('asistencia')" data-tab="asistencia" class="tab-btn active px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap flex items-center gap-2 cursor-pointer transition">
+        <i class="fa-solid fa-chart-column"></i> Resumen Asistencia
+      </button>
+      <button onclick="switchTab('empleados')" data-tab="empleados" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-100 whitespace-nowrap flex items-center gap-2 cursor-pointer transition">
+        <i class="fa-solid fa-users"></i> Empleados
+      </button>
+      <button onclick="switchTab('permisos')" data-tab="permisos" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-100 whitespace-nowrap flex items-center gap-2 cursor-pointer transition">
+        <i class="fa-solid fa-calendar-check"></i> Permisos y Licencias
+      </button>
+      <button onclick="switchTab('nomina')" data-tab="nomina" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-100 whitespace-nowrap flex items-center gap-2 cursor-pointer transition">
+        <i class="fa-solid fa-money-check-dollar"></i> Generador de Nómina
+      </button>
+      <button onclick="switchTab('config')" data-tab="config" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-100 whitespace-nowrap flex items-center gap-2 cursor-pointer transition">
+        <i class="fa-solid fa-sliders"></i> Configuración General
+      </button>
+    </div>
+  </nav>
+
+  <div id="toastBox" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm no-print"></div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA 1: RESUMEN DE ASISTENCIA                                    -->
+    <!-- =================================================================== -->
+    <section id="tab-asistencia" class="tab-panel space-y-5">
+      <div class="card-hm p-4 no-print">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Desde</label>
+            <input type="date" id="filtDesde" class="input-hm" onchange="renderAsistenciaResumen()" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Hasta</label>
+            <input type="date" id="filtHasta" class="input-hm" onchange="renderAsistenciaResumen()" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Local / Sucursal</label>
+            <select id="filtSucursal" class="input-hm" onchange="renderAsistenciaResumen()">
+              <option value="">Todas las sucursales</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Turno</label>
+            <select id="filtTurno" class="input-hm" onchange="renderAsistenciaResumen()">
+              <option value="">Todos los turnos</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Empleado</label>
+            <select id="filtEmpleado" class="input-hm" onchange="renderAsistenciaResumen()">
+              <option value="">Todos los empleados</option>
+            </select>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="exportAsistenciaResumenCSV()" class="flex-1 py-2 px-3 rounded-lg bg-hm-med hover:bg-hm-dark text-white text-xs font-bold cursor-pointer">
+              <i class="fa-solid fa-file-excel mr-1"></i> Excel
+            </button>
+            <button onclick="window.print()" class="py-2 px-3 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-xs font-bold cursor-pointer">
+              <i class="fa-solid fa-print"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card-hm p-4">
+          <p class="text-xs text-gray-500 font-semibold">Total Marcajes</p>
+          <p id="kpiTotalMarcajes" class="text-2xl font-black text-hm-dark mt-1">0</p>
+        </div>
+        <div class="card-hm p-4 border-t-[#3C8038]">
+          <p class="text-xs text-gray-500 font-semibold">Entradas A Tiempo</p>
+          <p id="kpiATiempo" class="text-2xl font-black text-emerald-700 mt-1">0</p>
+        </div>
+        <div class="card-hm p-4 border-t-[#C59B27]">
+          <p class="text-xs text-gray-500 font-semibold">Tardanzas Autorizadas</p>
+          <p id="kpiTardanzas" class="text-2xl font-black text-amber-600 mt-1">0</p>
+        </div>
+        <div class="card-hm p-4">
+          <p class="text-xs text-gray-500 font-semibold">Empleados Activos en Rango</p>
+          <p id="kpiEmpleadosUnicos" class="text-2xl font-black text-hm-dark mt-1">0</p>
+        </div>
+      </div>
+
+      <!-- Resumen Agrupado por Empleado / Local / Turno -->
+      <div class="card-hm overflow-hidden">
+        <div class="px-5 py-3 bg-gray-50 border-b flex items-center justify-between">
+          <h2 class="font-bold text-sm text-hm-dark"><i class="fa-solid fa-table-list mr-2 text-hm-gold"></i>Resumen Consolidado por Empleado, Local y Turno</h2>
+          <button onclick="exportAsistenciaDetalleCSV()" class="no-print text-xs font-bold text-hm-dark hover:underline cursor-pointer">
+            <i class="fa-solid fa-download mr-1"></i>Exportar Detalle Crudo (.csv)
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-hm-dark text-white uppercase">
+              <tr>
+                <th class="px-4 py-2.5">ID</th>
+                <th class="px-4 py-2.5">Empleado</th>
+                <th class="px-4 py-2.5">Sucursal</th>
+                <th class="px-4 py-2.5">Turno</th>
+                <th class="px-4 py-2.5 text-center">Entradas</th>
+                <th class="px-4 py-2.5 text-center">Salidas</th>
+                <th class="px-4 py-2.5 text-center">A Tiempo</th>
+                <th class="px-4 py-2.5 text-center">Tardanzas</th>
+                <th class="px-4 py-2.5 text-center">Permisos Aprob.</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyResumenAsistencia" class="divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detalle Cronológico -->
+      <div class="card-hm overflow-hidden">
+        <div class="px-5 py-3 bg-gray-50 border-b">
+          <h2 class="font-bold text-sm text-hm-dark"><i class="fa-solid fa-clock-rotate-left mr-2 text-hm-gold"></i>Registro Detallado de Marcajes</h2>
+        </div>
+        <div class="overflow-x-auto max-h-96">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-gray-100 text-gray-700 sticky top-0">
+              <tr>
+                <th class="px-3 py-2">Fecha</th>
+                <th class="px-3 py-2">Hora</th>
+                <th class="px-3 py-2">Empleado</th>
+                <th class="px-3 py-2">Sucursal</th>
+                <th class="px-3 py-2">Turno</th>
+                <th class="px-3 py-2">Acción</th>
+                <th class="px-3 py-2">Estado</th>
+                <th class="px-3 py-2">Dist. (m)</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDetalleAsistencia" class="divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA 2: GESTIÓN DE EMPLEADOS                                     -->
+    <!-- =================================================================== -->
+    <section id="tab-empleados" class="tab-panel hidden space-y-5">
+      <div class="card-hm p-4 flex flex-wrap items-center justify-between gap-3 no-print">
+        <div class="flex flex-wrap items-center gap-2 flex-1">
+          <input type="text" id="empSearchInput" placeholder="Buscar por Nombre, Cédula o ID..." class="input-hm !w-64" oninput="renderEmpleadosTable()" />
+          <select id="empFilterSucursal" class="input-hm !w-56" onchange="renderEmpleadosTable()">
+            <option value="">Todas las sucursales</option>
+          </select>
+        </div>
+        <button onclick="exportEmpleadosCSV()" class="px-4 py-2 rounded-lg bg-hm-med hover:bg-hm-dark text-white text-xs font-bold cursor-pointer">
+          <i class="fa-solid fa-file-excel mr-1"></i> Exportar Empleados (.csv)
+        </button>
+      </div>
+
+      <div class="card-hm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-hm-dark text-white uppercase">
+              <tr>
+                <th class="px-4 py-3">ID</th>
+                <th class="px-4 py-3">Nombre Completo</th>
+                <th class="px-4 py-3">Cédula</th>
+                <th class="px-4 py-3">Cargo / Depto</th>
+                <th class="px-4 py-3">Sucursal / Turno</th>
+                <th class="px-4 py-3 text-right">Salario Base (Bs.)</th>
+                <th class="px-4 py-3 text-center">Teléfono Vinculado</th>
+                <th class="px-4 py-3 text-center no-print">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyEmpleados" class="divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA 3: PERMISOS Y LICENCIAS                                     -->
+    <!-- =================================================================== -->
+    <section id="tab-permisos" class="tab-panel hidden space-y-5">
+      <div class="card-hm p-5 no-print">
+        <h2 class="font-bold text-sm text-hm-dark mb-4"><i class="fa-solid fa-file-circle-plus mr-2 text-hm-gold"></i>Otorgar Permiso / Justificación Laboral</h2>
+        <form onsubmit="submitPermiso(event)" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-bold text-gray-600 mb-1">Empleado *</label>
+            <select id="permEmpleado" required class="input-hm"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Tipo de Permiso *</label>
+            <select id="permTipo" required class="input-hm">
+              <option value="Permiso Personal">Permiso Personal</option>
+              <option value="Reposo Médico">Reposo Médico</option>
+              <option value="Llegada Tarde Autorizada">Llegada Tarde Autorizada</option>
+              <option value="Día Libre / Compensatorio">Día Libre / Compensatorio</option>
+              <option value="Vacaciones">Vacaciones</option>
+              <option value="Ausencia Injustificada">Ausencia Injustificada</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Desde *</label>
+            <input type="date" id="permDesde" required class="input-hm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Hasta *</label>
+            <input type="date" id="permHasta" required class="input-hm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">¿Remunerado?</label>
+            <select id="permRemunerado" class="input-hm">
+              <option value="Sí">Sí (Se paga en nómina)</option>
+              <option value="No">No (Se descuenta)</option>
+            </select>
+          </div>
+          <div class="md:col-span-2 lg:col-span-5">
+            <label class="block text-xs font-bold text-gray-600 mb-1">Motivo / Observación</label>
+            <input type="text" id="permMotivo" placeholder="Detalle o soporte del permiso..." class="input-hm" />
+          </div>
+          <div>
+            <button type="submit" class="w-full py-2 px-4 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-xs font-bold cursor-pointer">
+              <i class="fa-solid fa-check mr-1"></i> Registrar Permiso
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card-hm overflow-hidden">
+        <div class="px-5 py-3 bg-gray-50 border-b flex justify-between items-center">
+          <h2 class="font-bold text-sm text-hm-dark">Historial de Permisos</h2>
+          <button onclick="exportPermisosCSV()" class="no-print text-xs font-bold text-hm-dark hover:underline cursor-pointer">
+            <i class="fa-solid fa-file-excel mr-1"></i> Exportar (.csv)
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-hm-dark text-white uppercase">
+              <tr>
+                <th class="px-3 py-2.5">ID</th>
+                <th class="px-3 py-2.5">Empleado</th>
+                <th class="px-3 py-2.5">Tipo</th>
+                <th class="px-3 py-2.5">Desde</th>
+                <th class="px-3 py-2.5">Hasta</th>
+                <th class="px-3 py-2.5">Remun.</th>
+                <th class="px-3 py-2.5">Motivo</th>
+                <th class="px-3 py-2.5">Estado</th>
+                <th class="px-3 py-2.5 text-center no-print">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPermisos" class="divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA 4: GENERADOR DE NÓMINA                                      -->
+    <!-- =================================================================== -->
+    <section id="tab-nomina" class="tab-panel hidden space-y-5">
+      <div class="card-hm p-5 no-print">
+        <h2 class="font-bold text-sm text-hm-dark mb-3"><i class="fa-solid fa-calculator mr-2 text-hm-gold"></i>Parámetros para Cálculo de Nómina</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Inicio Período</label>
+            <input type="date" id="nomDesde" class="input-hm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Fin Período</label>
+            <input type="date" id="nomHasta" class="input-hm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Base Días Período</label>
+            <select id="nomDiasBase" class="input-hm">
+              <option value="15">Quincenal (15 días)</option>
+              <option value="30">Mensual (30 días)</option>
+              <option value="7">Semanal (7 días)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Sucursal</label>
+            <select id="nomSucursal" class="input-hm">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2 pt-4">
+            <input type="checkbox" id="nomAplicarLey" checked class="w-4 h-4 accent-[#1B4D2E]" />
+            <label for="nomAplicarLey" class="text-xs font-semibold text-gray-700">Aplicar IVSS/FAOV/RPE</label>
+          </div>
+          <div>
+            <button onclick="calcularNominaPreview()" class="w-full py-2.5 px-4 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-xs font-bold cursor-pointer">
+              <i class="fa-solid fa-gears mr-1"></i> Calcular Nómina
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-hm overflow-hidden">
+        <div class="px-5 py-3 bg-gray-50 border-b flex flex-wrap justify-between items-center gap-2">
+          <div>
+            <h2 class="font-bold text-sm text-hm-dark">Pre-Nómina Calculada (Editable antes de guardar)</h2>
+            <p class="text-[11px] text-gray-500">Calcula días asistidos reales + permisos remunerados. Puedes ajustar Asignaciones o Deducciones manualmente.</p>
+          </div>
+          <div class="flex gap-2 no-print">
+            <button onclick="guardarNominaEnSheets()" class="px-3.5 py-2 rounded-lg bg-hm-gold hover:bg-amber-600 text-white text-xs font-bold cursor-pointer">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar Cierre en Sheets
+            </button>
+            <button onclick="exportNominaCSV()" class="px-3.5 py-2 rounded-lg bg-hm-med hover:bg-hm-dark text-white text-xs font-bold cursor-pointer">
+              <i class="fa-solid fa-file-excel mr-1"></i> Exportar Excel
+            </button>
+            <button onclick="window.print()" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs font-bold cursor-pointer">
+              <i class="fa-solid fa-print"></i>
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-hm-dark text-white uppercase">
+              <tr>
+                <th class="px-3 py-2.5">ID</th>
+                <th class="px-3 py-2.5">Empleado</th>
+                <th class="px-3 py-2.5">Cargo</th>
+                <th class="px-3 py-2.5 text-right">Salario Base (Bs.)</th>
+                <th class="px-3 py-2.5 text-center">Asist.</th>
+                <th class="px-3 py-2.5 text-center">Perm. Pag.</th>
+                <th class="px-3 py-2.5 text-right">Asignaciones (Bs.)</th>
+                <th class="px-3 py-2.5 text-right">Deducciones (Bs.)</th>
+                <th class="px-3 py-2.5 text-right">Neto a Pagar (Bs.)</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyNomina" class="divide-y divide-gray-100"></tbody>
+            <tfoot class="bg-emerald-50 font-extrabold text-hm-dark">
+              <tr>
+                <td colspan="8" class="px-4 py-3 text-right uppercase">Total Neto Nómina (Bs.):</td>
+                <td id="nomTotalNeto" class="px-3 py-3 text-right text-sm font-mono">0,00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA 5: CONFIGURACIÓN GENERAL                                    -->
+    <!-- =================================================================== -->
+    <section id="tab-config" class="tab-panel hidden space-y-5">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        <!-- Horarios y Parámetros -->
+        <div class="card-hm p-5 space-y-4">
+          <h2 class="font-bold text-sm text-hm-dark border-b pb-2"><i class="fa-solid fa-clock mr-2 text-hm-gold"></i>Horarios de Turnos y Seguridad</h2>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">PIN Administrador</label>
+              <input type="text" id="cfgPinAdmin" class="input-hm font-mono" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">PIN Recursos Humanos</label>
+              <input type="text" id="cfgPinRrhh" class="input-hm font-mono" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">Radio Máximo GPS (metros)</label>
+              <input type="number" id="cfgRadio" class="input-hm font-mono" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">Minutos Antes para Entrada</label>
+              <input type="number" id="cfgTolAntes" class="input-hm font-mono" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t">
+            <div>
+              <label class="block text-[11px] font-bold text-gray-600 mb-1">IVSS (%)</label>
+              <input type="number" step="0.1" id="cfgIvss" class="input-hm font-mono" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-gray-600 mb-1">FAOV (%)</label>
+              <input type="number" step="0.1" id="cfgFaov" class="input-hm font-mono" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-gray-600 mb-1">RPE (%)</label>
+              <input type="number" step="0.1" id="cfgRpe" class="input-hm font-mono" />
+            </div>
+          </div>
+
+          <div class="pt-2 border-t space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-hm-dark">Turnos Activos</span>
+              <button type="button" onclick="addTurnoRow()" class="text-xs font-bold text-hm-med hover:underline cursor-pointer">+ Agregar Turno</button>
+            </div>
+            <div id="cfgTurnosList" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Sucursales y Coordenadas GPS -->
+        <div class="card-hm p-5 space-y-4">
+          <div class="flex justify-between items-center border-b pb-2">
+            <h2 class="font-bold text-sm text-hm-dark"><i class="fa-solid fa-location-dot mr-2 text-hm-gold"></i>Lugares de Registro (Sucursales GPS)</h2>
+            <button type="button" onclick="addSucursalRow()" class="text-xs font-bold text-hm-med hover:underline cursor-pointer">+ Agregar Sucursal</button>
+          </div>
+          <div id="cfgSucursalesList" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="saveAllConfig()" class="px-6 py-3 rounded-xl bg-hm-dark hover:bg-hm-med text-white font-bold text-sm shadow-lg cursor-pointer">
+          <i class="fa-solid fa-floppy-disk mr-2 text-hm-light-gold"></i>Guardar Toda la Configuración en Google Sheets
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL EDICIÓN RÁPIDA DE EMPLEADO -->
+  <div id="editEmpModal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border-t-4 border-hm-gold overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="bg-hm-dark text-white px-5 py-3.5 flex justify-between items-center">
+        <h3 class="font-bold text-sm">Editar Trabajador: <span id="editEmpTitle" class="text-hm-light-gold"></span></h3>
+        <button onclick="closeEditEmpModal()" class="text-white/80 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <input type="hidden" id="editEmpId" />
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Nombres</label>
+          <input type="text" id="editEmpNombres" class="input-hm" />
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Apellidos</label>
+          <input type="text" id="editEmpApellidos" class="input-hm" />
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Cédula</label>
+          <input type="text" id="editEmpCedula" class="input-hm font-mono" />
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Teléfono Móvil</label>
+          <input type="text" id="editEmpTelefono" class="input-hm font-mono" />
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Sucursal Asignada</label>
+          <select id="editEmpSucursal" class="input-hm"></select>
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Horario / Turno</label>
+          <select id="editEmpHorario" class="input-hm">
+            <option value="Turno 01 (07:00 am - 03:00 pm)">Turno 01 (07:00 am - 03:00 pm)</option>
+            <option value="Turno 02 (02:00 pm - 10:00 pm)">Turno 02 (02:00 pm - 10:00 pm)</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Cargo</label>
+          <input type="text" id="editEmpCargo" class="input-hm" />
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Departamento</label>
+          <input type="text" id="editEmpDepto" class="input-hm" />
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">Salario Base (Bs.)</label>
+          <input type="text" id="editEmpSalario" class="input-hm font-mono" placeholder="0,00" />
+        </div>
+        <div>
+          <label class="font-bold text-gray-600 block mb-1">PIN Personal Asistencia (Opcional)</label>
+          <input type="text" id="editEmpPin" maxlength="4" class="input-hm font-mono" placeholder="Por defecto últimos 4 de CI" />
+        </div>
+      </div>
+      <div class="px-5 py-3 bg-gray-50 border-t flex justify-end gap-2">
+        <button onclick="closeEditEmpModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-xs font-bold cursor-pointer">Cancelar</button>
+        <button onclick="saveEditedEmployee()" class="px-5 py-2 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-xs font-bold cursor-pointer">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
+
+  let ADMIN_PIN = "";
+  let APP_CONFIG = {};
+  let EMPLEADOS = [];
+  let ASISTENCIA = [];
+  let PERMISOS = [];
+  let NOMINA_PREVIEW = [];
+  let RESUMEN_ACTUAL = [];
+
+  // ---------------------------------------------------------------------------
+  // INICIALIZACIÓN Y LOGIN
+  // ---------------------------------------------------------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+    const todayIso = today.toISOString().slice(0, 10);
+    ["filtDesde", "nomDesde", "permDesde", "permHasta"].forEach(id => document.getElementById(id).value = id.includes("perm") ? todayIso : firstDay);
+    ["filtHasta", "nomHasta"].forEach(id => document.getElementById(id).value = todayIso);
+  });
+
+  async function attemptAdminLogin() {
+    const pin = document.getElementById("adminPinLogin").value.trim();
+    const errEl = document.getElementById("loginError");
+    const btn = document.getElementById("btnLogin");
+    if (!pin) return;
+
+    btn.disabled = true;
+    btn.innerText = "Verificando...";
+    errEl.classList.add("hidden");
+
+    ADMIN_PIN = pin;
+    const ok = await loadAdminData();
+    if (ok) {
+      document.getElementById("loginOverlay").classList.add("hidden");
+    } else {
+      ADMIN_PIN = "";
+      errEl.innerText = "PIN incorrecto o error de conexión.";
+      errEl.classList.remove("hidden");
+    }
+    btn.disabled = false;
+    btn.innerText = "Ingresar al Panel";
+  }
+
+  function logoutAdmin() {
+    ADMIN_PIN = "";
+    document.getElementById("adminPinLogin").value = "";
+    document.getElementById("loginOverlay").classList.remove("hidden");
+  }
+
+  async function loadAdminData() {
+    try {
+      const res = await fetch(`${SCRIPT_URL}?module=admin&action=bootstrap&pin=${encodeURIComponent(ADMIN_PIN)}&_t=${Date.now()}`);
+      const json = await res.json();
+      if (json.status !== "ok") return false;
+
+      APP_CONFIG = json.config || {};
+      EMPLEADOS = json.empleados || [];
+      ASISTENCIA = json.asistencia || [];
+      PERMISOS = json.permisos || [];
+
+      populateFilterSelects();
+      renderAsistenciaResumen();
+      renderEmpleadosTable();
+      renderPermisosTable();
+      renderConfigForm();
+      showToast("Datos sincronizados con HyperMarket_SLWA.", "success");
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  function switchTab(tabName) {
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("hidden"));
+    document.getElementById("tab-" + tabName).classList.remove("hidden");
+    document.querySelectorAll(".tab-btn").forEach(b => {
+      b.classList.remove("active");
+      b.classList.add("text-gray-600");
+    });
+    const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    activeBtn.classList.add("active");
+    activeBtn.classList.remove("text-gray-600");
+  }
+
+  // ---------------------------------------------------------------------------
+  // UTILIDADES FECHAS Y NÚMEROS
+  // ---------------------------------------------------------------------------
+  function ddmmyyyyToIso(str) {
+    const m = String(str || "").match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : "";
+  }
+
+  function parseBs(val) {
+    if (!val) return 0;
+    const clean = String(val).replace(/\./g, "").replace(",", ".").replace(/[^0-9.-]/g, "");
+    return parseFloat(clean) || 0;
+  }
+
+  function formatBs(num) {
+    return (Number(num) || 0).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function populateFilterSelects() {
+    const sucursales = (APP_CONFIG.sucursales || []).map(s => s.nombre);
+    ["filtSucursal", "empFilterSucursal", "nomSucursal", "editEmpSucursal"].forEach(id => {
+      const sel = document.getElementById(id);
+      const val = sel.value;
+      sel.innerHTML = id === "editEmpSucursal" ? "" : `<option value="">Todas</option>`;
+      sucursales.forEach(s => {
+        const o = document.createElement("option");
+        o.value = s; o.textContent = s;
+        sel.appendChild(o);
+      });
+      if (val) sel.value = val;
+    });
+
+    const turnos = (APP_CONFIG.turnos || []).map(t => t.nombre);
+    const selTurno = document.getElementById("filtTurno");
+    selTurno.innerHTML = `<option value="">Todos los turnos</option>`;
+    turnos.forEach(t => {
+      const o = document.createElement("option");
+      o.value = t; o.textContent = t;
+      selTurno.appendChild(o);
+    });
+
+    const empNames = EMPLEADOS.map(e => ({ id: e.ID_Unico, nombre: `${e.Nombres || ""} ${e.Apellidos || ""}`.trim() }))
+      .filter(e => e.nombre).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+
+    ["filtEmpleado", "permEmpleado"].forEach(id => {
+      const sel = document.getElementById(id);
+      sel.innerHTML = id === "filtEmpleado" ? `<option value="">Todos los empleados</option>` : `<option value="">Seleccione empleado...</option>`;
+      empNames.forEach(e => {
+        const o = document.createElement("option");
+        o.value = id === "permEmpleado" ? `${e.id}||${e.nombre}` : e.nombre;
+        o.textContent = `${e.nombre} (${e.id})`;
+        sel.appendChild(o);
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // MÓDULO 1: RESUMEN DE ASISTENCIA
+  // ---------------------------------------------------------------------------
+  function renderAsistenciaResumen() {
+    const desde = document.getElementById("filtDesde").value;
+    const hasta = document.getElementById("filtHasta").value;
+    const suc = document.getElementById("filtSucursal").value;
+    const turno = document.getElementById("filtTurno").value;
+    const emp = document.getElementById("filtEmpleado").value;
+
+    const filtrados = ASISTENCIA.filter(r => {
+      const iso = ddmmyyyyToIso(r.Fecha);
+      if (desde && iso && iso < desde) return false;
+      if (hasta && iso && iso > hasta) return false;
+      if (suc && r.Sucursal !== suc) return false;
+      if (turno && r.Turno !== turno) return false;
+      if (emp && r.Empleado !== emp) return false;
+      return true;
+    });
+
+    let aTiempo = 0, tardanzas = 0;
+    const resumenMap = {};
+
+    filtrados.forEach(r => {
+      if (r.Accion === "ENTRADA") {
+        if (String(r.Estado).includes("Tarde")) tardanzas++;
+        else aTiempo++;
+      }
+      const key = `${r.ID_Unico || r.Empleado}|${r.Sucursal}|${r.Turno}`;
+      if (!resumenMap[key]) {
+        resumenMap[key] = {
+          id: r.ID_Unico || "-", empleado: r.Empleado, sucursal: r.Sucursal, turno: r.Turno,
+          entradas: 0, salidas: 0, aTiempo: 0, tardanzas: 0, permisos: 0
+        };
+      }
+      if (r.Accion === "ENTRADA") {
+        resumenMap[key].entradas++;
+        if (String(r.Estado).includes("Tarde")) resumenMap[key].tardanzas++;
+        else resumenMap[key].aTiempo++;
+      } else if (r.Accion === "SALIDA") {
+        resumenMap[key].salidas++;
+      }
+    });
+
+    Object.values(resumenMap).forEach(item => {
+      item.permisos = PERMISOS.filter(p =>
+        p.Estado === "Aprobado" && (p.ID_Unico === item.id || p.Empleado === item.empleado) &&
+        (!desde || p.Fecha_Fin >= desde) && (!hasta || p.Fecha_Inicio <= hasta)
+      ).length;
+    });
+
+    RESUMEN_ACTUAL = Object.values(resumenMap);
+
+    document.getElementById("kpiTotalMarcajes").innerText = filtrados.length;
+    document.getElementById("kpiATiempo").innerText = aTiempo;
+    document.getElementById("kpiTardanzas").innerText = tardanzas;
+    document.getElementById("kpiEmpleadosUnicos").innerText = new Set(filtrados.map(r => r.Empleado)).size;
+
+    const tbResumen = document.getElementById("tbodyResumenAsistencia");
+    tbResumen.innerHTML = RESUMEN_ACTUAL.length ? RESUMEN_ACTUAL.map(x => `
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2.5 font-mono font-bold text-hm-dark">${x.id}</td>
+        <td class="px-4 py-2.5 font-semibold">${x.empleado}</td>
+        <td class="px-4 py-2.5">${x.sucursal}</td>
+        <td class="px-4 py-2.5">${x.turno}</td>
+        <td class="px-4 py-2.5 text-center font-bold">${x.entradas}</td>
+        <td class="px-4 py-2.5 text-center font-bold">${x.salidas}</td>
+        <td class="px-4 py-2.5 text-center text-emerald-700 font-bold">${x.aTiempo}</td>
+        <td class="px-4 py-2.5 text-center text-amber-600 font-bold">${x.tardanzas}</td>
+        <td class="px-4 py-2.5 text-center font-bold">${x.permisos}</td>
+      </tr>`).join("") : `<tr><td colspan="9" class="p-6 text-center text-gray-400">Sin registros para los filtros seleccionados.</td></tr>`;
+
+    const tbDet = document.getElementById("tbodyDetalleAsistencia");
+    tbDet.innerHTML = filtrados.slice().reverse().map(r => `
+      <tr class="hover:bg-gray-50">
+        <td class="px-3 py-2 font-mono">${r.Fecha}</td>
+        <td class="px-3 py-2 font-mono">${r.Hora}</td>
+        <td class="px-3 py-2 font-semibold">${r.Empleado}</td>
+        <td class="px-3 py-2">${r.Sucursal}</td>
+        <td class="px-3 py-2">${r.Turno}</td>
+        <td class="px-3 py-2 font-bold ${r.Accion === 'ENTRADA' ? 'text-emerald-700' : 'text-amber-700'}">${r.Accion}</td>
+        <td class="px-3 py-2">${r.Estado}</td>
+        <td class="px-3 py-2 font-mono">${r.Distancia_m || "-"}</td>
+      </tr>`).join("");
+  }
+
+  // ---------------------------------------------------------------------------
+  // MÓDULO 2: GESTIÓN DE EMPLEADOS
+  // ---------------------------------------------------------------------------
+  function renderEmpleadosTable() {
+    const q = document.getElementById("empSearchInput").value.trim().toLowerCase();
+    const suc = document.getElementById("empFilterSucursal").value;
+
+    const list = EMPLEADOS.filter(e => {
+      const full = `${e.Nombres || ""} ${e.Apellidos || ""}`.toLowerCase();
+      const matchQ = !q || full.includes(q) || String(e.Cedula || "").toLowerCase().includes(q) || String(e.ID_Unico || "").toLowerCase().includes(q);
+      const matchS = !suc || e.Sucursal === suc;
+      return matchQ && matchS;
+    });
+
+    document.getElementById("tbodyEmpleados").innerHTML = list.map(e => `
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2.5 font-mono font-bold text-hm-dark">${e.ID_Unico}</td>
+        <td class="px-4 py-2.5 font-semibold">${e.Nombres} ${e.Apellidos}</td>
+        <td class="px-4 py-2.5 font-mono">${e.Cedula}</td>
+        <td class="px-4 py-2.5">${e.Cargo || "-"} <span class="block text-[10px] text-gray-400">${e.Departamento || ""}</span></td>
+        <td class="px-4 py-2.5">${e.Sucursal || "-"} <span class="block text-[10px] text-gray-400">${e.Horario || ""}</span></td>
+        <td class="px-4 py-2.5 text-right font-mono font-bold">${e.Salario_Base_Bs || "0,00"}</td>
+        <td class="px-4 py-2.5 text-center">
+          ${e.Dispositivo_ID
+            ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-hm-dark font-bold text-[10px]">Vinculado</span>`
+            : `<span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-[10px]">Libre</span>`}
+        </td>
+        <td class="px-4 py-2.5 text-center space-x-1 no-print whitespace-nowrap">
+          <button onclick='openEditEmpModal("${e.ID_Unico}")' class="px-2.5 py-1 rounded bg-hm-dark text-white hover:bg-hm-med cursor-pointer" title="Editar"><i class="fa-solid fa-pen"></i></button>
+          ${e.Dispositivo_ID ? `<button onclick='resetDeviceAdmin("${e.ID_Unico}")' class="px-2.5 py-1 rounded bg-amber-600 text-white hover:bg-amber-700 cursor-pointer" title="Desvincular Teléfono"><i class="fa-solid fa-mobile-screen-button"></i></button>` : ""}
+        </td>
+      </tr>`).join("");
+  }
+
+  function openEditEmpModal(id) {
+    const e = EMPLEADOS.find(x => x.ID_Unico === id);
+    if (!e) return;
+    document.getElementById("editEmpId").value = e.ID_Unico;
+    document.getElementById("editEmpTitle").innerText = `${e.Nombres} ${e.Apellidos} (${e.ID_Unico})`;
+    document.getElementById("editEmpNombres").value = e.Nombres || "";
+    document.getElementById("editEmpApellidos").value = e.Apellidos || "";
+    document.getElementById("editEmpCedula").value = e.Cedula || "";
+    document.getElementById("editEmpTelefono").value = e.Telefono_Movil || "";
+    document.getElementById("editEmpSucursal").value = e.Sucursal || "";
+    document.getElementById("editEmpHorario").value = e.Horario || "Turno 01 (07:00 am - 03:00 pm)";
+    document.getElementById("editEmpCargo").value = e.Cargo || "";
+    document.getElementById("editEmpDepto").value = e.Departamento || "";
+    document.getElementById("editEmpSalario").value = e.Salario_Base_Bs || "";
+    document.getElementById("editEmpPin").value = e.PIN_Asistencia || "";
+    document.getElementById("editEmpModal").classList.remove("hidden");
+  }
+
+  function closeEditEmpModal() { document.getElementById("editEmpModal").classList.add("hidden"); }
+
+  async function saveEditedEmployee() {
+    const id = document.getElementById("editEmpId").value;
+    const orig = EMPLEADOS.find(x => x.ID_Unico === id) || {};
+    const updated = Object.assign({}, orig, {
+      Nombres: document.getElementById("editEmpNombres").value.trim(),
+      Apellidos: document.getElementById("editEmpApellidos").value.trim(),
+      Cedula: document.getElementById("editEmpCedula").value.trim(),
+      Telefono_Movil: document.getElementById("editEmpTelefono").value.trim(),
+      Sucursal: document.getElementById("editEmpSucursal").value,
+      Horario: document.getElementById("editEmpHorario").value,
+      Cargo: document.getElementById("editEmpCargo").value.trim(),
+      Departamento: document.getElementById("editEmpDepto").value.trim(),
+      Salario_Base_Bs: document.getElementById("editEmpSalario").value.trim(),
+      PIN_Asistencia: document.getElementById("editEmpPin").value.trim()
+    });
+    await postAdmin("saveEmployee", { employee: updated });
+    closeEditEmpModal();
+    showToast("Empleado actualizado.", "success");
+    setTimeout(loadAdminData, 1000);
+  }
+
+  async function resetDeviceAdmin(idUnico) {
+    if (!confirm(`¿Desvincular el teléfono de ${idUnico}?`)) return;
+    await postAdmin("resetDevice", { id_unico: idUnico });
+    showToast("Dispositivo desvinculado.", "success");
+    setTimeout(loadAdminData, 1000);
+  }
+
+  // ---------------------------------------------------------------------------
+  // MÓDULO 3: PERMISOS
+  // ---------------------------------------------------------------------------
+  async function submitPermiso(e) {
+    e.preventDefault();
+    const val = document.getElementById("permEmpleado").value;
+    if (!val) return;
+    const [idUnico, nombre] = val.split("||");
+    const permiso = {
+      ID_Unico: idUnico,
+      Empleado: nombre,
+      Tipo_Permiso: document.getElementById("permTipo").value,
+      Fecha_Inicio: document.getElementById("permDesde").value,
+      Fecha_Fin: document.getElementById("permHasta").value,
+      Remunerado: document.getElementById("permRemunerado").value,
+      Motivo: document.getElementById("permMotivo").value.trim(),
+      Estado: "Aprobado"
+    };
+    await postAdmin("savePermiso", { permiso });
+    document.getElementById("permMotivo").value = "";
+    showToast("Permiso registrado y aprobado.", "success");
+    setTimeout(loadAdminData, 1000);
+  }
+
+  async function changePermisoStatus(idPermiso, estado) {
+    await postAdmin("updatePermisoEstado", { id_permiso: idPermiso, estado });
+    showToast(`Permiso ${idPermiso}: ${estado}`, "info");
+    setTimeout(loadAdminData, 900);
+  }
+
+  function renderPermisosTable() {
+    document.getElementById("tbodyPermisos").innerHTML = PERMISOS.slice().reverse().map(p => `
+      <tr class="hover:bg-gray-50">
+        <td class="px-3 py-2 font-mono font-bold">${p.ID_Permiso}</td>
+        <td class="px-3 py-2 font-semibold">${p.Empleado}</td>
+        <td class="px-3 py-2">${p.Tipo_Permiso}</td>
+        <td class="px-3 py-2 font-mono">${p.Fecha_Inicio}</td>
+        <td class="px-3 py-2 font-mono">${p.Fecha_Fin}</td>
+        <td class="px-3 py-2 font-bold">${p.Remunerado}</td>
+        <td class="px-3 py-2">${p.Motivo || "-"}</td>
+        <td class="px-3 py-2">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${p.Estado === 'Aprobado' ? 'bg-emerald-100 text-hm-dark' : 'bg-red-100 text-red-700'}">${p.Estado}</span>
+        </td>
+        <td class="px-3 py-2 text-center no-print space-x-1">
+          <button onclick="changePermisoStatus('${p.ID_Permiso}','Aprobado')" class="px-2 py-1 rounded bg-emerald-600 text-white cursor-pointer">✓</button>
+          <button onclick="changePermisoStatus('${p.ID_Permiso}','Rechazado')" class="px-2 py-1 rounded bg-red-600 text-white cursor-pointer">✕</button>
+        </td>
+      </tr>`).join("");
+  }
+
+  // ---------------------------------------------------------------------------
+  // MÓDULO 4: GENERADOR DE NÓMINA
+  // ---------------------------------------------------------------------------
+  function calcularNominaPreview() {
+    const desde = document.getElementById("nomDesde").value;
+    const hasta = document.getElementById("nomHasta").value;
+    const diasBase = parseInt(document.getElementById("nomDiasBase").value, 10) || 15;
+    const suc = document.getElementById("nomSucursal").value;
+    const aplicarLey = document.getElementById("nomAplicarLey").checked;
+
+    const pctTotalLey = aplicarLey
+      ? ((Number(APP_CONFIG.ivssPct) || 4) + (Number(APP_CONFIG.faovPct) || 1) + (Number(APP_CONFIG.rpePct) || 0.5)) / 100
+      : 0;
+
+    NOMINA_PREVIEW = EMPLEADOS.filter(e => !suc || e.Sucursal === suc).map(e => {
+      const nombre = `${e.Nombres || ""} ${e.Apellidos || ""}`.trim();
+      const salMensual = parseBs(e.Salario_Base_Bs);
+      const salDiario = salMensual / 30;
+
+      // Contar días únicos con ENTRADA en el rango
+      const diasAsistidosSet = new Set();
+      let tardanzas = 0;
+      ASISTENCIA.forEach(r => {
+        const iso = ddmmyyyyToIso(r.Fecha);
+        if (r.Accion === "ENTRADA" && (r.ID_Unico === e.ID_Unico || r.Empleado === nombre)) {
+          if ((!desde || iso >= desde) && (!hasta || iso <= hasta)) {
+            diasAsistidosSet.add(r.Fecha);
+            if (String(r.Estado).includes("Tarde")) tardanzas++;
+          }
+        }
+      });
+
+      // Contar permisos remunerados aprobados
+      let diasPermiso = 0;
+      PERMISOS.forEach(p => {
+        if (p.Estado === "Aprobado" && p.Remunerado === "Sí" && (p.ID_Unico === e.ID_Unico || p.Empleado === nombre)) {
+          if ((!desde || p.Fecha_Fin >= desde) && (!hasta || p.Fecha_Inicio <= hasta)) {
+            const d1 = new Date(Math.max(new Date(p.Fecha_Inicio), new Date(desde || p.Fecha_Inicio)));
+            const d2 = new Date(Math.min(new Date(p.Fecha_Fin), new Date(hasta || p.Fecha_Fin)));
+            const diff = Math.floor((d2 - d1) / 86400000) + 1;
+            if (diff > 0) diasPermiso += diff;
+          }
+        }
+      });
+
+      const diasTrabajados = diasAsistidosSet.size;
+      const diasPagables = Math.min(diasBase, diasTrabajados + diasPermiso);
+      const asignaciones = salDiario * diasPagables;
+      const deducciones = asignaciones * pctTotalLey;
+      const neto = Math.max(0, asignaciones - deducciones);
+
+      return {
+        ID_Unico: e.ID_Unico, Empleado: nombre, Cedula: e.Cedula,
+        Cargo: e.Cargo || "-", Sucursal: e.Sucursal || "-",
+        Salario_Base_Bs: formatBs(salMensual), Dias_Periodo: diasBase,
+        Dias_Trabajados: diasTrabajados, Dias_Permiso: diasPermiso, Tardanzas: tardanzas,
+        asignacionesNum: asignaciones, deduccionesNum: deducciones, netoNum: neto
+      };
+    });
+
+    renderNominaTable();
+  }
+
+  function renderNominaTable() {
+    let totalNeto = 0;
+    document.getElementById("tbodyNomina").innerHTML = NOMINA_PREVIEW.map((f, idx) => {
+      totalNeto += f.netoNum;
+      return `
+        <tr class="hover:bg-gray-50">
+          <td class="px-3 py-2 font-mono font-bold">${f.ID_Unico}</td>
+          <td class="px-3 py-2 font-semibold">${f.Empleado}</td>
+          <td class="px-3 py-2">${f.Cargo}</td>
+          <td class="px-3 py-2 text-right font-mono">${f.Salario_Base_Bs}</td>
+          <td class="px-3 py-2 text-center font-bold">${f.Dias_Trabajados}</td>
+          <td class="px-3 py-2 text-center font-bold text-hm-med">${f.Dias_Permiso}</td>
+          <td class="px-3 py-2 text-right">
+            <input type="number" step="0.01" value="${f.asignacionesNum.toFixed(2)}" onchange="updateNominaRow(${idx}, 'asig', this.value)" class="input-hm !py-1 !w-28 text-right font-mono" />
+          </td>
+          <td class="px-3 py-2 text-right">
+            <input type="number" step="0.01" value="${f.deduccionesNum.toFixed(2)}" onchange="updateNominaRow(${idx}, 'ded', this.value)" class="input-hm !py-1 !w-28 text-right font-mono text-red-700" />
+          </td>
+          <td class="px-3 py-2 text-right font-mono font-extrabold text-hm-dark">${formatBs(f.netoNum)}</td>
+        </tr>`;
+    }).join("");
+    document.getElementById("nomTotalNeto").innerText = formatBs(totalNeto);
+  }
+
+  function updateNominaRow(idx, field, val) {
+    const num = parseFloat(val) || 0;
+    if (field === "asig") NOMINA_PREVIEW[idx].asignacionesNum = num;
+    if (field === "ded") NOMINA_PREVIEW[idx].deduccionesNum = num;
+    NOMINA_PREVIEW[idx].netoNum = Math.max(0, NOMINA_PREVIEW[idx].asignacionesNum - NOMINA_PREVIEW[idx].deduccionesNum);
+    renderNominaTable();
+  }
+
+  async function guardarNominaEnSheets() {
+    if (!NOMINA_PREVIEW.length) return showToast("Primero calcule la nómina.", "error");
+    const periodo = `${document.getElementById("nomDesde").value} al ${document.getElementById("nomHasta").value}`;
+    const filas = NOMINA_PREVIEW.map(f => ({
+      ID_Unico: f.ID_Unico, Empleado: f.Empleado, Cedula: f.Cedula,
+      Cargo: f.Cargo, Sucursal: f.Sucursal, Salario_Base_Bs: f.Salario_Base_Bs,
+      Dias_Periodo: f.Dias_Periodo, Dias_Trabajados: f.Dias_Trabajados,
+      Dias_Permiso: f.Dias_Permiso, Tardanzas: f.Tardanzas,
+      Asignaciones_Bs: formatBs(f.asignacionesNum),
+      Deducciones_Bs: formatBs(f.deduccionesNum),
+      Neto_Pagar_Bs: formatBs(f.netoNum)
+    }));
+    await postAdmin("saveNomina", { periodo, filas });
+    showToast("Nómina guardada en la hoja 'Nomina' de Google Sheets.", "success");
+  }
+
+  // ---------------------------------------------------------------------------
+  // MÓDULO 5: CONFIGURACIÓN GENERAL
+  // ---------------------------------------------------------------------------
+  function renderConfigForm() {
+    document.getElementById("cfgPinAdmin").value = APP_CONFIG.pinAdmin || "1984";
+    document.getElementById("cfgPinRrhh").value = APP_CONFIG.pinRrhh || "SLWA2026";
+    document.getElementById("cfgRadio").value = APP_CONFIG.radioMetros || 20;
+    document.getElementById("cfgTolAntes").value = APP_CONFIG.toleranciaAntesMin || 10;
+    document.getElementById("cfgIvss").value = APP_CONFIG.ivssPct ?? 4;
+    document.getElementById("cfgFaov").value = APP_CONFIG.faovPct ?? 1;
+    document.getElementById("cfgRpe").value = APP_CONFIG.rpePct ?? 0.5;
+
+    const tList = document.getElementById("cfgTurnosList");
+    tList.innerHTML = "";
+    (APP_CONFIG.turnos || []).forEach(t => addTurnoRow(t));
+
+    const sList = document.getElementById("cfgSucursalesList");
+    sList.innerHTML = "";
+    (APP_CONFIG.sucursales || []).forEach(s => addSucursalRow(s));
+  }
+
+  function addTurnoRow(t = { nombre: "", entrada: "07:00", salida: "15:00" }) {
+    const div = document.createElement("div");
+    div.className = "turno-row grid grid-cols-12 gap-2 items-center bg-gray-50 p-2 rounded-lg border";
+    div.innerHTML = `
+      <input type="text" class="input-hm col-span-5 t-nombre" placeholder="Nombre Turno" value="${t.nombre}" />
+      <input type="time" class="input-hm col-span-3 t-entrada" value="${t.entrada}" />
+      <input type="time" class="input-hm col-span-3 t-salida" value="${t.salida}" />
+      <button type="button" onclick="this.closest('.turno-row').remove()" class="col-span-1 text-red-600 cursor-pointer"><i class="fa-solid fa-trash"></i></button>
+    `;
+    document.getElementById("cfgTurnosList").appendChild(div);
+  }
+
+  function addSucursalRow(s = { nombre: "", lat: "", lng: "" }) {
+    const div = document.createElement("div");
+    div.className = "suc-row p-3 rounded-lg bg-gray-50 border space-y-2";
+    div.innerHTML = `
+      <div class="flex gap-2">
+        <input type="text" class="input-hm s-nombre font-semibold" placeholder="Nombre de Sucursal" value="${s.nombre}" />
+        <button type="button" onclick="fillCurrentGps(this)" class="px-2.5 rounded-lg bg-hm-med text-white text-xs cursor-pointer" title="Usar GPS actual"><i class="fa-solid fa-crosshairs"></i></button>
+        <button type="button" onclick="this.closest('.suc-row').remove()" class="px-2.5 rounded-lg bg-red-100 text-red-600 text-xs cursor-pointer"><i class="fa-solid fa-trash"></i></button>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <input type="text" class="input-hm font-mono text-xs s-lat" placeholder="Latitud" value="${s.lat}" />
+        <input type="text" class="input-hm font-mono text-xs s-lng" placeholder="Longitud" value="${s.lng}" />
+      </div>
+    `;
+    document.getElementById("cfgSucursalesList").appendChild(div);
+  }
+
+  function fillCurrentGps(btn) {
+    if (!navigator.geolocation) return alert("GPS no soportado.");
+    navigator.geolocation.getCurrentPosition(pos => {
+      const row = btn.closest(".suc-row");
+      row.querySelector(".s-lat").value = pos.coords.latitude;
+      row.querySelector(".s-lng").value = pos.coords.longitude;
+      showToast("Coordenadas actuales capturadas.", "success");
+    });
+  }
+
+  async function saveAllConfig() {
+    const turnos = Array.from(document.querySelectorAll(".turno-row")).map(r => ({
+      nombre: r.querySelector(".t-nombre").value.trim(),
+      entrada: r.querySelector(".t-entrada").value,
+      salida: r.querySelector(".t-salida").value
+    })).filter(t => t.nombre);
+
+    const sucursales = Array.from(document.querySelectorAll(".suc-row")).map(r => ({
+      nombre: r.querySelector(".s-nombre").value.trim(),
+      lat: parseFloat(r.querySelector(".s-lat").value) || 0,
+      lng: parseFloat(r.querySelector(".s-lng").value) || 0
+    })).filter(s => s.nombre);
+
+    const newConfig = {
+      pinAdmin: document.getElementById("cfgPinAdmin").value.trim() || "1984",
+      pinRrhh: document.getElementById("cfgPinRrhh").value.trim() || "SLWA2026",
+      radioMetros: parseInt(document.getElementById("cfgRadio").value, 10) || 20,
+      toleranciaAntesMin: parseInt(document.getElementById("cfgTolAntes").value, 10) || 10,
+      ivssPct: parseFloat(document.getElementById("cfgIvss").value) || 0,
+      faovPct: parseFloat(document.getElementById("cfgFaov").value) || 0,
+      rpePct: parseFloat(document.getElementById("cfgRpe").value) || 0,
+      turnos, sucursales
+    };
+
+    await postAdmin("saveConfig", { config: newConfig });
+    ADMIN_PIN = newConfig.pinAdmin;
+    showToast("Configuración guardada en Google Sheets.", "success");
+    setTimeout(loadAdminData, 1000);
+  }
+
+  // ---------------------------------------------------------------------------
+  // EXPORTACIONES CSV (EXCEL) Y COMUNICACIÓN POST
+  // ---------------------------------------------------------------------------
+  function downloadCSV(filename, headers, rows) {
+    const esc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = "\uFEFF" + [headers.map(esc).join(","), ...rows.map(r => r.map(esc).join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+  }
+
+  function exportAsistenciaResumenCSV() {
+    downloadCSV("Resumen_Asistencia_SLWA.csv",
+      ["ID", "Empleado", "Sucursal", "Turno", "Entradas", "Salidas", "A Tiempo", "Tardanzas", "Permisos"],
+      RESUMEN_ACTUAL.map(x => [x.id, x.empleado, x.sucursal, x.turno, x.entradas, x.salidas, x.aTiempo, x.tardanzas, x.permisos])
+    );
+  }
+
+  function exportAsistenciaDetalleCSV() {
+    downloadCSV("Detalle_Asistencia_SLWA.csv",
+      ["ID_Registro", "Fecha", "Hora", "ID_Unico", "Empleado", "Sucursal", "Turno", "Accion", "Estado", "Distancia_m"],
+      ASISTENCIA.map(r => [r.ID_Registro, r.Fecha, r.Hora, r.ID_Unico, r.Empleado, r.Sucursal, r.Turno, r.Accion, r.Estado, r.Distancia_m])
+    );
+  }
+
+  function exportEmpleadosCSV() {
+    downloadCSV("Empleados_HyperMarket_SLWA.csv",
+      ["ID_Unico", "Nombres", "Apellidos", "Cedula", "Telefono_Movil", "Sucursal", "Cargo", "Departamento", "Horario", "Salario_Base_Bs"],
+      EMPLEADOS.map(e => [e.ID_Unico, e.Nombres, e.Apellidos, e.Cedula, e.Telefono_Movil, e.Sucursal, e.Cargo, e.Departamento, e.Horario, e.Salario_Base_Bs])
+    );
+  }
+
+  function exportPermisosCSV() {
+    downloadCSV("Permisos_SLWA.csv",
+      ["ID_Permiso", "Empleado", "Tipo", "Desde", "Hasta", "Remunerado", "Motivo", "Estado"],
+      PERMISOS.map(p => [p.ID_Permiso, p.Empleado, p.Tipo_Permiso, p.Fecha_Inicio, p.Fecha_Fin, p.Remunerado, p.Motivo, p.Estado])
+    );
+  }
+
+  function exportNominaCSV() {
+    if (!NOMINA_PREVIEW.length) return showToast("Calcule la nómina primero.", "error");
+    downloadCSV("Nomina_HyperMarket_SLWA.csv",
+      ["ID", "Empleado", "Cedula", "Cargo", "Sucursal", "Salario Base", "Asistencias", "Permisos Pagados", "Asignaciones", "Deducciones", "Neto a Pagar"],
+      NOMINA_PREVIEW.map(f => [f.ID_Unico, f.Empleado, f.Cedula, f.Cargo, f.Sucursal, f.Salario_Base_Bs, f.Dias_Trabajados, f.Dias_Permiso, f.asignacionesNum.toFixed(2), f.deduccionesNum.toFixed(2), f.netoNum.toFixed(2)])
+    );
+  }
+
+  async function postAdmin(action, extra) {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(Object.assign({ module: "admin", adminPin: ADMIN_PIN, action }, extra))
+    });
+  }
+
+  function showToast(msg, type = "info") {
+    const box = document.getElementById("toastBox");
+    const t = document.createElement("div");
+    const cls = type === "success" ? "bg-[#1B4D2E] border-l-4 border-[#E5C558]" : type === "error" ? "bg-red-700 border-l-4 border-red-300" : "bg-gray-800 border-l-4 border-[#75A438]";
+    t.className = `${cls} text-white px-4 py-3 rounded-xl shadow-lg text-xs font-semibold`;
+    t.innerText = msg;
+    box.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+</script>
+</body>
+</html>
