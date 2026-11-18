@@ -139,6 +139,7 @@
       border-radius: 6px;
       background-color: var(--slwa-bg);
       border: 1px solid #e2e8e2;
+      line-height: 1.45;
     }
 
     .admin-section {
@@ -180,17 +181,12 @@
 
       <label for="sucursal">Selecciona la Sucursal:</label>
       <select id="sucursal" onchange="verificarCampos()">
-        <option value="">-- Seleccionar Sucursal --</option>
-        <option value="HyperMarket SLWA C.A. (Principal)">HyperMarket SLWA C.A. (Principal)</option>
-        <option value="HyperMarket SLWA C.A. II">HyperMarket SLWA C.A. II</option>
-        <option value="HyperMarket SLWA C.A. III">HyperMarket SLWA C.A. III</option>
+        <option value="">-- Cargando sucursales... --</option>
       </select>
 
       <label for="turno">Selecciona tu Turno:</label>
       <select id="turno" onchange="verificarCampos()">
-        <option value="">-- Seleccionar Turno --</option>
-        <option value="Turno 01">Turno 01 (07:00 am - 03:00 pm)</option>
-        <option value="Turno 02">Turno 02 (02:00 pm - 10:00 pm)</option>
+        <option value="">-- Cargando turnos... --</option>
       </select>
 
       <div class="btn-group">
@@ -198,7 +194,7 @@
         <button id="btnSalida" class="btn-out" onclick="iniciarVerificacionBiometrica('SALIDA')" disabled>Salida</button>
       </div>
 
-      <div id="status">Cargando lista de empleados desde Google Sheets...</div>
+      <div id="status">Cargando empleados y configuración desde Google Sheets...</div>
 
       <div class="admin-section">
         <button class="admin-btn" onclick="solicitarDesbloqueo()">🔓 Llegada Tarde (Admin)</button>
@@ -210,25 +206,106 @@
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
   const CACHE_EMPLEADOS_KEY = "slwa_asistencia_empleados_v1";
+  const CACHE_CONFIG_KEY = "slwa_asistencia_config_v1";
   const DEVICE_OWNER_KEY = "slwa_dispositivo_propietario";
   const DEVICE_OWNER_NAME_KEY = "slwa_dispositivo_propietario_nombre";
 
   let EMPLEADOS_DATA = {};
+  let LOCACIONES = {};
+  let TURNOS_MAP = {};
 
-  const LOCACIONES = {
-    "HyperMarket SLWA C.A. (Principal)": { lat: 10.243544950163466, lng: -68.76970601509083 },
-    "HyperMarket SLWA C.A. II": { lat: 10.2483362545119, lng: -68.76544580796221 },
-    "HyperMarket SLWA C.A. III": { lat: 10.248189357346705, lng: -68.76978399165277 }
+  let APP_CONFIG = {
+    radioMetros: 20,
+    toleranciaAntesMin: 10,
+    toleranciaDespuesSalidaMin: 30,
+    turnos: [
+      { nombre: "Turno 01", entrada: "07:00", salida: "15:00" },
+      { nombre: "Turno 02", entrada: "15:00", salida: "22:00" }
+    ],
+    sucursales: [
+      { nombre: "HyperMarket SLWA C.A. (Principal)", lat: 10.243544950163466, lng: -68.76970601509083 },
+      { nombre: "HyperMarket SLWA C.A. II", lat: 10.2483362545119, lng: -68.76544580796221 },
+      { nombre: "HyperMarket SLWA C.A. III", lat: 10.248189357346705, lng: -68.76978399165277 }
+    ]
   };
 
-  const RADIO_MAXIMO_METROS = 20;
   const PIN_ADMIN = "1984";
-
   let estadoForzadoTarde = false;
 
   document.addEventListener("DOMContentLoaded", () => {
-    cargarEmpleadosDesdeSheets();
+    aplicarConfiguracion(APP_CONFIG);
+    cargarEmpleadosYConfigDesdeSheets();
   });
+
+  function parseHHMM(hhmm) {
+    const parts = String(hhmm || "").trim().split(":");
+    if (parts.length < 2) return null;
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    if (isNaN(h) || isNaN(m)) return null;
+    return h * 60 + m;
+  }
+
+  function formatMinutes12h(totalMin) {
+    const norm = ((totalMin % 1440) + 1440) % 1440;
+    let h = Math.floor(norm / 60);
+    const m = String(norm % 60).padStart(2, "0");
+    const ampm = h >= 12 ? "pm" : "am";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${String(h).padStart(2, "0")}:${m} ${ampm}`;
+  }
+
+  function isTimeInRange(nowMin, startMin, endMin) {
+    const s = ((startMin % 1440) + 1440) % 1440;
+    const e = ((endMin % 1440) + 1440) % 1440;
+    if (s <= e) {
+      return nowMin >= s && nowMin <= e;
+    }
+    return nowMin >= s || nowMin <= e;
+  }
+
+  function aplicarConfiguracion(cfg) {
+    if (!cfg || typeof cfg !== "object") return;
+    APP_CONFIG = Object.assign({}, APP_CONFIG, cfg);
+
+    // Poblar Sucursales dinámicas
+    const selSuc = document.getElementById("sucursal");
+    const sucActual = selSuc.value;
+    LOCACIONES = {};
+    selSuc.innerHTML = `<option value="">-- Seleccionar Sucursal --</option>`;
+
+    (APP_CONFIG.sucursales || []).forEach(s => {
+      if (!s || !s.nombre) return;
+      LOCACIONES[s.nombre] = { lat: Number(s.lat), lng: Number(s.lng) };
+      const opt = document.createElement("option");
+      opt.value = s.nombre;
+      opt.textContent = s.nombre;
+      selSuc.appendChild(opt);
+    });
+    if (sucActual && LOCACIONES[sucActual]) selSuc.value = sucActual;
+
+    // Poblar Turnos dinámicos desde Google Sheets
+    const selTur = document.getElementById("turno");
+    const turActual = selTur.value;
+    TURNOS_MAP = {};
+    selTur.innerHTML = `<option value="">-- Seleccionar Turno --</option>`;
+
+    (APP_CONFIG.turnos || []).forEach(t => {
+      if (!t || !t.nombre) return;
+      TURNOS_MAP[t.nombre] = t;
+      const eMin = parseHHMM(t.entrada);
+      const sMin = parseHHMM(t.salida);
+      const labelHora = (eMin !== null && sMin !== null)
+        ? ` (${formatMinutes12h(eMin)} - ${formatMinutes12h(sMin)})`
+        : "";
+      const opt = document.createElement("option");
+      opt.value = t.nombre;
+      opt.textContent = `${t.nombre}${labelHora}`;
+      selTur.appendChild(opt);
+    });
+    if (turActual && TURNOS_MAP[turActual]) selTur.value = turActual;
+  }
 
   function obtenerFechaHoyClave() {
     const d = new Date();
@@ -248,14 +325,16 @@
     localStorage.setItem(clave, accion);
   }
 
-  async function cargarEmpleadosDesdeSheets() {
+  async function cargarEmpleadosYConfigDesdeSheets() {
     const selectEmpleado = document.getElementById("empleado");
     const statusDiv = document.getElementById("status");
 
     try {
-      const cached = JSON.parse(localStorage.getItem(CACHE_EMPLEADOS_KEY) || "[]");
-      if (Array.isArray(cached) && cached.length > 0) {
-        poblarSelectEmpleados(cached);
+      const cachedCfg = JSON.parse(localStorage.getItem(CACHE_CONFIG_KEY) || "null");
+      if (cachedCfg) aplicarConfiguracion(cachedCfg);
+      const cachedEmp = JSON.parse(localStorage.getItem(CACHE_EMPLEADOS_KEY) || "[]");
+      if (Array.isArray(cachedEmp) && cachedEmp.length > 0) {
+        poblarSelectEmpleados(cachedEmp);
       }
     } catch (e) {}
 
@@ -271,8 +350,14 @@
       }
 
       if (json && json.status === "ok" && Array.isArray(json.empleados)) {
+        if (json.config) {
+          localStorage.setItem(CACHE_CONFIG_KEY, JSON.stringify(json.config));
+          aplicarConfiguracion(json.config);
+        }
         localStorage.setItem(CACHE_EMPLEADOS_KEY, JSON.stringify(json.empleados));
         poblarSelectEmpleados(json.empleados);
+        verificarCampos();
+
         statusDiv.style.color = "var(--slwa-text)";
         statusDiv.innerText = json.empleados.length > 0
           ? "Seleccione su nombre e ingrese su PIN personal (últimos 4 dígitos de su Cédula)."
@@ -323,10 +408,12 @@
         document.getElementById("sucursal").value = emp.sucursal;
       }
       if (emp.horario) {
-        if (emp.horario.indexOf("Turno 01") !== -1) {
-          document.getElementById("turno").value = "Turno 01";
-        } else if (emp.horario.indexOf("Turno 02") !== -1) {
-          document.getElementById("turno").value = "Turno 02";
+        const empHor = emp.horario.toLowerCase();
+        const turnoMatch = (APP_CONFIG.turnos || []).find(
+          t => empHor.indexOf(String(t.nombre || "").toLowerCase()) !== -1
+        );
+        if (turnoMatch) {
+          document.getElementById("turno").value = turnoMatch.nombre;
         }
       }
     }
@@ -375,7 +462,6 @@
     const idDispositivoActual = obtenerIdDispositivoUnico();
     const identificadorEmpleado = empInfo.id || empleado;
 
-    // A) Verificar si este teléfono ya pertenece a otro empleado en localStorage
     const propietarioLocal = localStorage.getItem(DEVICE_OWNER_KEY);
     const propietarioLocalNombre = localStorage.getItem(DEVICE_OWNER_NAME_KEY);
 
@@ -387,7 +473,6 @@
       return;
     }
 
-    // B) Verificar si en Google Sheets otro empleado ya tiene registrado este mismo Device ID
     const otroDuenoEnSheets = Object.values(EMPLEADOS_DATA).find(
       e => e.deviceId && e.deviceId === idDispositivoActual && (e.id || e.nombre) !== identificadorEmpleado
     );
@@ -399,7 +484,6 @@
       return;
     }
 
-    // C) Verificar si este empleado ya tiene otro teléfono vinculado en Google Sheets (ej. intenta usar modo incógnito u otro celular)
     if (empInfo.deviceId && empInfo.deviceId !== idDispositivoActual) {
       btnEntrada.disabled = true;
       btnSalida.disabled = true;
@@ -409,39 +493,47 @@
     }
 
     // -----------------------------------------------------------------------
-    // REGLA 2: BLOQUEAR ENTRADA SI YA MARCÓ ENTRADA HOY HASTA QUE MARQUE SALIDA
+    // REGLA 2: CÁLCULO DINÁMICO DESDE CONFIGURACIÓN EN GOOGLE SHEETS
+    // -----------------------------------------------------------------------
+    const turnoObj = TURNOS_MAP[turno];
+    if (!turnoObj) {
+      btnEntrada.disabled = true;
+      btnSalida.disabled = true;
+      statusDiv.style.color = "var(--danger-color)";
+      statusDiv.innerText = "❌ Turno no encontrado en la configuración.";
+      return;
+    }
+
+    const entradaMin = parseHHMM(turnoObj.entrada);
+    const salidaMin = parseHHMM(turnoObj.salida);
+    const tolAntes = Number(APP_CONFIG.toleranciaAntesMin ?? 10);
+    const tolDespuesSalida = Number(APP_CONFIG.toleranciaDespuesSalidaMin ?? 30);
+
+    const entradaInicio = entradaMin - tolAntes;
+    const entradaFin = entradaMin;
+    const salidaInicio = salidaMin - tolAntes;
+    const salidaFin = salidaMin + tolDespuesSalida;
+
+    const ahora = new Date();
+    const tiempoMinutosActual = ahora.getHours() * 60 + ahora.getMinutes();
+
+    const entradaPermitida = isTimeInRange(tiempoMinutosActual, entradaInicio, entradaFin);
+    const salidaPermitida = isTimeInRange(tiempoMinutosActual, salidaInicio, salidaFin);
+
+    let esTarde = false;
+    if (!entradaPermitida && !salidaPermitida) {
+      if (entradaFin < salidaInicio) {
+        esTarde = tiempoMinutosActual > entradaFin && tiempoMinutosActual < salidaInicio;
+      } else {
+        esTarde = tiempoMinutosActual > entradaFin || tiempoMinutosActual < salidaInicio;
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // REGLA 3: BLOQUEAR ENTRADA SI YA MARCÓ ENTRADA HOY HASTA MARCAR SALIDA
     // -----------------------------------------------------------------------
     const ultimoMarcaje = empInfo.ultimoMarcajeHoy || obtenerUltimoMarcajeLocal(empInfo);
     const yaMarcoEntrada = (ultimoMarcaje === "ENTRADA");
-
-    const ahora = new Date();
-    const horas = ahora.getHours();
-    const minutos = ahora.getMinutes();
-    const tiempoMinutosActual = horas * 60 + minutos;
-
-    let entradaPermitida = false;
-    let salidaPermitida = false;
-    let esTarde = false;
-
-    if (turno === "Turno 01") {
-      if (tiempoMinutosActual >= 410 && tiempoMinutosActual <= 420) {
-        entradaPermitida = true;
-      } else if (tiempoMinutosActual > 420 && tiempoMinutosActual < 900) {
-        esTarde = true;
-      }
-      if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 930) {
-        salidaPermitida = true;
-      }
-    } else if (turno === "Turno 02") {
-      if (tiempoMinutosActual >= 890 && tiempoMinutosActual <= 900) {
-        entradaPermitida = true;
-      } else if (tiempoMinutosActual > 900 && tiempoMinutosActual < 1320) {
-        esTarde = true;
-      }
-      if (tiempoMinutosActual >= 1310 && tiempoMinutosActual <= 1350) {
-        salidaPermitida = true;
-      }
-    }
 
     if (estadoForzadoTarde && !yaMarcoEntrada) {
       btnEntrada.disabled = false;
@@ -459,7 +551,7 @@
         statusDiv.innerText = "✅ Entrada ya registrada. Botón de Salida habilitado.";
       } else {
         statusDiv.style.color = "var(--slwa-gold)";
-        statusDiv.innerText = "ℹ️ Ya registró su Entrada hoy. El botón de Entrada permanecerá bloqueado hasta que registre su Salida.";
+        statusDiv.innerText = `ℹ️ Entrada ya registrada hoy. Botón Entrada bloqueado hasta registrar Salida (${formatMinutes12h(salidaInicio)} - ${formatMinutes12h(salidaFin)}).`;
       }
       return;
     }
@@ -467,12 +559,14 @@
     btnEntrada.disabled = !entradaPermitida;
     btnSalida.disabled = !salidaPermitida;
 
+    const rangoTexto = `Entrada: ${formatMinutes12h(entradaInicio)} - ${formatMinutes12h(entradaFin)} | Salida: ${formatMinutes12h(salidaInicio)} - ${formatMinutes12h(salidaFin)}`;
+
     if (esTarde) {
       statusDiv.style.color = "var(--danger-color)";
-      statusDiv.innerText = "❌ Horario de entrada vencido. Solicite desbloqueo de administrador.";
+      statusDiv.innerText = `❌ Horario de entrada vencido. Solicite desbloqueo de administrador.\n(${rangoTexto})`;
     } else if (!entradaPermitida && !salidaPermitida) {
       statusDiv.style.color = "var(--slwa-text)";
-      statusDiv.innerText = "⏳ Fuera de horario permitido (Los botones se abren 10 minutos antes).";
+      statusDiv.innerText = `⏳ Fuera de horario permitido.\n(${rangoTexto})`;
     } else {
       statusDiv.style.color = "var(--slwa-green-medium)";
       statusDiv.innerText = "✅ Dispositivo verificado y botones habilitados.";
@@ -512,7 +606,7 @@
           const res = await fetch(`${SCRIPT_URL}?action=resetDevice&pin=${encodeURIComponent(pin)}&q=${encodeURIComponent(q)}&_t=${Date.now()}`);
           const json = await res.json();
           if (json && json.status === "ok") {
-            await cargarEmpleadosDesdeSheets();
+            await cargarEmpleadosYConfigDesdeSheets();
             alert(json.message);
           } else {
             alert("Teléfono local liberado. En Google Sheets: " + (json.message || "No encontrado"));
@@ -569,6 +663,7 @@
     const turno = document.getElementById("turno").value;
     const statusDiv = document.getElementById("status");
     const idDispositivoActual = obtenerIdDispositivoUnico();
+    const radioMaximo = Number(APP_CONFIG.radioMetros || 20);
 
     if (!navigator.geolocation) {
       alert("La geolocalización no está soportada en este dispositivo.");
@@ -584,11 +679,17 @@
         const lonDevice = position.coords.longitude;
 
         const sucursalCoords = LOCACIONES[sucursalSeleccionada];
+        if (!sucursalCoords) {
+          statusDiv.style.color = "var(--danger-color)";
+          statusDiv.innerText = "❌ Coordenadas de la sucursal no configuradas.";
+          return;
+        }
+
         const distanciaMetros = calcularDistancia(latDevice, lonDevice, sucursalCoords.lat, sucursalCoords.lng);
 
-        if (distanciaMetros > RADIO_MAXIMO_METROS) {
+        if (distanciaMetros > radioMaximo) {
           statusDiv.style.color = "var(--danger-color)";
-          statusDiv.innerText = `❌ Fuera del radio de la sucursal. Estás a ${Math.round(distanciaMetros)}m (Máx: ${RADIO_MAXIMO_METROS}m).`;
+          statusDiv.innerText = `❌ Fuera del radio de la sucursal. Estás a ${Math.round(distanciaMetros)}m (Máx: ${radioMaximo}m).`;
           return;
         }
 
@@ -618,11 +719,9 @@
           body: JSON.stringify(payload)
         })
         .then(() => {
-          // Vincular este teléfono exclusivamente a este empleado
           localStorage.setItem(DEVICE_OWNER_KEY, empInfo.id || empleado);
           localStorage.setItem(DEVICE_OWNER_NAME_KEY, empleado);
 
-          // Actualizar estado de Entrada/Salida inmediatamente en memoria y caché local
           guardarUltimoMarcajeLocal(empInfo, accion);
           if (EMPLEADOS_DATA[empleado]) {
             EMPLEADOS_DATA[empleado].ultimoMarcajeHoy = accion;
