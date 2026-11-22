@@ -47,9 +47,14 @@
     }
     .header-left {
       display: flex;
+      flex-direction: column;
+    }
+    .header-right {
+      display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
+      margin-left: auto;
     }
     .bcv-widget {
       background: rgba(0, 0, 0, 0.28);
@@ -296,7 +301,21 @@
 <body>
 
 <header>
+  <div class="header-left">
+    <h1>HyperMarket SLWA C.A. — Control de Nómina Semanal</h1>
+    <p>Base en Dólares ($) &rarr; Cálculo de Nómina en Bolívares (Bs.) &bull; Lun–Sáb (48h / 6 turnos) &bull; Domingo: $10,00</p>
+  </div>
+
   <div class="header-right">
+    <div class="actions">
+      <button class="gold" onclick="syncFromGoogleSheets(true)">🔄 Sincronizar</button>
+      <button class="success" onclick="saveNominaToSheets()">💾 Guardar Cierre</button>
+      <label class="btn-upload" for="fileInput">📂 Importar</label>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+      <button class="secondary" onclick="exportCSV()">📥 Excel (CSV)</button>
+      <button class="secondary" onclick="window.print()">🖨️ PDF</button>
+    </div>
+
     <!-- TASA DÓLAR BCV EN LA PARTE SUPERIOR DERECHA -->
     <div class="bcv-widget">
       <label for="bcvRate">💵 Dólar BCV (Bs. / $)</label>
@@ -305,20 +324,6 @@
         <button type="button" class="bcv-btn" onclick="fetchBcvOfficialRate()" title="Consultar tasa oficial BCV">🔄 Auto</button>
       </div>
     </div>
-
-    <div>
-      <h1>HyperMarket SLWA C.A. — Control de Nómina Semanal</h1>
-      <p>Base en Dólares ($) &rarr; Cálculo de Nómina en Bolívares (Bs.) &bull; Lun–Sáb (48h / 6 turnos) &bull; Domingo: $10,00</p>
-    </div>
-  </div>
-
-  <div class="actions">
-    <button class="gold" onclick="syncFromGoogleSheets(true)">🔄 Sincronizar</button>
-    <button class="success" onclick="saveNominaToSheets()">💾 Guardar Cierre</button>
-    <label class="btn-upload" for="fileInput">📂 Importar</label>
-    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
-    <button class="secondary" onclick="exportCSV()">📥 Excel (CSV)</button>
-    <button class="secondary" onclick="window.print()">🖨️ PDF</button>
   </div>
 </header>
 
@@ -527,7 +532,7 @@
       throw new Error("Tasa no disponible");
     } catch (err) {
       if (!silent) {
-        showAlert("⚠️ No se pudo consultar la tasa BCV en línea automáticamente. Ingresa la tasa del día manualmente en la casilla superior izquierda.", true);
+        showAlert("⚠️ No se pudo consultar la tasa BCV en línea automáticamente. Ingresa la tasa del día manualmente en la casilla superior derecha.", true);
       }
     }
   }
@@ -984,7 +989,6 @@
         tr.appendChild(tdSal);
       }
 
-      // Cálculos en $ y conversión a Bs. según Tasa BCV
       const payLS_USD = method === "hours" ? empHoursLS * (emp.base / weeklyHours) : empShiftsLS * (emp.base / weeklyShifts);
       const payDom_USD = empDomShifts * sundayRate;
       const totalPay_USD = payLS_USD + payDom_USD;
