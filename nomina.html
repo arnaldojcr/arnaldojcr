@@ -412,7 +412,14 @@
     bar.innerHTML = msg;
     bar.className = isError ? "alert-bar error" : "alert-bar";
     bar.style.display = "block";
-    setTimeout(() => { bar.style.display = "none"; }, 7000);
+    setTimeout(() => { bar.style.display = "none"; }, 9000);
+  }
+
+  function normName(str) {
+    return String(str || "")
+      .trim().toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
   }
 
   // ---------------------------------------------------------------------------
@@ -492,7 +499,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // SINCRONIZACIÓN EN TIEMPO REAL DESDE GOOGLE SHEETS
+  // SINCRONIZACIÓN EN TIEMPO REAL DESDE GOOGLE SHEETS (Empleados + Asistencia)
   // ---------------------------------------------------------------------------
   async function syncFromGoogleSheets(showToastMsg = false) {
     const desde = state.isoDates[0];
@@ -506,7 +513,6 @@
         throw new Error(json.message || "Error al consultar Google Sheets");
       }
 
-      // Poblar selector de sucursales
       const selBranch = document.getElementById("branchFilter");
       const branchVal = selBranch.value;
       if (Array.isArray(json.sucursales)) {
@@ -521,11 +527,10 @@
 
       const branchFilter = selBranch.value;
 
-      // Construir mapa base de todos los empleados desde la hoja "Empleados"
       const empMap = new Map();
       (json.empleados || []).forEach(emp => {
         if (branchFilter && emp.sucursal && emp.sucursal !== branchFilter) return;
-        const keyId = emp.id ? `id:${emp.id.toLowerCase()}` : `name:${emp.name.toLowerCase()}`;
+        const keyId = emp.id ? `id:${emp.id.toLowerCase()}` : `name:${normName(emp.name)}`;
         empMap.set(keyId, {
           id: emp.id || "",
           name: emp.name,
@@ -535,10 +540,9 @@
         });
       });
 
-      // Ordenar asistencia cronológicamente y asignar a cada día Lun..Dom
       const registros = (json.asistencia || []).map(r => ({
         ...r,
-        hora24: normalizeTimeTo24h(r.hora)
+        hora24: r.hora24 || normalizeTimeTo24h(r.hora)
       })).filter(r => r.hora24 && (!branchFilter || r.sucursal === branchFilter));
 
       registros.sort((a, b) => a.fechaIso.localeCompare(b.fechaIso) || a.hora24.localeCompare(b.hora24));
@@ -547,20 +551,19 @@
         const dayIdx = state.isoDates.indexOf(r.fechaIso);
         if (dayIdx < 0 || dayIdx > 6) return;
 
-        // Buscar por ID_Unico o por Nombre completo
         let empObj = null;
         if (r.id_unico) empObj = empMap.get(`id:${r.id_unico.toLowerCase()}`);
         if (!empObj && r.empleado) {
+          const rNorm = normName(r.empleado);
           for (const val of empMap.values()) {
-            if (val.name.toLowerCase() === r.empleado.toLowerCase()) {
+            if (normName(val.name) === rNorm) {
               empObj = val;
               break;
             }
           }
         }
-        // Si marcó alguien que no estaba en el mapa filtrado, agregarlo igual
         if (!empObj && r.empleado) {
-          const newKey = r.id_unico ? `id:${r.id_unico.toLowerCase()}` : `name:${r.empleado.toLowerCase()}`;
+          const newKey = r.id_unico ? `id:${r.id_unico.toLowerCase()}` : `name:${normName(r.empleado)}`;
           empObj = {
             id: r.id_unico || "",
             name: r.empleado,
@@ -588,7 +591,14 @@
       document.getElementById("lastSyncTime").innerText = `(${nowStr})`;
 
       if (showToastMsg) {
-        showAlert(`✅ Sincronizado en tiempo real: <strong>${state.employees.length} empleados</strong> y <strong>${registros.length} marcaciones</strong> (${state.dates[0]} al ${state.dates[6]}).`);
+        if (registros.length === 0 && json.ultimaFechaIso) {
+          showAlert(
+            `ℹ️ Sin marcajes entre <strong>${state.dates[0]}</strong> y <strong>${state.dates[6]}</strong>. El último registro en <strong>Asistencia</strong> es del <strong>${json.ultimaFechaIso}</strong> ` +
+            `<button type="button" style="margin-left:8px;padding:3px 10px;font-size:0.78rem;" onclick="document.getElementById('weekRefDate').value='${json.ultimaFechaIso}'; onWeekChanged();">Ir a esa semana</button>`
+          );
+        } else {
+          showAlert(`✅ Sincronizado: <strong>${state.employees.length} empleados</strong> y <strong>${registros.length} marcaciones</strong> (${state.dates[0]} al ${state.dates[6]}).`);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -880,6 +890,10 @@
     render();
   }
 
+  document.getElementById("newEmpName").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") confirmAddEmployee();
+  });
+
   // Importación manual Excel / CSV
   function excelSerialToUTCDate(val) {
     if (typeof val === "number") return new Date(Date.UTC(1899, 11, 30) + Math.round(val) * 86400000);
@@ -940,7 +954,7 @@
     }
 
     const currentBases = {};
-    state.employees.forEach(e => { if (e.base > 0) currentBases[e.name.trim().toLowerCase()] = e.base; });
+    state.employees.forEach(e => { if (e.base > 0) currentBases[normName(e.name)] = e.base; });
 
     const records = [];
     let minDate = null;
@@ -970,7 +984,7 @@
     records.sort((a, b) => (a.dt - b.dt) || a.tm.localeCompare(b.tm));
     const empMap = new Map();
     records.forEach(r => {
-      const key = r.empName.toLowerCase();
+      const key = normName(r.empName);
       if (!empMap.has(key)) {
         empMap.set(key, { id: "", name: r.empName, base: currentBases[key] || 0, sucursal: "", days: [["",""],["",""],["",""],["",""],["",""],["",""],["",""]] });
       }
@@ -985,7 +999,7 @@
     isManualImportMode = true;
     state.dates = newDates;
     state.isoDates = newIsos;
-    state.employees = Array.from(empMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+    state.employees = Array.from(empMap.values()).sort((a, b) => a.name.localeCompare(b.name, "es"));
     saveState();
     render();
     showAlert(`✅ Archivo importado (${newDates[0]} al ${newDates[6]}). Pulsa "Sincronizar Tiempo Real" para volver a Google Sheets.`);
