@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nómina Semanal - HyperMarket SLWA C.A.</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #1B4D2E;
+      --primary-light: #3C8038;
+      --accent: #3C8038;
+      --gold: #C59B27;
+      --gold-light: #E5C558;
+      --bg: #f3f6f4;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --warn-bg: #fef3c7;
+      --warn-border: #f59e0b;
+      --warn-text: #92400e;
+      --ok-bg: #dcfce7;
+      --ok-text: #166534;
+      --double-bg: #dbeafe;
+      --double-text: #1e40af;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #fff;
+      padding: 14px 20px;
+      border-bottom: 4px solid var(--gold);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-left {
+      display: flex;
+      flex-direction: column;
+    }
+    .header-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      margin-left: auto;
+    }
+    .bcv-widget {
+      background: rgba(0, 0, 0, 0.28);
+      border: 2px solid var(--gold-light);
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 195px;
+    }
+    .bcv-widget label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gold-light);
+    }
+    .bcv-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bcv-input {
+      width: 105px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--gold);
+      font-size: 0.95rem;
+      font-weight: 800;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--primary);
+      background: #fff;
+      text-align: right;
+    }
+    .bcv-btn {
+      background: var(--gold);
+      color: #1B4D2E;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .bcv-btn:hover { background: var(--gold-light); }
+    header h1 { margin: 0; font-size: 1.22rem; font-weight: 700; }
+    header p { margin: 3px 0 0; font-size: 0.8rem; color: var(--gold-light); }
+    .container { max-width: 1680px; margin: 18px auto; padding: 0 16px 36px; }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .kpi {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 14px 16px;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .kpi .label { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+    .kpi .value { font-size: 1.32rem; font-weight: 700; margin-top: 4px; color: var(--primary); }
+    .kpi .sub { font-size: 0.74rem; color: var(--muted); margin-top: 2px; }
+    .kpi.highlight { border-top-color: var(--gold); }
+    .kpi.highlight .value { color: var(--accent); }
+    .kpi.warn .value { color: #b45309; }
+    .panel {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .controls-group { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+    .field select, .field input {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: #fff;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    button, .btn-upload {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    button:hover, .btn-upload:hover { background: var(--primary-light); }
+    button.secondary { background: #475569; }
+    button.secondary:hover { background: #334155; }
+    button.success { background: var(--accent); }
+    button.success:hover { background: #2e662b; }
+    button.gold { background: var(--gold); color: #1B4D2E; }
+    button.gold:hover { background: #d4aa32; }
+    input[type="file"] { display: none; }
+    .alert-bar {
+      background: #ecfdf5;
+      border-left: 4px solid var(--primary-light);
+      color: var(--primary);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .alert-bar.error {
+      background: #fee2e2;
+      border-left-color: #dc2626;
+      color: #7f1d1d;
+    }
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      padding: 5px 10px;
+      border-radius: 999px;
+    }
+    .table-wrap {
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.79rem; min-width: 1540px; }
+    th, td { border: 1px solid #cbd5e1; padding: 5px 4px; text-align: center; vertical-align: middle; }
+    thead th { background: #e6f0e8; color: var(--primary); font-weight: 700; }
+    thead tr.dates-row th { background: #f8fafc; font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+    thead tr.sub-row th { background: #f0f7f1; font-size: 0.72rem; color: #334155; padding: 3px; }
+    tbody tr:nth-child(even) { background: #f8fafc; }
+    tbody tr:hover { background: #f1f5f9; }
+    td.name-col, th.name-col {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: inherit;
+      text-align: left;
+      padding: 6px 10px;
+      min-width: 230px;
+      font-weight: 600;
+      border-right: 2px solid #94a3b8;
+    }
+    thead th.name-col { background: #e6f0e8; z-index: 3; }
+    .name-input {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text);
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .name-input:focus { outline: none; border-color: var(--primary); background: #fff; }
+    .base-input {
+      width: 64px;
+      text-align: right;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 5px;
+      font-size: 0.8rem;
+    }
+    .time-input {
+      width: 72px;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 3px 2px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.75rem;
+      background: #fff;
+      color: var(--text);
+    }
+    .time-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(27,77,46,0.15); }
+    .cell-incomplete { background: var(--warn-bg) !important; }
+    .cell-incomplete .time-input { border-color: var(--warn-border); }
+    .cell-double { background: var(--double-bg) !important; }
+    .day-sep { border-left: 2px solid #64748b !important; }
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+    .badge-ok { background: var(--ok-bg); color: var(--ok-text); }
+    .badge-warn { background: var(--warn-bg); color: var(--warn-text); }
+    .bs-cell { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; white-space: nowrap; }
+    .total-cell { font-weight: 800; color: var(--primary); font-size: 0.84rem; background: #ecfdf5 !important; white-space: nowrap; }
+    tfoot td { background: #e2e8f0; font-weight: 700; font-size: 0.83rem; padding: 8px 6px; white-space: nowrap; }
+    .del-btn { background: transparent; color: #ef4444; padding: 2px 6px; font-size: 0.85rem; }
+    .del-btn:hover { background: #fee2e2; color: #b91c1c; }
+    .legend { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.78rem; color: var(--muted); align-items: center; }
+    .legend span.swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: middle; margin-right: 5px; border: 1px solid #cbd5e1; }
+
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
+      display: none; align-items: center; justify-content: center; z-index: 999; padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 12px; width: 100%; max-width: 420px;
+      padding: 20px; box-shadow: 0 20px 35px rgba(0,0,0,0.2); border-top: 4px solid var(--gold);
+    }
+    .modal h2 { margin: 0 0 14px; font-size: 1.1rem; color: var(--primary); }
+    .modal .field { margin-bottom: 12px; }
+    .modal .field input { width: 100%; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+    @media print {
+      header .actions, .panel, .del-col, .legend, .modal-backdrop, .alert-bar, .bcv-btn { display: none !important; }
+      header { background: #fff !important; color: #000 !important; border-bottom: 2px solid #000; padding: 8px 0; }
+      header p { color: #333 !important; }
+      .bcv-widget { background: #f8fafc !important; border: 1px solid #000; color: #000 !important; }
+      .bcv-widget label { color: #000 !important; }
+      .bcv-input { border: none; padding: 0; width: auto; }
+      body { background: #fff; }
+      .container { margin: 0; padding: 0; max-width: 100%; }
+      .table-wrap { border: none; box-shadow: none; overflow: visible; }
+      table { min-width: auto; font-size: 0.65rem; }
+      .time-input, .base-input, .name-input { border: none; padding: 0; width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>HyperMarket SLWA C.A. — Control de Nómina Semanal</h1>
+    <p>Base en Dólares ($) &rarr; Cálculo de Nómina en Bolívares (Bs.) &bull; Lun–Sáb (48h / 6 turnos) &bull; Domingo: $10,00</p>
+  </div>
+
+  <div class="header-right">
+    <div class="actions">
+      <button class="gold" onclick="syncFromGoogleSheets(true)">🔄 Sincronizar</button>
+      <button class="success" onclick="saveNominaToSheets()">💾 Guardar Cierre</button>
+      <label class="btn-upload" for="fileInput">📂 Importar</label>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+      <button class="secondary" onclick="exportCSV()">📥 Excel (CSV)</button>
+      <button class="secondary" onclick="window.print()">🖨️ PDF</button>
+    </div>
+
+    <!-- TASA DÓLAR BCV EN LA PARTE SUPERIOR DERECHA -->
+    <div class="bcv-widget">
+      <label for="bcvRate">💵 Dólar BCV (Bs. / $)</label>
+      <div class="bcv-row">
+        <input type="number" id="bcvRate" class="bcv-input" step="0.01" min="0.01" value="60.00" oninput="onBcvChanged()" />
+        <button type="button" class="bcv-btn" onclick="fetchBcvOfficialRate()" title="Consultar tasa oficial BCV">🔄 Auto</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div id="alertBar" class="alert-bar"></div>
+
+  <!-- Barra de Selección de Semana y Filtros por Empleado / Sucursal -->
+  <div class="panel">
+    <div class="controls-group">
+      <div class="field">
+        <label>Semana a Consultar (Elige cualquier día)</label>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button type="button" class="secondary" style="padding:7px 10px;" onclick="shiftWeek(-7)">◀ Ant.</button>
+          <input type="date" id="weekRefDate" onchange="onWeekChanged()" />
+          <button type="button" class="secondary" style="padding:7px 10px;" onclick="shiftWeek(7)">Sig. ▶</button>
+          <button type="button" style="padding:7px 10px;" onclick="goToCurrentWeek()">Hoy</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Filtrar por Sucursal</label>
+        <select id="branchFilter" onchange="syncFromGoogleSheets(false)">
+          <option value="">Todas las Sucursales</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Filtrar por Empleado</label>
+        <select id="employeeFilter" onchange="render()">
+          <option value="">Todos los Empleados</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Buscar Nombre</label>
+        <input type="text" id="employeeSearch" placeholder="Escribe un nombre..." style="width:185px;" oninput="render()" />
+      </div>
+
+      <button type="button" class="secondary" style="padding:7px 10px;" onclick="clearEmployeeFilters()">Limpiar</button>
+    </div>
+
+    <div class="actions">
+      <div class="live-pill">
+        <input type="checkbox" id="autoRefreshCheck" checked style="margin:0; accent-color:#1B4D2E;" />
+        <label for="autoRefreshCheck" style="cursor:pointer;">Auto (60s)</label>
+        <span id="lastSyncTime" style="color:#475569; font-weight:normal;"></span>
+      </div>
+      <button onclick="openAddModal()">➕ Agregar</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Empleados Mostrados</div><div class="value" id="kpiEmp">0</div></div>
+    <div class="kpi"><div class="label">Total Horas (Lun–Sáb)</div><div class="value" id="kpiHours">0,00 h</div></div>
+    <div class="kpi"><div class="label">Turnos Domingo</div><div class="value" id="kpiDom">0 (Bs. 0,00)</div><div class="sub" id="kpiDomUsd">Ref: $0,00</div></div>
+    <div class="kpi warn"><div class="label">Marcaciones Incompletas</div><div class="value" id="kpiWarn">0</div></div>
+    <div class="kpi highlight"><div class="label">Total Nómina Semanal (Bs.)</div><div class="value" id="kpiTotal">Bs. 0,00</div><div class="sub" id="kpiTotalUsd">Ref: $0,00 | BCV: 60,00</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="controls-group">
+      <div class="field">
+        <label>Método de Cálculo (Lun–Sáb)</label>
+        <select id="calcMethod" onchange="render()">
+          <option value="hours">Por Horas Exactas (Base ÷ 48 × Horas)</option>
+          <option value="shifts">Por Turnos Completos (Base ÷ 6 × Turnos)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Horas Semanales</label>
+        <input type="number" id="weeklyHours" value="48" min="1" step="1" style="width:85px" onchange="render()" />
+      </div>
+      <div class="field">
+        <label>Turnos Semanales</label>
+        <input type="number" id="weeklyShifts" value="6" min="1" step="1" style="width:85px" onchange="render()" />
+      </div>
+      <div class="field">
+        <label>Pago Domingo ($/turno)</label>
+        <input type="number" id="sundayRate" value="10" min="0" step="0.5" style="width:95px" onchange="render()" />
+      </div>
+      <div class="field">
+        <label>Mín. horas Doble Turno</label>
+        <input type="number" id="doubleHours" value="12" min="8" step="0.5" style="width:95px" onchange="render()" />
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="payrollTable">
+      <thead>
+        <tr>
+          <th class="name-col" rowspan="3">Nombres y Apellidos</th>
+          <th rowspan="3">Base ($)</th>
+          <th colspan="2" class="day-sep">Lunes</th>
+          <th colspan="2" class="day-sep">Martes</th>
+          <th colspan="2" class="day-sep">Miércoles</th>
+          <th colspan="2" class="day-sep">Jueves</th>
+          <th colspan="2" class="day-sep">Viernes</th>
+          <th colspan="2" class="day-sep">Sábado</th>
+          <th colspan="2" class="day-sep">Domingo</th>
+          <th rowspan="3" class="day-sep">Horas<br>Lun–Sáb</th>
+          <th rowspan="3">Turnos<br>Lun–Sáb</th>
+          <th rowspan="3">Pago Lun–Sáb<br>(Bs.)</th>
+          <th rowspan="3">Pago Domingo<br>(Bs.)</th>
+          <th rowspan="3">Total a Pagar<br>(Bs.)</th>
+          <th rowspan="3">Estado</th>
+          <th rowspan="3" class="del-col"></th>
+        </tr>
+        <tr class="dates-row" id="datesHeader"></tr>
+        <tr class="sub-row">
+          <th class="day-sep">Ent</th><th>Sal</th>
+          <th class="day-sep">Ent</th><th>Sal</th>
+          <th class="day-sep">Ent</th><th>Sal</th>
+          <th class="day-sep">Ent</th><th>Sal</th>
+          <th class="day-sep">Ent</th><th>Sal</th>
+          <th class="day-sep">Ent</th><th>Sal</th>
+          <th class="day-sep">Ent</th><th>Sal</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+      <tfoot id="tableFoot"></tfoot>
+    </table>
+  </div>
+
+  <div class="legend">
+    <div><span class="swatch" style="background:var(--warn-bg);border-color:var(--warn-border)"></span>Marcación incompleta (falta entrada o salida — se computa Bs. 0,00 hasta completarla)</div>
+    <div><span class="swatch" style="background:var(--double-bg);border-color:#93c5fd"></span>Doble turno detectado (≥ 12 horas en el día)</div>
+    <div><strong>Moneda:</strong> <code>Base ($)</code> viene de <code>Salario_Base_Bs</code> (expresado en dólares) y todos los pagos se calculan en <strong>Bolívares (Bs.)</strong> a la tasa BCV.</div>
+  </div>
+</div>
+
+<!-- Modal Agregar Empleado -->
+<div class="modal-backdrop" id="addModal">
+  <div class="modal">
+    <h2>Agregar Empleado Manual a Vista</h2>
+    <div class="field">
+      <label>Nombres y Apellidos</label>
+      <input type="text" id="newEmpName" placeholder="Ej: Juan Carlos Perez" />
+    </div>
+    <div class="field">
+      <label>Base Semanal ($)</label>
+      <input type="number" id="newEmpBase" value="35" min="0" step="0.5" />
+    </div>
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeAddModal()">Cancelar</button>
+      <button class="success" onclick="confirmAddEmployee()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
+  const STORAGE_KEY = "hypermarket_slwa_nomina_semanal_cache_v1";
+  const BCV_STORAGE_KEY = "hypermarket_slwa_bcv_rate_v1";
+
+  let state = {
+    dates: [],
+    isoDates: [],
+    employees: []
+  };
+
+  let isManualImportMode = false;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedBcv = localStorage.getItem(BCV_STORAGE_KEY);
+    if (savedBcv && parseFloat(savedBcv) > 0) {
+      document.getElementById("bcvRate").value = parseFloat(savedBcv).toFixed(2);
+    } else {
+      fetchBcvOfficialRate(true);
+    }
+
+    goToCurrentWeek();
+    setInterval(() => {
+      if (!isManualImportMode && document.getElementById("autoRefreshCheck").checked) {
+        syncFromGoogleSheets(false);
+      }
+    }, 60000);
+  });
+
+  // ---------------------------------------------------------------------------
+  // TASA DÓLAR BCV
+  // ---------------------------------------------------------------------------
+  function getBcvRate() {
+    const v = parseFloat(document.getElementById("bcvRate").value);
+    return v > 0 ? v : 1;
+  }
+
+  function onBcvChanged() {
+    const val = parseFloat(document.getElementById("bcvRate").value);
+    if (val > 0) localStorage.setItem(BCV_STORAGE_KEY, String(val));
+    render();
+  }
+
+  async function fetchBcvOfficialRate(silent = false) {
+    try {
+      const res = await fetch("https://ve.dolarapi.com/v1/dolares/oficial");
+      const json = await res.json();
+      const rate = parseFloat(json && (json.promedio || json.venta || json.precio));
+      if (rate > 0) {
+        document.getElementById("bcvRate").value = rate.toFixed(2);
+        localStorage.setItem(BCV_STORAGE_KEY, String(rate));
+        render();
+        if (!silent) showAlert(`✅ Tasa BCV actualizada automáticamente: <strong>Bs. ${fmtNumberVE(rate)} / $</strong>`);
+        return;
+      }
+      throw new Error("Tasa no disponible");
+    } catch (err) {
+      if (!silent) {
+        showAlert("⚠️ No se pudo consultar la tasa BCV en línea automáticamente. Ingresa la tasa del día manualmente en la casilla superior derecha.", true);
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // UTILIDADES GENERALES Y FORMATO VENEZOLANO
+  // ---------------------------------------------------------------------------
+  function showAlert(msg, isError = false) {
+    const bar = document.getElementById("alertBar");
+    bar.innerHTML = msg;
+    bar.className = isError ? "alert-bar error" : "alert-bar";
+    bar.style.display = "block";
+    setTimeout(() => { bar.style.display = "none"; }, 9000);
+  }
+
+  function normName(str) {
+    return String(str || "")
+      .trim().toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function fmtNumberVE(n, dec = 2) {
+    const fixed = (Number(n) || 0).toFixed(dec);
+    const parts = fixed.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return parts.join(",");
+  }
+
+  function fmtBs(n) { return "Bs. " + fmtNumberVE(n, 2); }
+  function fmtUSD(n) { return "$" + fmtNumberVE(n, 2); }
+
+  // ---------------------------------------------------------------------------
+  // CÁLCULO DE SEMANA (LUNES A DOMINGO)
+  // ---------------------------------------------------------------------------
+  function getMondayOfDate(dateObj) {
+    const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+    const day = d.getUTCDay();
+    const diff = (day + 6) % 7;
+    d.setUTCDate(d.getUTCDate() - diff);
+    return d;
+  }
+
+  function formatUTC_DDMMYYYY(d) {
+    return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${d.getUTCFullYear()}`;
+  }
+
+  function formatUTC_ISO(d) {
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+  }
+
+  function computeWeekDates(refIso) {
+    const parts = refIso.split("-").map(Number);
+    const baseDate = new Date(parts[0], parts[1] - 1, parts[2]);
+    const monday = getMondayOfDate(baseDate);
+    const dates = [], isoDates = [];
+    for (let i = 0; i < 7; i++) {
+      const cur = new Date(monday.getTime() + i * 86400000);
+      dates.push(formatUTC_DDMMYYYY(cur));
+      isoDates.push(formatUTC_ISO(cur));
+    }
+    return { dates, isoDates };
+  }
+
+  function goToCurrentWeek() {
+    const now = new Date();
+    const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    document.getElementById("weekRefDate").value = iso;
+    onWeekChanged();
+  }
+
+  function shiftWeek(deltaDays) {
+    const cur = document.getElementById("weekRefDate").value;
+    if (!cur) return;
+    const p = cur.split("-").map(Number);
+    const d = new Date(p[0], p[1] - 1, p[2] + deltaDays);
+    document.getElementById("weekRefDate").value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    onWeekChanged();
+  }
+
+  function onWeekChanged() {
+    isManualImportMode = false;
+    const refIso = document.getElementById("weekRefDate").value;
+    const w = computeWeekDates(refIso);
+    state.dates = w.dates;
+    state.isoDates = w.isoDates;
+    syncFromGoogleSheets(true);
+  }
+
+  // ---------------------------------------------------------------------------
+  // CONVERSIÓN DE HORAS
+  // ---------------------------------------------------------------------------
+  function normalizeTimeTo24h(str) {
+    if (!str) return "";
+    const s = String(str).trim().toLowerCase();
+    const isPM = s.includes("p");
+    const isAM = s.includes("a");
+    const m = s.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (!m) return "";
+    let h = parseInt(m[1], 10);
+    const min = m[2].padStart(2, "0");
+    const sec = (m[3] || "00").padStart(2, "0");
+    if (isPM && h < 12) h += 12;
+    if (isAM && h === 12) h = 0;
+    return `${String(h).padStart(2, "0")}:${min}:${sec}`;
+  }
+
+  // ---------------------------------------------------------------------------
+  // FILTROS POR EMPLEADO
+  // ---------------------------------------------------------------------------
+  function populateEmployeeFilterSelect() {
+    const sel = document.getElementById("employeeFilter");
+    const prev = sel.value;
+    sel.innerHTML = `<option value="">Todos los Empleados (${state.employees.length})</option>`;
+    state.employees.forEach(emp => {
+      const opt = document.createElement("option");
+      opt.value = emp.id ? `id:${emp.id}` : `name:${normName(emp.name)}`;
+      opt.textContent = emp.id ? `${emp.name} (${emp.id})` : emp.name;
+      sel.appendChild(opt);
+    });
+    if (prev && Array.from(sel.options).some(o => o.value === prev)) {
+      sel.value = prev;
+    }
+  }
+
+  function clearEmployeeFilters() {
+    document.getElementById("employeeFilter").value = "";
+    document.getElementById("employeeSearch").value = "";
+    if (document.getElementById("branchFilter").value !== "") {
+      document.getElementById("branchFilter").value = "";
+      syncFromGoogleSheets(false);
+    } else {
+      render();
+    }
+  }
+
+  function getFilteredEmployees() {
+    const empSelect = document.getElementById("employeeFilter").value;
+    const empQuery = normName(document.getElementById("employeeSearch").value);
+
+    return state.employees.filter(emp => {
+      if (empSelect) {
+        const key = emp.id ? `id:${emp.id}` : `name:${normName(emp.name)}`;
+        if (key !== empSelect) return false;
+      }
+      if (empQuery) {
+        const matchName = normName(emp.name).includes(empQuery);
+        const matchId = normName(emp.id).includes(empQuery);
+        if (!matchName && !matchId) return false;
+      }
+      return true;
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // SINCRONIZACIÓN EN TIEMPO REAL DESDE GOOGLE SHEETS
+  // ---------------------------------------------------------------------------
+  async function syncFromGoogleSheets(showToastMsg = false) {
+    const desde = state.isoDates[0];
+    const hasta = state.isoDates[6];
+    if (!desde || !hasta) return;
+
+    try {
+      const res = await fetch(`${SCRIPT_URL}?module=nomina&action=getSemana&desde=${desde}&hasta=${hasta}&_t=${Date.now()}`);
+      const json = await res.json();
+      if (json.status !== "ok") throw new Error(json.message || "Error al consultar Google Sheets");
+
+      const selBranch = document.getElementById("branchFilter");
+      const branchVal = selBranch.value;
+      if (Array.isArray(json.sucursales)) {
+        selBranch.innerHTML = `<option value="">Todas las Sucursales</option>`;
+        json.sucursales.forEach(s => {
+          const o = document.createElement("option");
+          o.value = s; o.textContent = s;
+          selBranch.appendChild(o);
+        });
+        if (branchVal) selBranch.value = branchVal;
+      }
+
+      const branchFilter = selBranch.value;
+
+      const empMap = new Map();
+      (json.empleados || []).forEach(emp => {
+        if (branchFilter && emp.sucursal && emp.sucursal !== branchFilter) return;
+        const keyId = emp.id ? `id:${emp.id.toLowerCase()}` : `name:${normName(emp.name)}`;
+        empMap.set(keyId, {
+          id: emp.id || "",
+          name: emp.name,
+          base: Number(emp.base) || 0,
+          sucursal: emp.sucursal || "",
+          days: [["",""],["",""],["",""],["",""],["",""],["",""],["",""]]
+        });
+      });
+
+      const registros = (json.asistencia || []).map(r => ({
+        ...r,
+        hora24: r.hora24 || normalizeTimeTo24h(r.hora)
+      })).filter(r => r.hora24 && (!branchFilter || r.sucursal === branchFilter));
+
+      registros.sort((a, b) => a.fechaIso.localeCompare(b.fechaIso) || a.hora24.localeCompare(b.hora24));
+
+      registros.forEach(r => {
+        const dayIdx = state.isoDates.indexOf(r.fechaIso);
+        if (dayIdx < 0 || dayIdx > 6) return;
+
+        let empObj = null;
+        if (r.id_unico) empObj = empMap.get(`id:${r.id_unico.toLowerCase()}`);
+        if (!empObj && r.empleado) {
+          const rNorm = normName(r.empleado);
+          for (const val of empMap.values()) {
+            if (normName(val.name) === rNorm) { empObj = val; break; }
+          }
+        }
+        if (!empObj && r.empleado) {
+          const newKey = r.id_unico ? `id:${r.id_unico.toLowerCase()}` : `name:${normName(r.empleado)}`;
+          empObj = {
+            id: r.id_unico || "",
+            name: r.empleado,
+            base: 0,
+            sucursal: r.sucursal || "",
+            days: [["",""],["",""],["",""],["",""],["",""],["",""],["",""]]
+          };
+          empMap.set(newKey, empObj);
+        }
+
+        if (empObj) {
+          if (r.accion === "ENTRADA") {
+            if (!empObj.days[dayIdx][0]) empObj.days[dayIdx][0] = r.hora24;
+          } else if (r.accion === "SALIDA") {
+            empObj.days[dayIdx][1] = r.hora24;
+          }
+        }
+      });
+
+      state.employees = Array.from(empMap.values()).sort((a, b) => a.name.localeCompare(b.name, "es"));
+      populateEmployeeFilterSelect();
+      saveState();
+      render();
+
+      const nowStr = new Date().toLocaleTimeString("es-VE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      document.getElementById("lastSyncTime").innerText = `(${nowStr})`;
+
+      if (showToastMsg) {
+        if (registros.length === 0 && json.ultimaFechaIso) {
+          showAlert(
+            `ℹ️ Sin marcajes entre <strong>${state.dates[0]}</strong> y <strong>${state.dates[6]}</strong>. El último registro en <strong>Asistencia</strong> es del <strong>${json.ultimaFechaIso}</strong> ` +
+            `<button type="button" style="margin-left:8px;padding:3px 10px;font-size:0.78rem;" onclick="document.getElementById('weekRefDate').value='${json.ultimaFechaIso}'; onWeekChanged();">Ir a esa semana</button>`
+          );
+        } else {
+          showAlert(`✅ Sincronizado: <strong>${state.employees.length} empleados</strong> y <strong>${registros.length} marcaciones</strong> (${state.dates[0]} al ${state.dates[6]}).`);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      if (showToastMsg) showAlert("❌ Error al sincronizar con Google Sheets: " + err.message, true);
+    }
+  }
+
+  async function persistBaseSalario(emp) {
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          module: "nomina",
+          action: "updateBaseUSD",
+          id_unico: emp.id || "",
+          name: emp.name,
+          base: emp.base
+        })
+      });
+    } catch (e) {}
+  }
+
+  async function saveNominaToSheets() {
+    const visible = getFilteredEmployees();
+    if (!visible.length) return showAlert("❌ No hay filas para guardar.", true);
+
+    const bcv = getBcvRate();
+    const method = document.getElementById("calcMethod").value;
+    const weeklyHours = parseFloat(document.getElementById("weeklyHours").value) || 48;
+    const weeklyShifts = parseFloat(document.getElementById("weeklyShifts").value) || 6;
+    const sundayRate = parseFloat(document.getElementById("sundayRate").value) || 10;
+    const doubleHours = parseFloat(document.getElementById("doubleHours").value) || 12;
+
+    const filas = visible.map(emp => {
+      let empHoursLS = 0, empShiftsLS = 0, empDomShifts = 0, empIncomplete = 0;
+      for (let d = 0; d < 7; d++) {
+        const [ent, sal] = emp.days[d] || ["", ""];
+        const res = calcDayHours(ent, sal);
+        const sh = calcShiftsFromHours(res.hours, doubleHours);
+        if (res.incomplete) empIncomplete++;
+        if (d < 6) { empHoursLS += res.hours; empShiftsLS += sh; }
+        else empDomShifts = sh;
+      }
+      const payLS_USD = method === "hours" ? empHoursLS * (emp.base / weeklyHours) : empShiftsLS * (emp.base / weeklyShifts);
+      const payDom_USD = empDomShifts * sundayRate;
+      const payLS_Bs = payLS_USD * bcv;
+      const payDom_Bs = payDom_USD * bcv;
+      const total_Bs = payLS_Bs + payDom_Bs;
+      const estado = empIncomplete > 0 ? `Revisar (${empIncomplete})` : (emp.base <= 0 && (empHoursLS > 0 || empDomShifts > 0) ? "Sin Base" : "OK");
+
+      return {
+        id: emp.id || "",
+        name: emp.name,
+        base: fmtNumberVE(emp.base),
+        days: emp.days,
+        horasLS: fmtNumberVE(empHoursLS),
+        turnosLS: empShiftsLS,
+        pagoLS: fmtBs(payLS_Bs),
+        pagoDom: fmtBs(payDom_Bs),
+        total: fmtBs(total_Bs),
+        estado: estado
+      };
+    });
+
+    const semana = `${state.dates[0]} al ${state.dates[6]} (BCV: ${fmtNumberVE(bcv)})`;
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          module: "nomina",
+          action: "saveNominaSemanal",
+          semana: semana,
+          filas: filas
+        })
+      });
+      showAlert(`✅ Cierre guardado en la hoja <strong>Nomina_Semanal</strong> (${semana}).`);
+    } catch (e) {
+      showAlert("❌ Error al guardar en Google Sheets.", true);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // CÁLCULO EN BS. Y RENDERIZADO
+  // ---------------------------------------------------------------------------
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function parseTimeToHours(str) {
+    if (!str) return null;
+    const norm = normalizeTimeTo24h(str);
+    const match = norm.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (!match) return null;
+    const h = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const s = match[3] ? parseInt(match[3], 10) : 0;
+    if (h > 23 || m > 59 || s > 59) return null;
+    return h + m / 60 + s / 3600;
+  }
+
+  function calcDayHours(entStr, salStr) {
+    const hasEnt = (entStr || "").trim() !== "";
+    const hasSal = (salStr || "").trim() !== "";
+    if (!hasEnt && !hasSal) return { hours: 0, incomplete: false };
+    if (hasEnt !== hasSal) return { hours: 0, incomplete: true };
+    const ent = parseTimeToHours(entStr);
+    const sal = parseTimeToHours(salStr);
+    if (ent === null || sal === null) return { hours: 0, incomplete: true };
+    let diff = sal - ent;
+    if (diff < 0) diff += 24;
+    return { hours: diff, incomplete: false };
+  }
+
+  function calcShiftsFromHours(hours, minDouble) {
+    if (hours >= minDouble) return 2;
+    if (hours >= 4) return 1;
+    return 0;
+  }
+
+  function render() {
+    document.getElementById("datesHeader").innerHTML =
+      state.dates.map(d => `<th colspan="2" class="day-sep">${d}</th>`).join("");
+
+    const bcv = getBcvRate();
+    const method = document.getElementById("calcMethod").value;
+    const weeklyHours = parseFloat(document.getElementById("weeklyHours").value) || 48;
+    const weeklyShifts = parseFloat(document.getElementById("weeklyShifts").value) || 6;
+    const sundayRate = parseFloat(document.getElementById("sundayRate").value) || 10;
+    const doubleHours = parseFloat(document.getElementById("doubleHours").value) || 12;
+
+    const visibleEmployees = getFilteredEmployees();
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    let sumHoursLS = 0, sumShiftsLS = 0;
+    let sumPayLS_Bs = 0, sumDomShifts = 0, sumPayDom_USD = 0, sumPayDom_Bs = 0;
+    let sumGrandTotal_USD = 0, sumGrandTotal_Bs = 0, totalIncomplete = 0;
+
+    visibleEmployees.forEach(emp => {
+      const tr = document.createElement("tr");
+
+      const tdName = document.createElement("td");
+      tdName.className = "name-col";
+      const inpName = document.createElement("input");
+      inpName.className = "name-input";
+      inpName.value = emp.name;
+      inpName.onchange = (e) => { emp.name = e.target.value; saveState(); populateEmployeeFilterSelect(); };
+      tdName.appendChild(inpName);
+      tr.appendChild(tdName);
+
+      const tdBase = document.createElement("td");
+      const inpBase = document.createElement("input");
+      inpBase.type = "number";
+      inpBase.step = "0.5";
+      inpBase.min = "0";
+      inpBase.className = "base-input";
+      inpBase.value = emp.base;
+      inpBase.onchange = (e) => {
+        emp.base = parseFloat(e.target.value) || 0;
+        saveState();
+        render();
+        persistBaseSalario(emp);
+      };
+      tdBase.appendChild(inpBase);
+      tr.appendChild(tdBase);
+
+      let empHoursLS = 0, empShiftsLS = 0, empDomShifts = 0, empIncomplete = 0;
+
+      for (let d = 0; d < 7; d++) {
+        if (!emp.days[d]) emp.days[d] = ["", ""];
+        const [entVal, salVal] = emp.days[d];
+        const res = calcDayHours(entVal, salVal);
+        const shifts = calcShiftsFromHours(res.hours, doubleHours);
+
+        if (res.incomplete) { empIncomplete++; totalIncomplete++; }
+        if (d < 6) { empHoursLS += res.hours; empShiftsLS += shifts; }
+        else { empDomShifts = shifts; }
+
+        const cellClass = res.incomplete ? "cell-incomplete" : (shifts === 2 ? "cell-double" : "");
+
+        const tdEnt = document.createElement("td");
+        tdEnt.className = `day-sep ${cellClass}`;
+        const inpEnt = document.createElement("input");
+        inpEnt.className = "time-input";
+        inpEnt.placeholder = "—";
+        inpEnt.value = entVal;
+        inpEnt.onchange = (e) => { emp.days[d][0] = normalizeTimeTo24h(e.target.value) || e.target.value.trim(); saveState(); render(); };
+        tdEnt.appendChild(inpEnt);
+        tr.appendChild(tdEnt);
+
+        const tdSal = document.createElement("td");
+        tdSal.className = cellClass;
+        const inpSal = document.createElement("input");
+        inpSal.className = "time-input";
+        inpSal.placeholder = "—";
+        inpSal.value = salVal;
+        inpSal.onchange = (e) => { emp.days[d][1] = normalizeTimeTo24h(e.target.value) || e.target.value.trim(); saveState(); render(); };
+        tdSal.appendChild(inpSal);
+        tr.appendChild(tdSal);
+      }
+
+      const payLS_USD = method === "hours" ? empHoursLS * (emp.base / weeklyHours) : empShiftsLS * (emp.base / weeklyShifts);
+      const payDom_USD = empDomShifts * sundayRate;
+      const totalPay_USD = payLS_USD + payDom_USD;
+
+      const payLS_Bs = payLS_USD * bcv;
+      const payDom_Bs = payDom_USD * bcv;
+      const totalPay_Bs = totalPay_USD * bcv;
+
+      sumHoursLS += empHoursLS;
+      sumShiftsLS += empShiftsLS;
+      sumPayLS_Bs += payLS_Bs;
+      sumDomShifts += empDomShifts;
+      sumPayDom_USD += payDom_USD;
+      sumPayDom_Bs += payDom_Bs;
+      sumGrandTotal_USD += totalPay_USD;
+      sumGrandTotal_Bs += totalPay_Bs;
+
+      const addCell = (txt, cls = "") => {
+        const td = document.createElement("td");
+        if (cls) td.className = cls;
+        td.textContent = txt;
+        tr.appendChild(td);
+      };
+
+      addCell(fmtNumberVE(empHoursLS), "day-sep");
+      addCell(empShiftsLS);
+      addCell(fmtBs(payLS_Bs), "bs-cell");
+      addCell(empDomShifts > 0 ? `${fmtBs(payDom_Bs)} (${empDomShifts}T)` : "Bs. 0,00", "bs-cell");
+      addCell(fmtBs(totalPay_Bs), "total-cell");
+
+      const tdStatus = document.createElement("td");
+      if (empIncomplete > 0) tdStatus.innerHTML = `<span class="badge badge-warn">⚠️ Revisar (${empIncomplete})</span>`;
+      else if (emp.base <= 0 && (empHoursLS > 0 || empDomShifts > 0)) tdStatus.innerHTML = `<span class="badge badge-warn">⚠️ Sin Base</span>`;
+      else tdStatus.innerHTML = `<span class="badge badge-ok">OK</span>`;
+      tr.appendChild(tdStatus);
+
+      const tdDel = document.createElement("td");
+      tdDel.className = "del-col";
+      const btnDel = document.createElement("button");
+      btnDel.className = "del-btn";
+      btnDel.textContent = "✕";
+      btnDel.title = "Quitar de la vista";
+      btnDel.onclick = () => {
+        const realIdx = state.employees.indexOf(emp);
+        if (realIdx >= 0) state.employees.splice(realIdx, 1);
+        populateEmployeeFilterSelect();
+        saveState();
+        render();
+      };
+      tdDel.appendChild(btnDel);
+      tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("tableFoot").innerHTML = `
+      <tr>
+        <td class="name-col">TOTALES (${visibleEmployees.length} empleados)</td>
+        <td>—</td>
+        <td colspan="14" class="day-sep" style="text-align:right;color:#475569;">Totales (BCV ${fmtNumberVE(bcv)}):</td>
+        <td class="day-sep">${fmtNumberVE(sumHoursLS)} h</td>
+        <td>${sumShiftsLS}</td>
+        <td>${fmtBs(sumPayLS_Bs)}</td>
+        <td>${fmtBs(sumPayDom_Bs)}</td>
+        <td class="total-cell">${fmtBs(sumGrandTotal_Bs)}</td>
+        <td colspan="2"></td>
+      </tr>`;
+
+    document.getElementById("kpiEmp").textContent = visibleEmployees.length;
+    document.getElementById("kpiHours").textContent = `${fmtNumberVE(sumHoursLS)} h`;
+    document.getElementById("kpiDom").textContent = `${sumDomShifts} (${fmtBs(sumPayDom_Bs)})`;
+    document.getElementById("kpiDomUsd").textContent = `Ref: ${fmtUSD(sumPayDom_USD)}`;
+    document.getElementById("kpiWarn").textContent = totalIncomplete;
+    document.getElementById("kpiTotal").textContent = fmtBs(sumGrandTotal_Bs);
+    document.getElementById("kpiTotalUsd").textContent = `Ref: ${fmtUSD(sumGrandTotal_USD)} | BCV: ${fmtNumberVE(bcv)}`;
+  }
+
+  // Modal Agregar Empleado
+  function openAddModal() {
+    document.getElementById("newEmpName").value = "";
+    document.getElementById("newEmpBase").value = "35";
+    document.getElementById("addModal").classList.add("open");
+    setTimeout(() => document.getElementById("newEmpName").focus(), 50);
+  }
+
+  function closeAddModal() {
+    document.getElementById("addModal").classList.remove("open");
+  }
+
+  function confirmAddEmployee() {
+    const name = document.getElementById("newEmpName").value.trim();
+    const base = parseFloat(document.getElementById("newEmpBase").value) || 0;
+    if (!name) { alert("Escribe el nombre del empleado."); return; }
+    state.employees.push({
+      id: "", name, base, sucursal: "",
+      days: [["",""],["",""],["",""],["",""],["",""],["",""],["",""]]
+    });
+    closeAddModal();
+    populateEmployeeFilterSelect();
+    saveState();
+    render();
+  }
+
+  document.getElementById("newEmpName").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") confirmAddEmployee();
+  });
+
+  // Importación manual Excel / CSV
+  function excelSerialToUTCDate(val) {
+    if (typeof val === "number") return new Date(Date.UTC(1899, 11, 30) + Math.round(val) * 86400000);
+    if (typeof val === "string") {
+      const s = val.trim();
+      if (/^\d{4,5}$/.test(s)) return new Date(Date.UTC(1899, 11, 30) + parseInt(s, 10) * 86400000);
+      let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (m) return new Date(Date.UTC(+m[3], +m[2] - 1, +m[1]));
+      m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+      if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    }
+    return null;
+  }
+
+  function excelTimeToStr(val) {
+    if (val === null || val === undefined || val === "") return "";
+    if (typeof val === "string") return normalizeTimeTo24h(val);
+    if (typeof val === "number") {
+      const frac = val >= 1 ? (val % 1) : val;
+      const totalSec = Math.round(frac * 86400) % 86400;
+      return `${String(Math.floor(totalSec / 3600)).padStart(2, "0")}:${String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0")}:${String(totalSec % 60).padStart(2, "0")}`;
+    }
+    return "";
+  }
+
+  function parseCSVText(text) {
+    const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n").filter(l => l.trim() !== "");
+    if (!lines.length) return [];
+    const sep = (lines[0].split(";").length > lines[0].split(",").length) ? ";" : ",";
+    return lines.map(line => {
+      const cols = [];
+      let cur = "", inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+          else inQuotes = !inQuotes;
+        } else if (ch === sep && !inQuotes) {
+          cols.push(cur.trim()); cur = "";
+        } else {
+          cur += ch;
+        }
+      }
+      cols.push(cur.trim());
+      return cols;
+    });
+  }
+
+  function processImportedRows(aoa) {
+    if (!aoa || aoa.length < 2) return showAlert("❌ Archivo vacío.", true);
+    const header = aoa[0].map(h => String(h || "").trim().toLowerCase());
+    const idxFecha = header.findIndex(h => h.includes("fecha"));
+    const idxHora = header.findIndex(h => h.includes("hora"));
+    const idxEmp = header.findIndex(h => h.includes("empleado") || h.includes("nombre"));
+    const idxAcc = header.findIndex(h => h.includes("acci") || h.includes("tipo"));
+    if (idxFecha === -1 || idxHora === -1 || idxEmp === -1 || idxAcc === -1) {
+      return showAlert("❌ El archivo debe tener las columnas: Fecha, Hora, Empleado, Acción.", true);
+    }
+
+    const currentBases = {};
+    state.employees.forEach(e => { if (e.base > 0) currentBases[normName(e.name)] = e.base; });
+
+    const records = [];
+    let minDate = null;
+    for (let i = 1; i < aoa.length; i++) {
+      const row = aoa[i];
+      if (!row || !row.length) continue;
+      const empName = String(row[idxEmp] || "").trim();
+      const acc = String(row[idxAcc] || "").trim().toUpperCase();
+      if (!empName || (acc !== "ENTRADA" && acc !== "SALIDA")) continue;
+      const dt = excelSerialToUTCDate(row[idxFecha]);
+      const tm = excelTimeToStr(row[idxHora]);
+      if (!dt || !tm) continue;
+      if (!minDate || dt < minDate) minDate = dt;
+      records.push({ empName, dt, tm, acc });
+    }
+    if (!records.length) return showAlert("❌ No se encontraron registros válidos.", true);
+
+    const jsDay = minDate.getUTCDay();
+    const monday = new Date(minDate.getTime() - ((jsDay + 6) % 7) * 86400000);
+    const newDates = [], newIsos = [];
+    for (let d = 0; d < 7; d++) {
+      const cur = new Date(monday.getTime() + d * 86400000);
+      newDates.push(formatUTC_DDMMYYYY(cur));
+      newIsos.push(formatUTC_ISO(cur));
+    }
+
+    records.sort((a, b) => (a.dt - b.dt) || a.tm.localeCompare(b.tm));
+    const empMap = new Map();
+    records.forEach(r => {
+      const key = normName(r.empName);
+      if (!empMap.has(key)) {
+        empMap.set(key, { id: "", name: r.empName, base: currentBases[key] || 0, sucursal: "", days: [["",""],["",""],["",""],["",""],["",""],["",""],["",""]] });
+      }
+      const dayIdx = Math.round((r.dt - monday) / 86400000);
+      if (dayIdx >= 0 && dayIdx < 7) {
+        const empObj = empMap.get(key);
+        if (r.acc === "ENTRADA") { if (!empObj.days[dayIdx][0]) empObj.days[dayIdx][0] = r.tm; }
+        else if (r.acc === "SALIDA") empObj.days[dayIdx][1] = r.tm;
+      }
+    });
+
+    isManualImportMode = true;
+    state.dates = newDates;
+    state.isoDates = newIsos;
+    state.employees = Array.from(empMap.values()).sort((a, b) => a.name.localeCompare(b.name, "es"));
+    populateEmployeeFilterSelect();
+    saveState();
+    render();
+    showAlert(`✅ Archivo importado (${newDates[0]} al ${newDates[6]}). Pulsa "Sincronizar" para volver a Google Sheets.`);
+  }
+
+  document.getElementById("fileInput").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (ext === "csv") {
+      const reader = new FileReader();
+      reader.onload = ev => processImportedRows(parseCSVText(ev.target.result));
+      reader.readAsText(file, "UTF-8");
+    } else {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        processImportedRows(XLSX.utils.sheet_to_json(ws, { header: 1, raw: true }));
+      };
+      reader.readAsArrayBuffer(file);
+    }
+    e.target.value = "";
+  });
+
+  function exportCSV() {
+    const bcv = getBcvRate();
+    const method = document.getElementById("calcMethod").value;
+    const weeklyHours = parseFloat(document.getElementById("weeklyHours").value) || 48;
+    const weeklyShifts = parseFloat(document.getElementById("weeklyShifts").value) || 6;
+    const sundayRate = parseFloat(document.getElementById("sundayRate").value) || 10;
+    const doubleHours = parseFloat(document.getElementById("doubleHours").value) || 12;
+
+    const visibleEmployees = getFilteredEmployees();
+
+    const headers = [
+      "Nombres y Apellidos", "Base_USD", "Tasa_BCV",
+      "Lun_Ent", "Lun_Sal", "Mar_Ent", "Mar_Sal", "Mie_Ent", "Mie_Sal",
+      "Jue_Ent", "Jue_Sal", "Vie_Ent", "Vie_Sal", "Sab_Ent", "Sab_Sal",
+      "Dom_Ent", "Dom_Sal", "Horas_Lun_Sab", "Turnos_Lun_Sab",
+      "Pago_Lun_Sab_Bs", "Pago_Domingo_Bs", "Total_Pagar_Bs"
+    ];
+    const rows = [headers.join(";")];
+
+    visibleEmployees.forEach(emp => {
+      let empHoursLS = 0, empShiftsLS = 0, empDomShifts = 0;
+      const flatDays = [];
+      for (let d = 0; d < 7; d++) {
+        const [ent, sal] = emp.days[d] || ["", ""];
+        flatDays.push(ent, sal);
+        const res = calcDayHours(ent, sal);
+        const sh = calcShiftsFromHours(res.hours, doubleHours);
+        if (d < 6) { empHoursLS += res.hours; empShiftsLS += sh; }
+        else empDomShifts = sh;
+      }
+      const payLS_Bs = (method === "hours" ? empHoursLS * (emp.base / weeklyHours) : empShiftsLS * (emp.base / weeklyShifts)) * bcv;
+      const payDom_Bs = (empDomShifts * sundayRate) * bcv;
+      const total_Bs = payLS_Bs + payDom_Bs;
+
+      rows.push([
+        emp.name, emp.base.toFixed(2).replace(".", ","), bcv.toFixed(2).replace(".", ","), ...flatDays,
+        empHoursLS.toFixed(2).replace(".", ","), empShiftsLS,
+        payLS_Bs.toFixed(2).replace(".", ","), payDom_Bs.toFixed(2).replace(".", ","),
+        total_Bs.toFixed(2).replace(".", ",")
+      ].join(";"));
+    });
+
+    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `Nomina_Bs_${state.dates[0]}_al_${state.dates[6]}.csv`;
+    a.click();
+  }
+</script>
+</body>
+</html>
