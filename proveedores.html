@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proveedores, CxP y Caja - HyperMarket SLWA C.A.</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    :root {
+      --primary: #1B4D2E;
+      --primary-light: #3C8038;
+      --gold: #C59B27;
+      --gold-light: #E5C558;
+      --bg: #f3f6f4;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --text: #1c2a27;
+      --muted: #5f706a;
+      --in: #1B4D2E;
+      --out: #b8482e;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
+
+    /* Header compacto corporativo */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #fff;
+      padding: 8px 18px;
+      border-bottom: 3px solid var(--gold);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-left { display: flex; flex-direction: column; gap: 5px; }
+    .header-title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+    header h1 { font-size: 1.08rem; margin: 0; font-weight: 700; }
+    header p { margin: 0; font-size: 0.74rem; color: var(--gold-light); }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    header button {
+      background: rgba(255,255,255,0.16); color: #fff; border: 1px solid rgba(255,255,255,0.35);
+      padding: 4px 10px; border-radius: 5px; cursor: pointer; font: 600 12px/1.3 inherit;
+    }
+    header button:hover { background: rgba(255,255,255,0.28); }
+    header button.gold-btn { background: var(--gold); color: #1B4D2E; border-color: var(--gold-light); }
+
+    .bcv-widget {
+      background: rgba(0,0,0,0.28); border: 1.5px solid var(--gold-light);
+      border-radius: 8px; padding: 5px 10px; display: flex; flex-direction: column; gap: 3px;
+    }
+    .bcv-widget label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--gold-light); }
+    .bcv-row { display: flex; align-items: center; gap: 5px; }
+    .bcv-input {
+      width: 90px; padding: 3px 6px; border-radius: 5px; border: 1px solid var(--gold);
+      font: 800 14px ui-monospace, monospace; color: var(--primary); background: #fff; text-align: right;
+    }
+    .bcv-btn { background: var(--gold) !important; color: #1B4D2E !important; border: none !important; padding: 4px 7px !important; font-weight: 700 !important; }
+
+    /* Tabs */
+    nav { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 18px 0; border-bottom: 1px solid var(--border); background: #e3ebe5; }
+    nav button {
+      border: 0; background: none; padding: 8px 16px; font: 600 13px inherit; cursor: pointer;
+      border-radius: 6px 6px 0 0; color: var(--muted);
+    }
+    nav button[aria-selected=true] { background: var(--bg); color: var(--primary); box-shadow: inset 0 -3px var(--primary); }
+    .bd { background: #b8482e; color: #fff; border-radius: 9px; padding: 1px 7px; font-size: 11px; margin-left: 6px; }
+    .bd:empty { display: none; }
+
+    main { max-width: 1220px; margin: 0 auto; padding: 16px; }
+    section { display: none; }
+    section.on { display: block; }
+
+    .pn { background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--primary); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+    .pn.gold-top { border-top-color: var(--gold); }
+    .pn h2 { font-size: 15px; margin: 0 0 10px; color: var(--primary); }
+
+    form { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 10px; align-items: end; }
+    label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); font-weight: 600; gap: 3px; }
+    input, select { font: inherit; padding: 6px 8px; border: 1px solid #b9c4c0; border-radius: 5px; color: var(--text); background: #fff; min-width: 0; }
+    input:focus, select:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-light); }
+
+    .btn { font: 600 13px inherit; padding: 7px 14px; border-radius: 5px; border: 1px solid var(--primary); background: var(--primary); color: #fff; cursor: pointer; }
+    .btn:hover { background: var(--primary-light); }
+    .btn.s { background: #fff; color: var(--primary); }
+    .btn.x { border-color: var(--out); color: var(--out); background: #fff; padding: 4px 9px; font-size: 12px; }
+    .btn.gold { background: var(--gold); border-color: var(--gold); color: #1B4D2E; }
+
+    .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .bar input[type=search] { flex: 1; min-width: 220px; max-width: 340px; }
+    .tw { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+    th { font-size: 12px; color: var(--muted); font-weight: 700; background: #f8fafc; }
+    td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+    .em { color: var(--muted); padding: 14px 4px; }
+
+    .kp, .kc { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .kp div, .kb { background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--primary); border-radius: 8px; padding: 12px 14px; text-align: left; }
+    .kb { cursor: pointer; font: inherit; color: var(--text); transition: transform .12s, box-shadow .12s; }
+    .kb:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .kp b, .kb b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+    .kp small, .kb small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .kp span, .kb span { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .in { color: var(--in); }
+    .out { color: var(--out); }
+
+    .chs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .ch { border: 1px solid var(--border); background: #fff; border-radius: 16px; padding: 4px 12px; cursor: pointer; font: 600 12px inherit; color: var(--text); }
+    .ch.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .fc { background: #fff; border: 1px solid var(--border); border-left: 6px solid var(--primary); border-radius: 8px; padding: 11px 14px; margin-bottom: 10px; }
+    .fc.venc { border-left-color: #b8482e; }
+    .fc.prox { border-left-color: #c58a12; }
+    .fc.pag { border-left-color: #9aa8a3; opacity: .85; }
+    .fh { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .fh > div:first-child { flex: 1; min-width: 210px; }
+    .fh small { display: block; color: var(--muted); }
+    .fm { text-align: right; }
+    .fm b { font-size: 16px; font-variant-numeric: tabular-nums; }
+    .tg { padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; color: #fff; background: var(--primary); }
+    .tg.venc { background: #b8482e; }
+    .tg.prox { background: #c58a12; }
+    .tg.pag { background: #7d8c87; }
+    .pb { height: 6px; background: #e3e9e7; border-radius: 3px; margin-top: 9px; overflow: hidden; }
+    .pb i { display: block; height: 100%; background: var(--primary-light); }
+    .ap { border-top: 1px dashed var(--border); margin-top: 10px; padding-top: 10px; }
+
+    /* Escáner OCR */
+    .ocr-box {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: #f8faf8; border: 1.5px dashed var(--primary-light); border-radius: 8px; padding: 12px;
+    }
+    .ocr-preview { max-height: 110px; border-radius: 6px; border: 1px solid #cbd5e1; display: none; }
+    .ocr-progress { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; width: 220px; display: none; margin-top: 6px; }
+    .ocr-progress i { display: block; height: 100%; background: var(--gold); width: 0%; transition: width .2s; }
+
+    .ch2 { display: inline-flex; gap: 5px; align-items: center; background: #e3ece9; border-radius: 12px; padding: 3px 6px 3px 10px; font-size: 12px; font-weight: 600; }
+    .ch2 button { border: 0; background: none; cursor: pointer; color: var(--out); font-size: 15px; line-height: 1; }
+    .lst { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    #ci2 { display: contents; }
+
+    .hb { display: grid; grid-template-columns: 160px 1fr 130px; gap: 8px; align-items: center; margin: 6px 0; font-size: 13px; }
+    .hb em { height: 14px; background: var(--out); border-radius: 3px; display: block; }
+    .hb span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .lg { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .lg i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; }
+    svg { width: 100%; height: auto; display: block; }
+
+    #av { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #1B4D2E; color: #fff; border-bottom: 3px solid var(--gold); padding: 9px 16px; border-radius: 8px; z-index: 99; max-width: 90vw; font-weight: 600; }
+    [hidden] { display: none !important; }
+    @media print {
+      header button, nav, .btn, .ap form, .ocr-box, form, .bar, .chs { display: none !important; }
+      body { background: #fff; }
+      section { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-title-row">
+      <h1>HyperMarket SLWA C.A. — Cuentas por Pagar y Caja</h1>
+      <p id="st">Sincronizando con HyperMarket_SLWA...</p>
+    </div>
+    <div class="header-actions">
+      <button class="gold-btn" onclick="syncAll()">🔄 Sincronizar</button>
+      <button onclick="exportarCSV()">📥 Exportar Excel (CSV)</button>
+      <button onclick="window.print()">🖨️ Imprimir / PDF</button>
+    </div>
+  </div>
+
+  <!-- Tasa Dólar BCV en la esquina superior derecha -->
+  <div class="bcv-widget">
+    <label for="bcvRate">💵 Dólar BCV (Bs. / $)</label>
+    <div class="bcv-row">
+      <input type="number" id="bcvRate" class="bcv-input" step="0.01" min="0.01" value="60.00" oninput="onBcvChange()" />
+      <button type="button" class="bcv-btn" onclick="fetchBcvRate()">🔄 Auto</button>
+    </div>
+  </div>
+</header>
+
+<nav role="tablist">
+  <button role="tab" data-t="c" aria-selected="true">Cuentas por pagar<span class="bd" id="bd"></span></button>
+  <button role="tab" data-t="p">Proveedores</button>
+  <button role="tab" data-t="m">Ingresos y egresos (Bs. / $)</button>
+  <button role="tab" data-t="b">Balance y gráficas</button>
+</nav>
+
+<main>
+  <!-- =================================================================== -->
+  <!-- PESTAÑA 1: CUENTAS POR PAGAR + ESCÁNER AUTOMÁTICO DE FACTURAS       -->
+  <!-- =================================================================== -->
+  <section id="c" class="on">
+    <div class="kc" id="kc"></div>
+
+    <!-- ESCÁNER OCR DE FACTURAS (OPCIÓN A - TESSERACT LOCAL GRATUITO) -->
+    <div class="pn gold-top">
+      <h2>📷 Escaneo Automático de Factura (OCR Local Gratuito)</h2>
+      <div class="ocr-box">
+        <div>
+          <input type="file" id="scanInput" accept="image/*" capture="environment" hidden onchange="scanInvoiceImage(this)" />
+          <button type="button" class="btn gold" onclick="document.getElementById('scanInput').click()">📷 Tomar Foto / Subir Factura</button>
+          <div class="ocr-progress" id="ocrProgressBar"><i id="ocrProgressFill"></i></div>
+          <small id="ocrStatus" style="display:block;color:var(--muted);margin-top:5px;">
+            Extrae automáticamente RIF, Proveedor, N° Factura, Control, Fecha y Total. Luego revisa y guarda.
+          </small>
+        </div>
+        <img id="ocrPreview" class="ocr-preview" alt="Vista previa de factura" />
+      </div>
+      <details id="ocrRawWrap" hidden style="margin-top:8px;">
+        <summary style="cursor:pointer;font-size:12px;color:var(--muted);">Ver texto leído por el escáner</summary>
+        <pre id="ocrRawText" style="font-size:11px;background:#f8fafc;padding:8px;border-radius:6px;max-height:140px;overflow:auto;"></pre>
+      </details>
+    </div>
+
+    <div class="pn">
+      <h2 id="ft">Registrar Factura por Pagar</h2>
+      <form id="ff">
+        <label>Proveedor (código, nombre o RIF)*
+          <input name="prov" list="dl" autocomplete="off" required placeholder="Ej: P-0001 o Distribuidora..." />
+        </label>
+        <datalist id="dl"></datalist>
+        <label>N.º de Factura* <input name="numero" required placeholder="00012345" /></label>
+        <label>N.º de Control <input name="control" placeholder="00-0012345" /></label>
+        <label>Fecha de Emisión* <input name="emision" type="date" required /></label>
+        <label>Vencimiento* <input name="vence" type="date" required /></label>
+        <label>Moneda Factura
+          <select name="moneda" onchange="updateFacturaPreview()">
+            <option value="USD">Dólares ($)</option>
+            <option value="Bs">Bolívares (Bs.)</option>
+          </select>
+        </label>
+        <label>Monto Factura* <input name="monto" type="number" min="0.01" step="0.01" required oninput="updateFacturaPreview()" /></label>
+        <input type="hidden" name="origen" value="Manual" />
+        <div>
+          <button class="btn" id="fb">Agregar factura</button>
+          <button type="button" class="btn s" id="fc" hidden onclick="cancelarF()">Cancelar</button>
+        </div>
+      </form>
+      <small id="ci" style="color:var(--primary);font-weight:600;display:block;margin-top:6px;"></small>
+    </div>
+
+    <div class="bar">
+      <input id="qc" type="search" placeholder="Buscar por proveedor, RIF, código o N° factura..." oninput="render()" />
+    </div>
+    <div class="chs" id="chs"></div>
+    <div id="lf"></div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- PESTAÑA 2: DIRECTORIO DE PROVEEDORES                                -->
+  <!-- =================================================================== -->
+  <section id="p">
+    <div class="pn">
+      <h2 id="pt">Nuevo Proveedor</h2>
+      <form id="fp">
+        <label>Código (automático) <input name="codigo" readonly /></label>
+        <label>Nombre / Razón Social* <input name="nombre" required /></label>
+        <label>RIF <input name="rif" placeholder="J-00000000-0" oninput="this.value=this.value.toUpperCase()" /></label>
+        <label>Banco <input name="banco" placeholder="Ej: Banesco / Venezuela" /></label>
+        <label>Días de crédito <input name="dias" type="number" min="0" value="0" /></label>
+        <label>N.º de Cuenta <input name="cuenta" inputmode="numeric" maxlength="20" /></label>
+        <label>Teléfono <input name="telefono" placeholder="04XX-0000000" /></label>
+        <div>
+          <button class="btn">Guardar proveedor</button>
+          <button type="button" class="btn s" onclick="cancelarP()">Limpiar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="pn">
+      <div class="bar">
+        <input id="q" type="search" placeholder="Buscar por código, nombre o RIF..." oninput="render()" />
+        <span id="cp" style="font-size:12px;color:var(--muted);"></span>
+      </div>
+      <div class="tw" id="tp"></div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- PESTAÑA 3: INGRESOS Y EGRESOS (CANALES EN BS. Y EN $)               -->
+  <!-- =================================================================== -->
+  <section id="m">
+    <div class="bar">
+      <label style="flex-direction:row;align-items:center;gap:8px">Mes a revisar <input type="month" id="mes" onchange="render()" /></label>
+    </div>
+    <div class="kp" id="km"></div>
+
+    <div class="pn">
+      <h2>Ingresos del Día (Canales en Bs. y en $)</h2>
+      <form id="fi">
+        <label>Fecha <input name="fecha" type="date" required /></label>
+        <div id="ci2"></div>
+        <div><button class="btn">Guardar ingresos del día</button></div>
+      </form>
+      <div class="bar" style="margin:10px 0 0">
+        <input id="nc" placeholder="Nuevo canal (ej. Cashea, Binance)" style="max-width:220px" />
+        <select id="ncMon" style="max-width:120px">
+          <option value="Bs">En Bs.</option>
+          <option value="USD">En Dólares ($)</option>
+        </select>
+        <button type="button" class="btn s" onclick="addCanal()">Añadir canal</button>
+      </div>
+      <div class="lst" id="lc"></div>
+    </div>
+
+    <div class="pn">
+      <h2>Registrar Otro Egreso</h2>
+      <form id="fe">
+        <label>Fecha <input name="fecha" type="date" required /></label>
+        <label>Categoría <select name="cat" id="sc" required></select></label>
+        <label>Moneda
+          <select name="moneda">
+            <option value="Bs">Bolívares (Bs.)</option>
+            <option value="USD">Dólares ($)</option>
+          </select>
+        </label>
+        <label>Método de Pago
+          <select name="metodo">
+            <option value="Transferencia">Transferencia</option>
+            <option value="Pago Móvil">Pago Móvil</option>
+            <option value="Efectivo $">Efectivo $</option>
+            <option value="Zelle">Zelle</option>
+            <option value="Efectivo Bs">Efectivo Bs.</option>
+          </select>
+        </label>
+        <label>Referencia <input name="ref" placeholder="N° Ref." /></label>
+        <label>Concepto <input name="concepto" placeholder="Descripción" /></label>
+        <label>Monto* <input name="monto" type="number" min="0.01" step="0.01" required /></label>
+        <div><button class="btn">Agregar egreso</button></div>
+      </form>
+      <div class="bar" style="margin:10px 0 0">
+        <input id="nk" placeholder="Nueva categoría (ej. Publicidad)" style="max-width:220px" />
+        <button type="button" class="btn s" onclick="addCategoria()">Añadir categoría</button>
+      </div>
+      <div class="lst" id="lk"></div>
+    </div>
+
+    <div class="pn">
+      <h2>Comparación Diaria del Mes (Consolidado en $)</h2>
+      <div id="cg"></div>
+      <div class="tw" id="cd" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="pn">
+      <h2>Movimientos del Mes</h2>
+      <div class="tw" id="tm"></div>
+    </div>
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- PESTAÑA 4: BALANCE Y GRÁFICAS                                       -->
+  <!-- =================================================================== -->
+  <section id="b">
+    <div class="kp">
+      <div><span>Ingresos Totales</span><b class="in" id="ki"></b><small id="kiBs"></small></div>
+      <div><span>Egresos Totales</span><b class="out" id="ke"></b><small id="keBs"></small></div>
+      <div><span>Saldo Neto</span><b id="ks"></b><small id="ksBs"></small></div>
+    </div>
+    <div class="pn"><h2>Ingresos y egresos por mes (últimos 12 — en $)</h2><div id="c1"></div></div>
+    <div class="pn"><h2>Pagos por proveedor (principales 8 — en $)</h2><div id="c2"></div></div>
+    <div class="pn"><h2>Egresos por categoría (en $)</h2><div id="c3"></div></div>
+  </section>
+</main>
+
+<div id="av" hidden role="status"></div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
+  const BCV_KEY = "hm_slwa_prov_bcv_v1";
+
+  let db = {
+    proveedores: [],
+    facturas: [],
+    abonos: [],
+    movimientos: [],
+    canalesIngreso: [
+      { nombre: "Punto de venta", moneda: "Bs" },
+      { nombre: "Biopago", moneda: "Bs" },
+      { nombre: "Pago Móvil", moneda: "Bs" },
+      { nombre: "Efectivo $", moneda: "USD" },
+      { nombre: "Zelle", moneda: "USD" }
+    ],
+    categoriasEgreso: ["Pago a proveedores", "Fletes", "Servicios", "Mantenimiento", "Nómina", "Otros egresos"]
+  };
+
+  let tab = "c", fil = "pend", abierta = null, editProvId = null, editFacId = null;
+
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+  const hoy = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+  const getBcv = () => { const v = parseFloat($("#bcvRate").value); return v > 0 ? v : 1; };
+  const fmtVE = n => (Number(n) || 0).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtUSD = n => "$" + fmtVE(n);
+  const fmtBs = n => "Bs. " + fmtVE(n);
+  const num = v => parseFloat(String(v || "0").replace(",", ".")) || 0;
+
+  let avT;
+  function aviso(msg) {
+    const a = $("#av"); a.textContent = msg; a.hidden = false;
+    clearTimeout(avT); avT = setTimeout(() => a.hidden = true, 6500);
+  }
+
+  // ---------------------------------------------------------------------------
+  // INICIALIZACIÓN Y TASA BCV
+  // ---------------------------------------------------------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedBcv = localStorage.getItem(BCV_KEY);
+    if (savedBcv && parseFloat(savedBcv) > 0) $("#bcvRate").value = parseFloat(savedBcv).toFixed(2);
+    else fetchBcvRate(true);
+
+    $("#mes").value = hoy().slice(0, 7);
+    $("#fi").elements.fecha.value = hoy();
+    $("#fe").elements.fecha.value = hoy();
+    $("#ff").elements.emision.value = hoy();
+
+    $("#fi").elements.fecha.addEventListener("change", renderDia);
+    document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+
+    syncAll();
+  });
+
+  function onBcvChange() {
+    const v = parseFloat($("#bcvRate").value);
+    if (v > 0) localStorage.setItem(BCV_KEY, String(v));
+    updateFacturaPreview();
+    render();
+  }
+
+  async function fetchBcvRate(silent = false) {
+    try {
+      const r = await fetch("https://ve.dolarapi.com/v1/dolares/oficial");
+      const j = await r.json();
+      const rate = parseFloat(j && (j.promedio || j.venta || j.precio));
+      if (rate > 0) {
+        $("#bcvRate").value = rate.toFixed(2);
+        localStorage.setItem(BCV_KEY, String(rate));
+        render();
+        if (!silent) aviso(`Tasa BCV actualizada: Bs. ${fmtVE(rate)} / $`);
+      }
+    } catch (e) {
+      if (!silent) aviso("No se pudo obtener la tasa BCV en línea; ingrésala manualmente.");
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // SINCRONIZACIÓN CON GOOGLE SHEETS
+  // ---------------------------------------------------------------------------
+  async function syncAll() {
+    $("#st").textContent = "Sincronizando con Google Sheets...";
+    try {
+      const res = await fetch(`${SCRIPT_URL}?module=proveedores&action=bootstrap&_t=${Date.now()}`);
+      const json = await res.json();
+      if (json.status !== "ok") throw new Error(json.message || "Error de servidor");
+
+      db.proveedores = json.proveedores || [];
+      db.facturas = json.facturas || [];
+      db.abonos = json.abonos || [];
+      db.movimientos = json.movimientos || [];
+      if (Array.isArray(json.canalesIngreso) && json.canalesIngreso.length) db.canalesIngreso = json.canalesIngreso;
+      if (Array.isArray(json.categoriasEgreso) && json.categoriasEgreso.length) db.categoriasEgreso = json.categoriasEgreso;
+
+      $("#st").textContent = `Conectado a HyperMarket_SLWA · ${db.proveedores.length} prov. · ${db.facturas.length} fact.`;
+      render();
+    } catch (e) {
+      $("#st").textContent = "Error al sincronizar: " + e.message;
+      aviso("Error de conexión con Google Sheets.");
+    }
+  }
+
+  async function postProv(action, payloadObj) {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(Object.assign({ module: "proveedores", action }, payloadObj))
+    });
+    setTimeout(syncAll, 900);
+  }
+
+  // ---------------------------------------------------------------------------
+  // ESCANEO AUTOMÁTICO DE FACTURAS (OCR LOCAL CON TESSERACT.JS)
+  // ---------------------------------------------------------------------------
+  async function scanInvoiceImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const preview = $("#ocrPreview");
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+
+    const bar = $("#ocrProgressBar"), fill = $("#ocrProgressFill"), status = $("#ocrStatus");
+    bar.style.display = "block"; fill.style.width = "10%";
+    status.textContent = "Iniciando escáner OCR en español...";
+
+    try {
+      const worker = await Tesseract.createWorker("spa", 1, {
+        logger: m => {
+          if (m.status === "recognizing text" && typeof m.progress === "number") {
+            const pct = Math.round(m.progress * 100);
+            fill.style.width = pct + "%";
+            status.textContent = `Leyendo factura... ${pct}%`;
+          }
+        }
+      });
+
+      const { data: { text } } = await worker.recognize(file);
+      await worker.terminate();
+
+      $("#ocrRawText").textContent = text;
+      $("#ocrRawWrap").hidden = false;
+      parseAndFillInvoiceOCR(text);
+      status.textContent = "✅ Lectura completada. Verifica los datos abajo antes de guardar.";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "❌ No se pudo leer la imagen. Intenta con mejor iluminación.";
+    } finally {
+      input.value = "";
+    }
+  }
+
+  function parseOcrAmount(raw) {
+    let s = String(raw || "").replace(/[^\d.,]/g, "");
+    if (!s) return 0;
+    if (s.includes(",") && s.includes(".")) {
+      if (s.lastIndexOf(",") > s.lastIndexOf(".")) s = s.replace(/\./g, "").replace(",", ".");
+      else s = s.replace(/,/g, "");
+    } else if (s.includes(",")) {
+      const parts = s.split(",");
+      if (parts[parts.length - 1].length <= 2) s = s.replace(",", ".");
+      else s = s.replace(/,/g, "");
+    }
+    return parseFloat(s) || 0;
+  }
+
+  function parseAndFillInvoiceOCR(text) {
+    const f = $("#ff").elements;
+    const upper = text.toUpperCase();
+
+    const rifMatches = [...upper.matchAll(/\b([JVEGP])[-\s.]?(\d{7,9})[-\s.]?(\d)?\b/g)]
+      .map(m => `${m[1]}-${m[2]}${m[3] ? "-" + m[3] : ""}`);
+
+    let matchedProv = null;
+    for (const r of rifMatches) {
+      const rDigits = r.replace(/\D/g, "");
+      matchedProv = db.proveedores.find(p => String(p.RIF || "").replace(/\D/g, "") === rDigits);
+      if (matchedProv) break;
+    }
+    if (!matchedProv) {
+      matchedProv = db.proveedores.find(p => p.Nombre && upper.includes(p.Nombre.toUpperCase()));
+    }
+    if (matchedProv) {
+      f.prov.value = `${matchedProv.Codigo} · ${matchedProv.Nombre}`;
+    } else if (rifMatches.length > 0) {
+      aviso(`RIF detectado (${rifMatches[0]}). Si es proveedor nuevo, créalo en la pestaña Proveedores.`);
+    }
+
+    const mFac = upper.match(/(?:FACTURA|FACT\.?|NRO\.?\s*FACTURA)\s*(?:N[°RO.]*|#|:|\s)*([A-Z0-9\-]{4,18})/);
+    if (mFac && mFac[1]) f.numero.value = mFac[1].trim();
+
+    const mCtrl = upper.match(/(?:CONTROL|NRO\.?\s*CONTROL)\s*(?:N[°RO.]*|#|:|\s)*([0-9\-]{4,20})/);
+    if (mCtrl && mCtrl[1]) f.control.value = mCtrl[1].trim();
+
+    const mDate = text.match(/\b(\d{2})[\/\-](\d{2})[\/\-](\d{2,4})\b/);
+    if (mDate) {
+      const dd = mDate[1], mm = mDate[2];
+      const yyyy = mDate[3].length === 2 ? "20" + mDate[3] : mDate[3];
+      if (+mm >= 1 && +mm <= 12 && +dd >= 1 && +dd <= 31) {
+        f.emision.value = `${yyyy}-${mm}-${dd}`;
+      }
+    }
+
+    const lines = upper.split(/\r?\n/);
+    let totalFound = 0;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i];
+      if (line.includes("TOTAL") && !line.includes("SUBTOTAL") && !line.includes("EXENTO")) {
+        const nums = line.match(/[\d.,]{3,}/g);
+        if (nums && nums.length) {
+          const val = parseOcrAmount(nums[nums.length - 1]);
+          if (val > 0) { totalFound = val; break; }
+        }
+      }
+    }
+    if (totalFound > 0) f.monto.value = totalFound.toFixed(2);
+
+    if (/\b(USD|\$|DIVISA|D[OÓ]LAR)\b/.test(upper)) f.moneda.value = "USD";
+    else if (/\b(BS\.?|BOL[IÍ]VAR)\b/.test(upper)) f.moneda.value = "Bs";
+
+    f.origen.value = "Escaneo";
+    autoVence();
+    updateFacturaPreview();
+  }
+
+  // ---------------------------------------------------------------------------
+  // PROVEEDORES
+  // ---------------------------------------------------------------------------
+  const provById = id => db.proveedores.find(p => p.ID_Proveedor === id);
+  function sigCodigo() {
+    const n = Math.max(0, ...db.proveedores.map(p => +((/^P-(\d+)$/.exec(p.Codigo) || [0, 0])[1])));
+    return "P-" + String(n + 1).padStart(4, "0");
+  }
+
+  $("#fp").onsubmit = async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const prov = {
+      ID_Proveedor: editProvId || "",
+      Codigo: f.get("codigo").trim(),
+      Nombre: f.get("nombre").trim(),
+      RIF: f.get("rif").trim().toUpperCase(),
+      Banco: f.get("banco").trim(),
+      Dias_Credito: f.get("dias") || "0",
+      Numero_Cuenta: f.get("cuenta").trim(),
+      Telefono: f.get("telefono").trim()
+    };
+    await postProv("saveProveedor", { proveedor: prov });
+    cancelarP();
+    aviso("Proveedor guardado en Google Sheets.");
+  };
+
+  function cancelarP() { editProvId = null; $("#fp").reset(); $("#fp").elements.codigo.value = sigCodigo(); $("#pt").textContent = "Nuevo Proveedor"; }
+  function editarP(id) {
+    const p = provById(id), f = $("#fp").elements;
+    editProvId = id;
+    f.codigo.value = p.Codigo; f.nombre.value = p.Nombre; f.rif.value = p.RIF;
+    f.banco.value = p.Banco; f.dias.value = p.Dias_Credito; f.cuenta.value = p.Numero_Cuenta; f.telefono.value = p.Telefono || "";
+    $("#pt").textContent = "Editando: " + p.Nombre;
+    tab = "p"; render(); window.scrollTo(0, 0);
+  }
+  async function borrarP(id) {
+    if (!confirm("¿Eliminar este proveedor?")) return;
+    await postProv("deleteProveedor", { id_proveedor: id });
+    aviso("Solicitud de eliminación enviada.");
+  }
+
+  // ---------------------------------------------------------------------------
+  // CUENTAS POR PAGAR Y ABONOS
+  // ---------------------------------------------------------------------------
+  const addD = (f, n) => new Date(Date.parse(f + "T00:00:00Z") + n * 864e5).toISOString().slice(0, 10);
+  const dd = (a, b) => Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 864e5);
+
+  function buscarProvInput(v) {
+    v = String(v || "").trim().toLowerCase();
+    if (!v) return null;
+    const lbl = p => `${p.Codigo} · ${p.Nombre}`.toLowerCase();
+    return db.proveedores.find(p => lbl(p) === v || p.Codigo.toLowerCase() === v || p.Nombre.toLowerCase() === v || (p.RIF && p.RIF.toLowerCase() === v));
+  }
+
+  function autoVence() {
+    const f = $("#ff").elements, p = buscarProvInput(f.prov.value);
+    if (p && f.emision.value) f.vence.value = addD(f.emision.value, parseInt(p.Dias_Credito || 0, 10));
+    updateFacturaPreview();
+  }
+
+  function updateFacturaPreview() {
+    const f = $("#ff").elements, p = buscarProvInput(f.prov.value), bcv = getBcv(), m = num(f.monto.value);
+    const mon = f.moneda.value;
+    let info = p ? `${p.Nombre} (${p.RIF || "Sin RIF"}) · Crédito: ${p.Dias_Credito} días` : "";
+    if (m > 0) {
+      info += (info ? "  |  " : "") + (mon === "USD" ? `Equivalente: ${fmtBs(m * bcv)}` : `Equivalente: ${fmtUSD(m / bcv)} (BCV ${fmtVE(bcv)})`);
+    }
+    $("#ci").textContent = info;
+  }
+
+  $("#ff").addEventListener("input", e => { if (["prov", "emision"].includes(e.target.name)) autoVence(); });
+
+  $("#ff").onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target.elements, p = buscarProvInput(f.prov.value);
+    if (!p) return alert("Selecciona un proveedor válido de la lista.");
+    if (f.vence.value < f.emision.value) return alert("El vencimiento no puede ser anterior a la emisión.");
+
+    const dup = db.facturas.find(x => x.ID_Factura !== editFacId && x.ID_Proveedor === p.ID_Proveedor && String(x.Numero_Factura).toLowerCase() === f.numero.value.trim().toLowerCase());
+    if (dup) return alert(`Ya existe la factura ${f.numero.value} para ${p.Nombre}.`);
+
+    const bcv = getBcv(), orig = num(f.monto.value), mon = f.moneda.value;
+    const montoUsd = mon === "Bs" ? (orig / bcv) : orig;
+
+    await postProv("saveFactura", {
+      factura: {
+        ID_Factura: editFacId || "",
+        ID_Proveedor: p.ID_Proveedor, Codigo_Prov: p.Codigo, Proveedor: p.Nombre, RIF: p.RIF,
+        Numero_Factura: f.numero.value.trim(), Numero_Control: f.control.value.trim(),
+        Fecha_Emision: f.emision.value, Fecha_Vencimiento: f.vence.value,
+        Moneda: mon, Tasa_BCV: bcv, Monto_Original: orig, Monto_USD: montoUsd,
+        Origen: f.origen.value || "Manual"
+      }
+    });
+    cancelarF();
+    aviso("Factura guardada en Google Sheets.");
+  };
+
+  function cancelarF() {
+    editFacId = null; const f = $("#ff"); f.reset(); f.elements.emision.value = hoy(); f.elements.origen.value = "Manual";
+    $("#ft").textContent = "Registrar Factura por Pagar"; $("#fb").textContent = "Agregar factura"; $("#fc").hidden = true; $("#ci").textContent = "";
+  }
+
+  function editarF(id) {
+    const x = db.facturas.find(y => y.ID_Factura === id), f = $("#ff").elements;
+    if (!x) return;
+    editFacId = id;
+    f.prov.value = `${x.Codigo_Prov} · ${x.Proveedor}`;
+    f.numero.value = x.Numero_Factura; f.control.value = x.Numero_Control || "";
+    f.emision.value = x.Fecha_Emision; f.vence.value = x.Fecha_Vencimiento;
+    f.moneda.value = x.Moneda || "USD"; f.monto.value = x.Monto_Original;
+    $("#ft").textContent = "Editando Factura " + x.Numero_Factura; $("#fb").textContent = "Guardar cambios"; $("#fc").hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  async function borrarF(id) {
+    if (!confirm("¿Eliminar esta factura y todos sus abonos asociados?")) return;
+    await postProv("deleteFactura", { id_factura: id });
+    abierta = null;
+    aviso("Factura eliminada.");
+  }
+
+  async function abonar(facId, e) {
+    e.preventDefault();
+    const fac = db.facturas.find(f => f.ID_Factura === facId);
+    const el = e.target.elements, bcv = getBcv();
+    const mon = el.moneda.value, orig = num(el.monto.value);
+    const usd = mon === "Bs" ? (orig / bcv) : orig;
+    const saldo = num(fac.Saldo_USD);
+    if (usd > saldo + 0.02) return alert(`El abono (${fmtUSD(usd)}) supera el saldo pendiente (${fmtUSD(saldo)}).`);
+
+    await postProv("saveAbono", {
+      abono: {
+        ID_Factura: facId, ID_Proveedor: fac.ID_Proveedor, Proveedor: fac.Proveedor, Numero_Factura: fac.Numero_Factura,
+        Fecha_Abono: el.fecha.value, Metodo_Pago: el.metodo.value, Referencia: el.ref.value.trim(),
+        Moneda: mon, Tasa_BCV: bcv, Monto_Original: orig
+      }
+    });
+    aviso("Abono registrado y enviado a egresos.");
+  }
+
+  async function borrarAb(idAbono) {
+    if (!confirm("¿Eliminar este abono? También se descontará de egresos.")) return;
+    await postProv("deleteAbono", { id_abono: idAbono });
+    aviso("Abono eliminado.");
+  }
+
+  // ---------------------------------------------------------------------------
+  // CAJA: INGRESOS Y EGRESOS (BIMONEDA BS. Y $)
+  // ---------------------------------------------------------------------------
+  function valDia(fecha, canalNombre) {
+    const m = db.movimientos.find(x => x.Tipo === "ingreso" && x.Fecha === fecha && x.Categoria_Canal === canalNombre);
+    return m ? num(m.Monto_Original) : "";
+  }
+
+  $("#fi").onsubmit = async e => {
+    e.preventDefault();
+    const fecha = e.target.elements.fecha.value;
+    const items = [];
+    e.target.querySelectorAll("[data-c]").forEach(inp => {
+      const c = db.canalesIngreso[+inp.dataset.c];
+      items.push({ canal: c.nombre, moneda: c.moneda, monto: num(inp.value) });
+    });
+    await postProv("saveIngresosDia", { fecha, tasaBCV: getBcv(), items });
+    aviso("Ingresos del " + fecha + " guardados.");
+  };
+
+  $("#fe").onsubmit = async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    await postProv("saveEgreso", {
+      egreso: {
+        Fecha: f.get("fecha"), Categoria: f.get("cat"), Moneda: f.get("moneda"),
+        Metodo_Pago: f.get("metodo"), Referencia: f.get("ref").trim(),
+        Concepto: f.get("concepto").trim(), Tasa_BCV: getBcv(), Monto_Original: num(f.get("monto"))
+      }
+    });
+    e.target.elements.concepto.value = ""; e.target.elements.ref.value = ""; e.target.elements.monto.value = "";
+    aviso("Egreso guardado en Google Sheets.");
+  };
+
+  async function borrarM(idMov) {
+    if (!confirm("¿Eliminar este movimiento?")) return;
+    await postProv("deleteMovimiento", { id_movimiento: idMov });
+    aviso("Movimiento eliminado.");
+  }
+
+  async function addCanal() {
+    const nombre = $("#nc").value.trim(), moneda = $("#ncMon").value;
+    if (!nombre) return;
+    if (db.canalesIngreso.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) return alert("Ese canal ya existe.");
+    db.canalesIngreso.push({ nombre, moneda });
+    $("#nc").value = "";
+    await postProv("saveListas", { canalesIngreso: db.canalesIngreso });
+    render();
+  }
+
+  async function quitarCanal(idx) {
+    const c = db.canalesIngreso[idx];
+    if (db.movimientos.some(m => m.Tipo === "ingreso" && m.Categoria_Canal === c.nombre)) return alert("Este canal ya tiene movimientos.");
+    db.canalesIngreso.splice(idx, 1);
+    await postProv("saveListas", { canalesIngreso: db.canalesIngreso });
+    render();
+  }
+
+  async function addCategoria() {
+    const cat = $("#nk").value.trim();
+    if (!cat) return;
+    if (db.categoriasEgreso.some(x => x.toLowerCase() === cat.toLowerCase())) return alert("Ya existe esa categoría.");
+    db.categoriasEgreso.push(cat);
+    $("#nk").value = "";
+    await postProv("saveListas", { categoriasEgreso: db.categoriasEgreso });
+    render();
+  }
+
+  async function quitarCategoria(idx) {
+    const cat = db.categoriasEgreso[idx];
+    if (db.movimientos.some(m => m.Tipo === "egreso" && m.Categoria_Canal === cat)) return alert("Esta categoría ya tiene movimientos.");
+    db.categoriasEgreso.splice(idx, 1);
+    await postProv("saveListas", { categoriasEgreso: db.categoriasEgreso });
+    render();
+  }
+
+  // ---------------------------------------------------------------------------
+  // RENDERIZADO GENERAL
+  // ---------------------------------------------------------------------------
+  function estFactura(f) {
+    const s = num(f.Saldo_USD), d = dd(hoy(), f.Fecha_Vencimiento);
+    return { s, d, e: s < 0.01 ? "pag" : d < 0 ? "venc" : d <= 7 ? "prox" : "dia" };
+  }
+
+  function render() {
+    document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-selected", b.dataset.t === tab));
+    document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === tab));
+    if (!editProvId) $("#fp").elements.codigo.value = sigCodigo();
+
+    renderCxP();
+    renderProveedores();
+    renderDia();
+    renderBalance();
+  }
+
+  function renderCxP() {
+    $("#dl").innerHTML = db.proveedores.map(p => `<option value="${esc(p.Codigo + " · " + p.Nombre)}">`).join("");
+    const bcv = getBcv();
+    const F = db.facturas.map(f => ({ f, ...estFactura(f) }));
+    const pend = F.filter(x => x.e !== "pag"), V = pend.filter(x => x.e === "venc"), P = pend.filter(x => x.e === "prox");
+    const sumUsd = arr => arr.reduce((t, x) => t + x.s, 0);
+
+    $("#bd").textContent = V.length || "";
+    $("#kc").innerHTML = `
+      <button class="kb out" onclick="fil='venc';render()"><span>Vencido · ${V.length} fact.</span><b>${fmtUSD(sumUsd(V))}</b><small>${fmtBs(sumUsd(V) * bcv)}</small></button>
+      <button class="kb" style="border-top-color:#c58a12" onclick="fil='prox';render()"><span>Vence en 7 días · ${P.length} fact.</span><b style="color:#9a6a08">${fmtUSD(sumUsd(P))}</b><small>${fmtBs(sumUsd(P) * bcv)}</small></button>
+      <button class="kb" onclick="fil='pend';render()"><span>Total Pendiente · ${pend.length} fact.</span><b>${fmtUSD(sumUsd(pend))}</b><small>${fmtBs(sumUsd(pend) * bcv)}</small></button>
+    `;
+
+    const chips = [
+      ["pend", "Pendientes", x => x.e !== "pag"],
+      ["venc", "Vencidas", x => x.e === "venc"],
+      ["prox", "Vencen en 7 días", x => x.e === "prox"],
+      ["dia", "Al día", x => x.e === "dia"],
+      ["pag", "Pagadas", x => x.e === "pag"],
+      ["todas", "Todas", () => true]
+    ];
+    $("#chs").innerHTML = chips.map(c => `<button class="ch${fil === c[0] ? " on" : ""}" onclick="fil='${c[0]}';render()">${c[1]} (${F.filter(c[2]).length})</button>`).join("");
+
+    const q = $("#qc").value.toLowerCase(), cf = chips.find(c => c[0] === fil)[2];
+    const L = F.filter(x => cf(x) && `${x.f.Proveedor} ${x.f.Codigo_Prov} ${x.f.RIF} ${x.f.Numero_Factura}`.toLowerCase().includes(q))
+               .sort((a, b) => (a.e === "pag") - (b.e === "pag") || String(a.f.Fecha_Vencimiento).localeCompare(String(b.f.Fecha_Vencimiento)));
+
+    $("#lf").innerHTML = L.length ? L.map(({ f, s, d, e }) => {
+      const mUsd = num(f.Monto_USD), abUsd = num(f.Abonado_USD), pc = mUsd > 0 ? Math.min(100, (abUsd / mUsd) * 100) : 0;
+      const txt = e === "pag" ? "Pagada" : d < 0 ? `Vencida (${-d}d)` : d === 0 ? "Vence hoy" : `Vence en ${d}d`;
+      const abs = db.abonos.filter(a => a.ID_Factura === f.ID_Factura);
+      return `
+        <article class="fc ${e}">
+          <div class="fh">
+            <div>
+              <b>${esc(f.Proveedor)}</b>
+              <small>${esc(f.Codigo_Prov)} · ${esc(f.RIF || "S/R")} · Fact: <strong>${esc(f.Numero_Factura)}</strong> · Vence: ${esc(f.Fecha_Vencimiento)} (${esc(f.Origen)})</small>
+            </div>
+            <span class="tg ${e}">${txt}</span>
+            <div class="fm">
+              <b>${fmtUSD(s)}</b>
+              <small>${fmtBs(s * bcv)} (de ${fmtUSD(mUsd)})</small>
+            </div>
+            <button class="btn s" onclick="abierta=abierta==='${f.ID_Factura}'?null:'${f.ID_Factura}';render()">${abierta === f.ID_Factura ? "Cerrar" : e === "pag" ? "Ver abonos" : "Abonar"}</button>
+            <button class="btn s" onclick="editarF('${f.ID_Factura}')">Editar</button>
+            <button class="btn x" onclick="borrarF('${f.ID_Factura}')">Eliminar</button>
+          </div>
+          <div class="pb"><i style="width:${pc}%"></i></div>
+          ${abierta === f.ID_Factura ? `
+            <div class="ap">
+              ${s > 0.01 ? `
+                <form onsubmit="abonar('${f.ID_Factura}', event)" style="margin-bottom:10px;">
+                  <label>Fecha <input name="fecha" type="date" value="${hoy()}" required /></label>
+                  <label>Método <select name="metodo"><option>Transferencia</option><option>Pago Móvil</option><option>Efectivo $</option><option>Zelle</option><option>Efectivo Bs</option></select></label>
+                  <label>Referencia <input name="ref" placeholder="N° Ref." /></label>
+                  <label>Moneda <select name="moneda" onchange="this.form.monto.value=this.value==='Bs'?'${(s*bcv).toFixed(2)}':'${s.toFixed(2)}'"><option value="USD">Dólares ($)</option><option value="Bs">Bolívares (Bs.)</option></select></label>
+                  <label>Monto <input name="monto" type="number" step="0.01" min="0.01" value="${s.toFixed(2)}" required /></label>
+                  <div><button class="btn">Registrar abono</button></div>
+                </form>` : ""}
+              ${abs.length ? `<table><tr><th>Fecha</th><th>Método</th><th>Ref.</th><th class="n">Original</th><th class="n">USD</th><th class="n">Bs.</th><th></th></tr>` +
+                abs.map(a => `<tr><td>${esc(a.Fecha_Abono)}</td><td>${esc(a.Metodo_Pago)}</td><td>${esc(a.Referencia)}</td><td class="n">${esc(a.Moneda)} ${fmtVE(num(a.Monto_Original))}</td><td class="n">${fmtUSD(num(a.Monto_USD))}</td><td class="n">${fmtBs(num(a.Monto_Bs))}</td><td><button class="btn x" onclick="borrarAb('${a.ID_Abono}')">✕</button></td></tr>`).join("") + `</table>`
+                : `<p class="em">Sin abonos registrados.</p>`}
+            </div>` : ""}
+        </article>`;
+    }).join("") : `<p class="em">No hay facturas en este filtro.</p>`;
+  }
+
+  function renderProveedores() {
+    const q = $("#q").value.toLowerCase();
+    const L = db.proveedores.filter(p => `${p.Codigo} ${p.Nombre} ${p.RIF}`.toLowerCase().includes(q))
+                            .sort((a, b) => String(a.Codigo).localeCompare(String(b.Codigo), "es", { numeric: true }));
+    $("#cp").textContent = `${L.length} proveedor(es)`;
+    $("#tp").innerHTML = L.length ? `<table><tr><th>Código</th><th>Nombre</th><th>RIF</th><th>Banco</th><th class="n">Crédito</th><th>Cuenta</th><th>Teléfono</th><th></th></tr>` +
+      L.map(p => `<tr><td><strong>${esc(p.Codigo)}</strong></td><td>${esc(p.Nombre)}</td><td>${esc(p.RIF)}</td><td>${esc(p.Banco)}</td><td class="n">${esc(p.Dias_Credito)} d</td><td>${esc(p.Numero_Cuenta)}</td><td>${esc(p.Telefono)}</td><td><button class="btn s" onclick="editarP('${p.ID_Proveedor}')">Editar</button> <button class="btn x" onclick="borrarP('${p.ID_Proveedor}')">Eliminar</button></td></tr>`).join("") + `</table>`
+      : `<p class="em">No hay proveedores registrados.</p>`;
+  }
+
+  function renderDia() {
+    const fe = $("#fi").elements.fecha.value;
+    $("#ci2").innerHTML = db.canalesIngreso.map((c, i) => `
+      <label>${esc(c.nombre)} (${esc(c.moneda)})
+        <input type="number" min="0" step="0.01" data-c="${i}" value="${valDia(fe, c.nombre)}" placeholder="0.00" />
+      </label>`).join("");
+
+    const sc = $("#sc"), curCat = sc.value;
+    sc.innerHTML = db.categoriasEgreso.map(c => `<option>${esc(c)}</option>`).join("");
+    if (db.categoriasEgreso.includes(curCat)) sc.value = curCat;
+
+    $("#lc").innerHTML = db.canalesIngreso.map((c, i) => `<span class="ch2">${esc(c.nombre)} (${esc(c.moneda)})<button onclick="quitarCanal(${i})">×</button></span>`).join("");
+    $("#lk").innerHTML = db.categoriasEgreso.map((c, i) => `<span class="ch2">${esc(c)}<button onclick="quitarCategoria(${i})">×</button></span>`).join("");
+
+    const mes = $("#mes").value || hoy().slice(0, 7), bcv = getBcv();
+    const MM = db.movimientos.filter(m => String(m.Fecha).startsWith(mes));
+    const D = {};
+    MM.forEach(m => {
+      const d = D[m.Fecha] ??= { iUsd: 0, eUsd: 0, iBs: 0, eBs: 0 };
+      const usd = num(m.Monto_USD), bs = num(m.Monto_Bs);
+      if (m.Tipo === "ingreso") { d.iUsd += usd; d.iBs += bs; }
+      else { d.eUsd += usd; d.eBs += bs; }
+    });
+
+    const ds = Object.keys(D).sort().reverse();
+    const I_usd = ds.reduce((t, k) => t + D[k].iUsd, 0), E_usd = ds.reduce((t, k) => t + D[k].eUsd, 0);
+    const rojos = ds.filter(k => D[k].eUsd > D[k].iUsd).length;
+
+    $("#km").innerHTML = `
+      <div><span>Ingresos del mes</span><b class="in">${fmtUSD(I_usd)}</b><small>${fmtBs(I_usd * bcv)}</small></div>
+      <div><span>Egresos del mes</span><b class="out">${fmtUSD(E_usd)}</b><small>${fmtBs(E_usd * bcv)}</small></div>
+      <div><span>Saldo del mes</span><b class="${I_usd - E_usd < 0 ? "out" : "in"}">${fmtUSD(I_usd - E_usd)}</b><small>${fmtBs((I_usd - E_usd) * bcv)}</small></div>
+      <div><span>Días en déficit</span><b class="${rojos ? "out" : ""}">${rojos}</b><small>Egresos &gt; Ingresos</small></div>
+    `;
+
+    barras("#cg", ds.slice().reverse().map(d => ({ t: d, l: d.slice(8), i: D[d].iUsd, e: D[d].eUsd })));
+
+    $("#cd").innerHTML = ds.length ? `<table><tr><th>Fecha</th><th class="n">Ingresos ($)</th><th class="n">Egresos ($)</th><th class="n">Diferencia ($)</th><th class="n">Diferencia (Bs.)</th></tr>` +
+      ds.map(d => {
+        const dif = D[d].iUsd - D[d].eUsd;
+        return `<tr><td>${d}</td><td class="n in">${fmtUSD(D[d].iUsd)}</td><td class="n out">${fmtUSD(D[d].eUsd)}</td><td class="n ${dif < 0 ? "out" : "in"}"><b>${fmtUSD(dif)}</b></td><td class="n">${fmtBs(dif * bcv)}</td></tr>`;
+      }).join("") + `</table>` : `<p class="em">Sin movimientos en este mes.</p>`;
+
+    const M = [...MM].sort((a, b) => String(b.Fecha).localeCompare(String(a.Fecha)));
+    $("#tm").innerHTML = M.length ? `<table><tr><th>Fecha</th><th>Tipo</th><th>Canal / Categoría</th><th>Concepto</th><th>Ref.</th><th class="n">Original</th><th class="n">Equiv. $</th><th class="n">Equiv. Bs.</th><th></th></tr>` +
+      M.map(m => `<tr><td>${esc(m.Fecha)}</td><td class="${m.Tipo === "ingreso" ? "in" : "out"}"><b>${m.Tipo === "ingreso" ? "Ingreso" : "Egreso"}</b></td><td>${esc(m.Categoria_Canal)}</td><td>${esc(m.Concepto)}</td><td>${esc(m.Referencia)}</td><td class="n">${esc(m.Moneda_Canal)} ${fmtVE(num(m.Monto_Original))}</td><td class="n">${fmtUSD(num(m.Monto_USD))}</td><td class="n">${fmtBs(num(m.Monto_Bs))}</td><td><button class="btn x" onclick="borrarM('${m.ID_Movimiento}')">✕</button></td></tr>`).join("") + `</table>`
+      : `<p class="em">Sin movimientos en este mes.</p>`;
+  }
+
+  function renderBalance() {
+    const bcv = getBcv();
+    const I = db.movimientos.filter(m => m.Tipo === "ingreso").reduce((t, m) => t + num(m.Monto_USD), 0);
+    const E = db.movimientos.filter(m => m.Tipo === "egreso").reduce((t, m) => t + num(m.Monto_USD), 0);
+    $("#ki").textContent = fmtUSD(I); $("#kiBs").textContent = fmtBs(I * bcv);
+    $("#ke").textContent = fmtUSD(E); $("#keBs").textContent = fmtBs(E * bcv);
+    $("#ks").textContent = fmtUSD(I - E); $("#ks").className = I - E < 0 ? "out" : "in"; $("#ksBs").textContent = fmtBs((I - E) * bcv);
+
+    const mMap = {};
+    db.movimientos.forEach(x => {
+      const k = String(x.Fecha || "").slice(0, 7);
+      if (!k) return;
+      (mMap[k] ??= { i: 0, e: 0 })[x.Tipo === "ingreso" ? "i" : "e"] += num(x.Monto_USD);
+    });
+    barras("#c1", Object.keys(mMap).sort().slice(-12).map(k => ({ t: k, l: k.slice(5) + "/" + k.slice(2, 4), i: mMap[k].i, e: mMap[k].e })));
+
+    const pMap = {}, cMap = {};
+    db.movimientos.filter(m => m.Tipo === "egreso").forEach(m => {
+      if (m.Proveedor) pMap[m.Proveedor] = (pMap[m.Proveedor] || 0) + num(m.Monto_USD);
+      cMap[m.Categoria_Canal] = (cMap[m.Categoria_Canal] || 0) + num(m.Monto_USD);
+    });
+    hbars("#c2", pMap, "Sin pagos a proveedores.");
+    hbars("#c3", cMap, "Sin egresos registrados.");
+  }
+
+  function barras(id, K) {
+    if (!K.length) return $(id).innerHTML = `<p class="em">Sin datos para graficar.</p>`;
+    const mx = Math.max(...K.flatMap(k => [k.i, k.e])) || 1, W = 720, H = 240, P = 30, bw = (W - P * 1.5) / K.length, A = H - 2 * P, st = Math.ceil(K.length / 14);
+    let s = `<div class="lg"><span><i style="background:var(--in)"></i>Ingresos ($)</span><span><i style="background:var(--out)"></i>Egresos ($)</span></div><svg viewBox="0 0 ${W} ${H}"><line x1="${P}" y1="${H - P}" x2="${W - 8}" y2="${H - P}" stroke="#d3dbd8"/>`;
+    K.forEach((k, j) => {
+      const x = P + j * bw, a = (k.i / mx) * A, b = (k.e / mx) * A, w = bw * 0.36;
+      s += `<rect x="${x + bw * 0.08}" y="${H - P - a}" width="${w}" height="${a}" fill="#1B4D2E"><title>Ingresos ${k.t}: ${fmtUSD(k.i)}</title></rect>` +
+           `<rect x="${x + bw * 0.08 + w + 1}" y="${H - P - b}" width="${w}" height="${b}" fill="#b8482e"><title>Egresos ${k.t}: ${fmtUSD(k.e)}</title></rect>` +
+           (j % st ? "" : `<text x="${x + bw / 2}" y="${H - P + 16}" text-anchor="middle" font-size="11" fill="#5f706a">${k.l}</text>`);
+    });
+    $(id).innerHTML = s + `</svg>`;
+  }
+
+  function hbars(id, t, emptyMsg) {
+    const L = Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    $(id).innerHTML = L.length ? L.map(([k, v]) => `<div class="hb"><span>${esc(k)}</span><em style="width:${Math.max(2, (v / L[0][1]) * 100)}%"></em><span>${fmtUSD(v)}</span></div>`).join("") : `<p class="em">${emptyMsg}</p>`;
+  }
+
+  function exportarCSV() {
+    const headers = ["ID_Factura", "Codigo_Prov", "Proveedor", "RIF", "Nro_Factura", "Emision", "Vencimiento", "Moneda", "Monto_USD", "Abonado_USD", "Saldo_USD", "Estado"];
+    const rows = [headers.join(";"), ...db.facturas.map(f => [
+      f.ID_Factura, f.Codigo_Prov, f.Proveedor, f.RIF, f.Numero_Factura, f.Fecha_Emision, f.Fecha_Vencimiento, f.Moneda, f.Monto_USD, f.Abonado_USD, f.Saldo_USD, f.Estado
+    ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";"))];
+    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Cuentas_Por_Pagar_SLWA_${hoy()}.csv`; a.click();
+  }
+</script>
+</body>
+</html>
