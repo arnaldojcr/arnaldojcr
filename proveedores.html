@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Proveedores, CxP y Caja - HyperMarket SLWA C.A.</title>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary: #1B4D2E;
@@ -78,9 +79,9 @@
     input:focus, select:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-light); }
     input[readonly] { background: #eef2ef; color: #4b5563; }
 
-    .btn { font: 600 13px inherit; padding: 7px 14px; border-radius: 5px; border: 1px solid var(--primary); background: var(--primary); color: #fff; cursor: pointer; }
-    .btn:hover { background: var(--primary-light); }
-    .btn.s { background: #fff; color: var(--primary); }
+    .btn, .btn-lbl { font: 600 13px inherit; padding: 7px 14px; border-radius: 5px; border: 1px solid var(--primary); background: var(--primary); color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+    .btn:hover, .btn-lbl:hover { background: var(--primary-light); }
+    .btn.s, .btn-lbl.s { background: #fff; color: var(--primary); }
     .btn.x { border-color: var(--out); color: var(--out); background: #fff; padding: 4px 9px; font-size: 12px; }
     .btn.gold { background: var(--gold); border-color: var(--gold); color: #1B4D2E; }
 
@@ -159,7 +160,7 @@
     #av { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #1B4D2E; color: #fff; border-bottom: 3px solid var(--gold); padding: 9px 16px; border-radius: 8px; z-index: 99; max-width: 90vw; font-weight: 600; }
     [hidden] { display: none !important; }
     @media print {
-      header button, nav, .btn, .ap form, .ocr-box, form, .bar, .chs, .modal-bg { display: none !important; }
+      header button, nav, .btn, .btn-lbl, .ap form, .ocr-box, form, .bar, .chs, .modal-bg { display: none !important; }
       body { background: #fff; }
       section { display: block !important; }
     }
@@ -176,7 +177,7 @@
     <div class="header-actions">
       <button class="gold-btn" onclick="syncAll()">🔄 Sincronizar</button>
       <button onclick="exportarCSV()">📥 Exportar Facturas</button>
-      <button onclick="exportarProveedoresCSV()">📥 Exportar Proveedores</button>
+      <button onclick="exportarProveedoresExcel()">📥 Exportar Proveedores</button>
       <button onclick="window.print()">🖨️ PDF</button>
     </div>
   </div>
@@ -210,7 +211,7 @@
           <button type="button" class="btn gold" onclick="document.getElementById('scanInput').click()">📷 Tomar Foto / Subir Factura</button>
           <div class="ocr-progress" id="ocrProgressBar"><i id="ocrProgressFill"></i></div>
           <small id="ocrStatus" style="display:block;color:var(--muted);margin-top:5px;">
-            Detecta automáticamente RIF, Razón Social/Comercial, N° Factura, Control, Fecha y Total.
+            Detecta automáticamente RIF/Cédula, Razón Social/Comercial, N° Factura, Control, Fecha y Total.
           </small>
         </div>
         <img id="ocrPreview" class="ocr-preview" alt="Vista previa de factura" />
@@ -224,7 +225,7 @@
     <div class="pn">
       <h2 id="ft">Registrar Factura por Pagar</h2>
       <form id="ff" class="form-grid">
-        <label>Proveedor Activo (código, nombre o RIF)<span class="req">*</span>
+        <label>Proveedor Activo (código, nombre, Cédula o RIF)<span class="req">*</span>
           <input name="prov" list="dl" autocomplete="off" required placeholder="Ej: P-0001 o Marca..." />
         </label>
         <datalist id="dl"></datalist>
@@ -255,104 +256,36 @@
     <div id="lf"></div>
   </section>
 
-  <!-- PESTAÑA 2: DIRECTORIO COMPLETO DE PROVEEDORES (4 BLOQUES) -->
+  <!-- PESTAÑA 2: DIRECTORIO DE PROVEEDORES -->
   <section id="p">
     <div class="pn">
-      <h2 id="pt">Registro de Proveedor (Ficha Integral)</h2>
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
+        <h2 id="pt" style="margin:0;">Registro Rápido de Proveedor</h2>
+        <button type="button" id="btnToggleDetails" class="btn s" onclick="toggleProvDetails()">
+          ➕ Mostrar Información Detallada
+        </button>
+      </div>
+
       <form id="fp">
         <div class="sub-block">
-          <h3>🏛️ 1. Identificación y Datos Fiscales (SENIAT — Obligatorios)</h3>
+          <h3>🏛️ Datos Principales del Proveedor</h3>
           <div class="form-grid">
             <label>Código (Automático) <input name="codigo" readonly /></label>
-            <label>Razón Social (Nombre Legal)<span class="req">*</span> <input name="razon" required placeholder="Ej: Distribuidora Alimentos C.A." /></label>
-            <label>Nombre Comercial (Marca / Tienda) <input name="comercial" placeholder="Ej: Alimentos El Sol" /></label>
-            <label>RIF<span class="req">*</span> <input name="rif" required placeholder="J-00000000-0" maxlength="12" oninput="formatRif(this)" /></label>
-            <label>Tipo de Persona
-              <select name="tipo_persona">
-                <option value="Persona Jurídica">Persona Jurídica</option>
-                <option value="Persona Natural">Persona Natural</option>
-              </select>
+            <label>Razón Social (Nombre Legal)<span class="req">*</span>
+              <input name="razon" required placeholder="Ej: Distribuidora Alimentos C.A." />
             </label>
-            <label>Condición Fiscal
-              <select name="condicion_fiscal">
-                <option value="Contribuyente Ordinario">Contribuyente Ordinario</option>
-                <option value="Contribuyente Especial">Contribuyente Especial (Agente Retención)</option>
-                <option value="Contribuyente Formal">Contribuyente Formal</option>
-                <option value="No Sujeto / Exento">No Sujeto / Exento</option>
-              </select>
+            <label>Nombre Comercial (Marca / Tienda)
+              <input name="comercial" placeholder="Ej: Alimentos El Sol" />
             </label>
-            <label style="grid-column: span 2;">Dirección Fiscal Exacta (SENIAT)<span class="req">*</span>
-              <input name="dir_fiscal" required placeholder="Av. / Calle / Edificio / Municipio / Estado" />
+            <label>Cédula (V 00.000.000)
+              <input name="cedula" placeholder="V 00.000.000" maxlength="12" style="font-family:monospace;" oninput="formatCedulaProv(this)" />
             </label>
-          </div>
-        </div>
-
-        <div class="sub-block">
-          <h3>🚚 2. Datos de Contacto y Logística</h3>
-          <div class="form-grid">
-            <label>Teléfono Principal <input name="tel_principal" placeholder="04XX-000.0000" maxlength="13" oninput="formatPhone(this)" /></label>
-            <label>WhatsApp Pedidos <input name="whatsapp" placeholder="04XX-000.0000" maxlength="13" oninput="formatPhone(this)" /></label>
-            <label>Correo Facturación / Cobranzas <input name="correo" type="email" placeholder="cobranzas@proveedor.com" /></label>
-            <label>Persona de Contacto (Nombre y Cargo) <input name="contacto" placeholder="Ej: Ana Pérez (Ejecutiva de Ventas)" /></label>
-            <label style="grid-column: span 2;">Dirección de Almacén o Despacho (si difiere de la fiscal)
-              <input name="dir_almacen" placeholder="Misma dirección fiscal o indique ubicación del galpón" />
+            <label>RIF (J-00000000-0)<span class="req">*</span>
+              <input name="rif" required placeholder="J-00000000-0" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" />
             </label>
-          </div>
-        </div>
-
-        <div class="sub-block">
-          <h3>🏦 3. Datos Bancarios (Transferencias, Pago Móvil y Divisas)</h3>
-          <div class="form-grid">
-            <label>Banco Receptor
-              <select name="banco" id="selBancoProv">
-                <option value="">Seleccione un banco...</option>
-                <option value="0102 - Banco de Venezuela">0102 - Banco de Venezuela</option>
-                <option value="0104 - Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
-                <option value="0105 - Banco Mercantil">0105 - Banco Mercantil</option>
-                <option value="0108 - Banco Provincial (BBVA)">0108 - Banco Provincial (BBVA)</option>
-                <option value="0114 - Bancaribe">0114 - Bancaribe</option>
-                <option value="0115 - Banco Exterior">0115 - Banco Exterior</option>
-                <option value="0128 - Banco Caroní">0128 - Banco Caroní</option>
-                <option value="0134 - Banesco Banco Universal">0134 - Banesco Banco Universal</option>
-                <option value="0137 - Banco Sofitasa">0137 - Banco Sofitasa</option>
-                <option value="0138 - Banco Plaza">0138 - Banco Plaza</option>
-                <option value="0151 - BFC Banco Fondo Común">0151 - BFC Banco Fondo Común</option>
-                <option value="0156 - 100% Banco">0156 - 100% Banco</option>
-                <option value="0157 - DelSur Banco Universal">0157 - DelSur Banco Universal</option>
-                <option value="0163 - Banco del Tesoro">0163 - Banco del Tesoro</option>
-                <option value="0168 - Bancrecer">0168 - Bancrecer</option>
-                <option value="0171 - Banco Activo">0171 - Banco Activo</option>
-                <option value="0172 - Bancamiga Banco Universal">0172 - Bancamiga Banco Universal</option>
-                <option value="0174 - Banplus">0174 - Banplus</option>
-                <option value="0175 - Banco Bicentenario">0175 - Banco Bicentenario</option>
-                <option value="0177 - BANFANB">0177 - BANFANB</option>
-                <option value="0178 - N58 Banco Digital">0178 - N58 Banco Digital</option>
-                <option value="0191 - BNC Banco Nacional de Crédito">0191 - BNC Banco Nacional de Crédito</option>
-              </select>
+            <label>Teléfono Principal
+              <input name="tel_principal" placeholder="04XX-000.0000" maxlength="13" style="font-family:monospace;" oninput="formatPhone(this)" />
             </label>
-            <label>Tipo de Cuenta
-              <select name="tipo_cuenta">
-                <option value="Corriente">Corriente</option>
-                <option value="Ahorro">Ahorro</option>
-              </select>
-            </label>
-            <label>Número de Cuenta (20 dígitos)
-              <input name="cuenta" inputmode="numeric" maxlength="20" placeholder="00000000000000000000" oninput="this.value=this.value.replace(/\D/g,'').slice(0,20)" />
-            </label>
-            <label>Titular de la Cuenta <input name="titular" placeholder="Nombre legal o titular" /></label>
-            <label>RIF / Cédula del Titular <input name="rif_titular" placeholder="J-00000000-0 o V-00000000" maxlength="12" oninput="formatRif(this)" /></label>
-            <label>Pago Móvil: Teléfono <input name="pm_tel" placeholder="04XX-000.0000" maxlength="13" oninput="formatPhone(this)" /></label>
-            <label>Pago Móvil: Banco <input name="pm_banco" placeholder="Ej: Banesco / BDV" /></label>
-            <label>Pago Móvil: RIF / Cédula <input name="pm_id" placeholder="J-00000000-0" maxlength="12" oninput="formatRif(this)" /></label>
-            <label style="grid-column: span 2;">Cuentas en Divisas / Zelle / Binance (Opcional)
-              <input name="divisas" placeholder="Ej: Zelle: pagos@empresa.com | Binance ID: 12345678" />
-            </label>
-          </div>
-        </div>
-
-        <div class="sub-block">
-          <h3>📋 4. Condiciones Comerciales y Clasificación</h3>
-          <div class="form-grid">
             <label>Categoría / Rubro
               <select name="rubro">
                 <option value="Víveres y Alimentos">Víveres y Alimentos</option>
@@ -376,32 +309,121 @@
             <label>Días de Crédito
               <input name="dias" type="number" min="0" value="0" placeholder="0, 7, 15, 30, 60" />
             </label>
-            <label>Límite de Crédito ($)
-              <input name="limite" type="number" min="0" step="0.01" value="0" />
-            </label>
-            <label>Moneda de Facturación
-              <select name="moneda_fac">
-                <option value="Multimoneda ($ / Bs)">Multimoneda ($ / Bs)</option>
-                <option value="Dólares ($)">Dólares ($)</option>
-                <option value="Bolívares (Bs.)">Bolívares (Bs.)</option>
-              </select>
-            </label>
-            <label>Retención IVA (%)
-              <select name="ret_iva">
-                <option value="75">75%</option>
-                <option value="100">100%</option>
-                <option value="0">0% (No aplica)</option>
-              </select>
-            </label>
-            <label>Retención ISLR (%)
-              <input name="ret_islr" type="number" min="0" max="34" step="0.5" value="0" placeholder="Ej: 1, 2, 3, 5" />
-            </label>
             <label>Estatus
               <select name="estatus">
                 <option value="Activo">Activo</option>
                 <option value="Inactivo">Inactivo</option>
               </select>
             </label>
+          </div>
+        </div>
+
+        <div id="provDetailedFields" hidden>
+          <div class="sub-block">
+            <h3>📄 1. Información Fiscal Adicional (SENIAT)</h3>
+            <div class="form-grid">
+              <label>Tipo de Persona
+                <select name="tipo_persona">
+                  <option value="Persona Jurídica">Persona Jurídica</option>
+                  <option value="Persona Natural">Persona Natural</option>
+                </select>
+              </label>
+              <label>Condición Fiscal
+                <select name="condicion_fiscal">
+                  <option value="Contribuyente Ordinario">Contribuyente Ordinario</option>
+                  <option value="Contribuyente Especial">Contribuyente Especial (Agente Retención)</option>
+                  <option value="Contribuyente Formal">Contribuyente Formal</option>
+                  <option value="No Sujeto / Exento">No Sujeto / Exento</option>
+                </select>
+              </label>
+              <label style="grid-column: span 2;">Dirección Fiscal Exacta (SENIAT)
+                <input name="dir_fiscal" placeholder="Av. / Calle / Edificio / Municipio / Estado" />
+              </label>
+            </div>
+          </div>
+
+          <div class="sub-block">
+            <h3>🚚 2. Datos de Contacto y Logística</h3>
+            <div class="form-grid">
+              <label>WhatsApp Pedidos <input name="whatsapp" placeholder="04XX-000.0000" maxlength="13" style="font-family:monospace;" oninput="formatPhone(this)" /></label>
+              <label>Correo Facturación / Cobranzas <input name="correo" type="email" placeholder="cobranzas@proveedor.com" /></label>
+              <label>Persona de Contacto (Nombre y Cargo) <input name="contacto" placeholder="Ej: Ana Pérez (Ejecutiva de Ventas)" /></label>
+              <label style="grid-column: span 2;">Dirección de Almacén o Despacho
+                <input name="dir_almacen" placeholder="Misma dirección fiscal o indique ubicación del galpón" />
+              </label>
+            </div>
+          </div>
+
+          <div class="sub-block">
+            <h3>🏦 3. Datos Bancarios (Transferencias, Pago Móvil y Divisas)</h3>
+            <div class="form-grid">
+              <label>Banco Receptor
+                <select name="banco" id="selBancoProv">
+                  <option value="">Seleccione un banco...</option>
+                  <option value="0102 - Banco de Venezuela">0102 - Banco de Venezuela</option>
+                  <option value="0104 - Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
+                  <option value="0105 - Banco Mercantil">0105 - Banco Mercantil</option>
+                  <option value="0108 - Banco Provincial (BBVA)">0108 - Banco Provincial (BBVA)</option>
+                  <option value="0114 - Bancaribe">0114 - Bancaribe</option>
+                  <option value="0115 - Banco Exterior">0115 - Banco Exterior</option>
+                  <option value="0128 - Banco Caroní">0128 - Banco Caroní</option>
+                  <option value="0134 - Banesco Banco Universal">0134 - Banesco Banco Universal</option>
+                  <option value="0137 - Banco Sofitasa">0137 - Banco Sofitasa</option>
+                  <option value="0138 - Banco Plaza">0138 - Banco Plaza</option>
+                  <option value="0151 - BFC Banco Fondo Común">0151 - BFC Banco Fondo Común</option>
+                  <option value="0156 - 100% Banco">0156 - 100% Banco</option>
+                  <option value="0157 - DelSur Banco Universal">0157 - DelSur Banco Universal</option>
+                  <option value="0163 - Banco del Tesoro">0163 - Banco del Tesoro</option>
+                  <option value="0168 - Bancrecer">0168 - Bancrecer</option>
+                  <option value="0171 - Banco Activo">0171 - Banco Activo</option>
+                  <option value="0172 - Bancamiga Banco Universal">0172 - Bancamiga Banco Universal</option>
+                  <option value="0174 - Banplus">0174 - Banplus</option>
+                  <option value="0175 - Banco Bicentenario">0175 - Banco Bicentenario</option>
+                  <option value="0177 - BANFANB">0177 - BANFANB</option>
+                  <option value="0178 - N58 Banco Digital">0178 - N58 Banco Digital</option>
+                  <option value="0191 - BNC Banco Nacional de Crédito">0191 - BNC Banco Nacional de Crédito</option>
+                </select>
+              </label>
+              <label>Tipo de Cuenta
+                <select name="tipo_cuenta">
+                  <option value="Corriente">Corriente</option>
+                  <option value="Ahorro">Ahorro</option>
+                </select>
+              </label>
+              <label>Número de Cuenta (20 dígitos)
+                <input name="cuenta" inputmode="numeric" maxlength="20" placeholder="00000000000000000000" style="font-family:monospace;" oninput="this.value=this.value.replace(/\D/g,'').slice(0,20)" />
+              </label>
+              <label>Titular de la Cuenta <input name="titular" placeholder="Nombre legal o titular" /></label>
+              <label>RIF / Cédula del Titular <input name="rif_titular" placeholder="J-00000000-0" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" /></label>
+              <label>Pago Móvil: Teléfono <input name="pm_tel" placeholder="04XX-000.0000" maxlength="13" style="font-family:monospace;" oninput="formatPhone(this)" /></label>
+              <label>Pago Móvil: Banco <input name="pm_banco" placeholder="Ej: Banesco / BDV" /></label>
+              <label>Pago Móvil: RIF / Cédula <input name="pm_id" placeholder="J-00000000-0" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" /></label>
+              <label style="grid-column: span 2;">Cuentas en Divisas / Zelle / Binance
+                <input name="divisas" placeholder="Ej: Zelle: pagos@empresa.com | Binance ID: 12345678" />
+              </label>
+            </div>
+          </div>
+
+          <div class="sub-block">
+            <h3>📋 4. Límites y Retenciones</h3>
+            <div class="form-grid">
+              <label>Límite de Crédito ($) <input name="limite" type="number" min="0" step="0.01" value="0" /></label>
+              <label>Moneda de Facturación
+                <select name="moneda_fac">
+                  <option value="Multimoneda ($ / Bs)">Multimoneda ($ / Bs)</option>
+                  <option value="Dólares ($)">Dólares ($)</option>
+                  <option value="Bolívares (Bs.)">Bolívares (Bs.)</option>
+                </select>
+              </label>
+              <label>Retención IVA (%)
+                <select name="ret_iva">
+                  <option value="75">75%</option>
+                  <option value="100">100%</option>
+                  <option value="0">0% (No aplica)</option>
+                </select>
+              </label>
+              <label>Retención ISLR (%) <input name="ret_islr" type="number" min="0" max="34" step="0.5" value="0" /></label>
+            </div>
           </div>
         </div>
 
@@ -413,20 +435,29 @@
     </div>
 
     <div class="pn">
-      <div class="bar">
-        <input id="q" type="search" placeholder="Buscar por código, razón social, marca, RIF o rubro..." oninput="render()" />
-        <select id="qEstatus" onchange="render()" style="max-width:150px;">
-          <option value="">Todos los estatus</option>
-          <option value="Activo">Solo Activos</option>
-          <option value="Inactivo">Solo Inactivos</option>
-        </select>
-        <span id="cp" style="font-size:12px;color:var(--muted);"></span>
+      <div class="bar" style="justify-content:space-between;">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;flex:1;">
+          <input id="q" type="search" placeholder="Buscar por código, razón social, marca, Cédula, RIF o rubro..." oninput="render()" />
+          <select id="qEstatus" onchange="render()" style="max-width:150px;">
+            <option value="">Todos los estatus</option>
+            <option value="Activo">Solo Activos</option>
+            <option value="Inactivo">Solo Inactivos</option>
+          </select>
+          <span id="cp" style="font-size:12px;color:var(--muted);"></span>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+          <input type="file" id="importProvInput" accept=".xlsx,.xls,.csv" hidden onchange="importProveedoresFile(this)" />
+          <label for="importProvInput" class="btn-lbl gold" title="Importar Excel o CSV de proveedores">📂 Importar Proveedores</label>
+          <button type="button" class="btn s" onclick="exportarProveedoresExcel()">📥 Exportar Excel (.xlsx)</button>
+          <button type="button" class="btn s" onclick="exportarProveedoresCSV()">📥 Exportar CSV</button>
+        </div>
       </div>
       <div class="tw" id="tp"></div>
     </div>
   </section>
 
-  <!-- PESTAÑA 3: INGRESOS Y EGRESOS (CANALES EN BS. Y EN $) -->
+  <!-- PESTAÑA 3: INGRESOS Y EGRESOS -->
   <section id="m">
     <div class="bar">
       <label style="flex-direction:row;align-items:center;gap:8px">Mes a revisar <input type="month" id="mes" onchange="render()" /></label>
@@ -540,7 +571,7 @@
     categoriasEgreso: ["Pago a proveedores", "Fletes", "Servicios", "Mantenimiento", "Nómina", "Otros egresos"]
   };
 
-  let tab = "c", fil = "pend", abierta = null, editProvId = null, editFacId = null;
+  let tab = "c", fil = "pend", abierta = null, editProvId = null, editFacId = null, detailsOpen = false;
 
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
@@ -559,12 +590,30 @@
     clearTimeout(avT); avT = setTimeout(() => a.hidden = true, 6500);
   }
 
+  function formatCedulaStr(str) {
+    let raw = String(str || "").toUpperCase().replace(/[^VE0-9]/g, "");
+    if (!raw) return "";
+    let letter = /^[VE]/.test(raw) ? raw[0] : "V";
+    let digits = (/^[VE]/.test(raw) ? raw.slice(1) : raw).replace(/\D/g, "").slice(0, 8);
+    if (!digits) return /^[VE]$/.test(raw) ? raw : "";
+    return `${letter} ${digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+  }
+
+  function formatCedulaProv(input) {
+    input.value = formatCedulaStr(input.value);
+  }
+
+  function formatRifStr(str) {
+    let clean = String(str || "").toUpperCase().replace(/[^JVEGP0-9]/g, "");
+    if (!clean) return "";
+    let letter = /^[JVEGP]/.test(clean) ? clean[0] : "J";
+    let nums = (/^[JVEGP]/.test(clean) ? clean.slice(1) : clean).replace(/\D/g, "").slice(0, 9);
+    if (!nums) return /^[JVEGP]$/.test(clean) ? clean : "";
+    return nums.length <= 8 ? `${letter}-${nums}` : `${letter}-${nums.slice(0, 8)}-${nums.slice(8)}`;
+  }
+
   function formatRif(input) {
-    let clean = input.value.toUpperCase().replace(/[^VEJPG0-9]/g, "");
-    if (!clean) { input.value = ""; return; }
-    let letter = /^[VEJPG]/.test(clean) ? clean[0] : "J";
-    let nums = (/^[VEJPG]/.test(clean) ? clean.slice(1) : clean).replace(/\D/g, "").slice(0, 9);
-    input.value = nums.length <= 8 ? `${letter}-${nums}` : `${letter}-${nums.slice(0, 8)}-${nums.slice(8)}`;
+    input.value = formatRifStr(input.value);
   }
 
   function formatPhone(input) {
@@ -581,9 +630,14 @@
     else { inp.readOnly = false; if (Number(inp.value) === 0) inp.value = "15"; }
   }
 
-  // ---------------------------------------------------------------------------
-  // INICIALIZACIÓN Y TASA BCV
-  // ---------------------------------------------------------------------------
+  function toggleProvDetails(forceState) {
+    detailsOpen = typeof forceState === "boolean" ? forceState : !detailsOpen;
+    $("#provDetailedFields").hidden = !detailsOpen;
+    $("#btnToggleDetails").textContent = detailsOpen
+      ? "➖ Ocultar Información Detallada"
+      : "➕ Mostrar Información Detallada";
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     const savedBcv = localStorage.getItem(BCV_KEY);
     if (savedBcv && parseFloat(savedBcv) > 0) $("#bcvRate").value = parseFloat(savedBcv).toFixed(2);
@@ -624,9 +678,6 @@
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // SINCRONIZACIÓN CON GOOGLE SHEETS
-  // ---------------------------------------------------------------------------
   async function syncAll() {
     $("#st").textContent = "Sincronizando con Google Sheets...";
     try {
@@ -649,19 +700,141 @@
     }
   }
 
-  async function postProv(action, payloadObj) {
+  async function postProv(action, payloadObj, delayMs = 900) {
     await fetch(SCRIPT_URL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(Object.assign({ module: "proveedores", action }, payloadObj))
     });
-    setTimeout(syncAll, 900);
+    setTimeout(syncAll, delayMs);
   }
 
-  // ---------------------------------------------------------------------------
-  // ESCANEO AUTOMÁTICO DE FACTURAS (OCR LOCAL CON TESSERACT.JS)
-  // ---------------------------------------------------------------------------
+  function normHeaderKey(h) {
+    return String(h || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_");
+  }
+
+  function importProveedoresFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const ext = file.name.split(".").pop().toLowerCase();
+
+    const processAoa = async aoa => {
+      if (!aoa || aoa.length < 2) return aviso("❌ El archivo no contiene filas de proveedores.");
+      const headers = aoa[0].map(normHeaderKey);
+      const col = (...names) => {
+        for (const n of names) {
+          const idx = headers.findIndex(h => h === n || h.includes(n));
+          if (idx !== -1) return idx;
+        }
+        return -1;
+      };
+
+      const iCod = col("codigo");
+      const iRaz = col("razon_social", "nombre_legal", "nombre");
+      const iCom = col("nombre_comercial", "marca", "tienda");
+      const iCed = col("cedula", "ci");
+      const iRif = col("rif");
+      const iDirF = col("direccion_fiscal", "direccion");
+      const iTipoP = col("tipo_persona");
+      const iCondF = col("condicion_fiscal");
+      const iTel = col("telefono_principal", "telefono");
+      const iWha = col("whatsapp");
+      const iCor = col("correo_facturacion", "correo", "email");
+      const iCont = col("persona_contacto", "contacto");
+      const iDirA = col("direccion_almacen", "almacen");
+      const iBan = col("banco");
+      const iTipC = col("tipo_cuenta");
+      const iCue = col("numero_cuenta", "cuenta");
+      const iTit = col("titular_cuenta", "titular");
+      const iRifT = col("rif_ci_titular");
+      const iPmTel = col("pago_movil_tel", "pago_movil_telefono");
+      const iPmBan = col("pago_movil_banco");
+      const iPmId = col("pago_movil_id");
+      const iDiv = col("cuenta_divisas", "divisas", "zelle", "binance");
+      const iRub = col("categoria_rubro", "rubro", "categoria");
+      const iCondP = col("condicion_pago");
+      const iDias = col("dias_credito", "dias");
+      const iLim = col("limite_credito", "limite");
+      const iMon = col("moneda_facturacion", "moneda");
+      const iIva = col("retencion_iva_pct", "ret_iva");
+      const iIslr = col("retencion_islr_pct", "ret_islr");
+      const iEst = col("estatus", "estado");
+
+      if (iRaz === -1 && iCom === -1) {
+        return aviso("❌ El archivo debe tener al menos la columna Razón Social o Nombre.");
+      }
+
+      const lista = [];
+      for (let r = 1; r < aoa.length; r++) {
+        const row = aoa[r];
+        if (!row || !row.length) continue;
+        const raz = iRaz >= 0 ? String(row[iRaz] || "").trim() : "";
+        const com = iCom >= 0 ? String(row[iCom] || "").trim() : "";
+        if (!raz && !com) continue;
+
+        const diasVal = iDias >= 0 ? parseInt(row[iDias] || "0", 10) || 0 : 0;
+        const condPago = iCondP >= 0 && row[iCondP] ? String(row[iCondP]).trim() : (diasVal > 0 ? "Crédito" : "Contado");
+
+        lista.push({
+          Codigo: iCod >= 0 ? String(row[iCod] || "").trim() : "",
+          Razon_Social: raz || com,
+          Nombre_Comercial: com,
+          Cedula: iCed >= 0 ? formatCedulaStr(row[iCed]) : "",
+          RIF: iRif >= 0 ? formatRifStr(row[iRif]) : "",
+          Direccion_Fiscal: iDirF >= 0 ? String(row[iDirF] || "").trim() : "",
+          Tipo_Persona: iTipoP >= 0 && row[iTipoP] ? String(row[iTipoP]).trim() : "Persona Jurídica",
+          Condicion_Fiscal: iCondF >= 0 && row[iCondF] ? String(row[iCondF]).trim() : "Contribuyente Ordinario",
+          Telefono_Principal: iTel >= 0 ? String(row[iTel] || "").trim() : "",
+          WhatsApp: iWha >= 0 ? String(row[iWha] || "").trim() : "",
+          Correo_Facturacion: iCor >= 0 ? String(row[iCor] || "").trim().toLowerCase() : "",
+          Persona_Contacto: iCont >= 0 ? String(row[iCont] || "").trim() : "",
+          Direccion_Almacen: iDirA >= 0 ? String(row[iDirA] || "").trim() : "",
+          Banco: iBan >= 0 ? String(row[iBan] || "").trim() : "",
+          Tipo_Cuenta: iTipC >= 0 && row[iTipC] ? String(row[iTipC]).trim() : "Corriente",
+          Numero_Cuenta: iCue >= 0 ? String(row[iCue] || "").replace(/\D/g, "").slice(0, 20) : "",
+          Titular_Cuenta: iTit >= 0 ? String(row[iTit] || "").trim() : "",
+          RIF_CI_Titular: iRifT >= 0 ? formatRifStr(row[iRifT]) : "",
+          Pago_Movil_Telefono: iPmTel >= 0 ? String(row[iPmTel] || "").trim() : "",
+          Pago_Movil_Banco: iPmBan >= 0 ? String(row[iPmBan] || "").trim() : "",
+          Pago_Movil_ID: iPmId >= 0 ? formatRifStr(row[iPmId]) : "",
+          Cuenta_Divisas: iDiv >= 0 ? String(row[iDiv] || "").trim() : "",
+          Categoria_Rubro: iRub >= 0 && row[iRub] ? String(row[iRub]).trim() : "Otros",
+          Condicion_Pago: condPago,
+          Dias_Credito: String(condPago === "Contado" ? 0 : diasVal),
+          Limite_Credito: iLim >= 0 ? String(row[iLim] || "0") : "0",
+          Moneda_Facturacion: iMon >= 0 && row[iMon] ? String(row[iMon]).trim() : "Multimoneda ($ / Bs)",
+          Retencion_IVA_Pct: iIva >= 0 && row[iIva] !== "" ? String(row[iIva]) : "75",
+          Retencion_ISLR_Pct: iIslr >= 0 && row[iIslr] !== "" ? String(row[iIslr]) : "0",
+          Estatus: iEst >= 0 && row[iEst] ? String(row[iEst]).trim() : "Activo"
+        });
+      }
+
+      if (!lista.length) return aviso("❌ No se encontraron proveedores válidos para importar.");
+      aviso(`Importando ${lista.length} proveedores a Google Sheets...`);
+      await postProv("importProveedores", { proveedores: lista }, 1800);
+    };
+
+    const reader = new FileReader();
+    if (ext === "csv") {
+      reader.onload = ev => {
+        const lines = ev.target.result.replace(/\r\n/g, "\n").split("\n").filter(l => l.trim());
+        const sep = lines[0] && lines[0].split(";").length > lines[0].split(",").length ? ";" : ",";
+        const aoa = lines.map(l => l.split(sep).map(c => c.replace(/^"|"$/g, "").replace(/""/g, '"').trim()));
+        processAoa(aoa);
+      };
+      reader.readAsText(file, "UTF-8");
+    } else {
+      reader.onload = ev => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        processAoa(XLSX.utils.sheet_to_json(ws, { header: 1, raw: false }));
+      };
+      reader.readAsArrayBuffer(file);
+    }
+    input.value = "";
+  }
+
   async function scanInvoiceImage(input) {
     const file = input.files[0];
     if (!file) return;
@@ -724,7 +897,10 @@
     let matchedProv = null;
     for (const r of rifMatches) {
       const rDigits = r.replace(/\D/g, "");
-      matchedProv = db.proveedores.find(p => String(p.RIF || "").replace(/\D/g, "") === rDigits);
+      matchedProv = db.proveedores.find(p =>
+        (p.RIF && String(p.RIF).replace(/\D/g, "") === rDigits) ||
+        (p.Cedula && String(p.Cedula).replace(/\D/g, "") === rDigits)
+      );
       if (matchedProv) break;
     }
     if (!matchedProv) {
@@ -736,7 +912,7 @@
     if (matchedProv) {
       f.prov.value = `${matchedProv.Codigo} · ${provNombre(matchedProv)}`;
     } else if (rifMatches.length > 0) {
-      aviso(`RIF detectado (${rifMatches[0]}). Si es nuevo, regístralo en Directorio de Proveedores.`);
+      aviso(`RIF/CI detectado (${rifMatches[0]}). Si es nuevo, regístralo en Directorio de Proveedores.`);
     }
 
     const mFac = upper.match(/(?:FACTURA|FACT\.?|NRO\.?\s*FACTURA)\s*(?:N[°RO.]*|#|:|\s)*([A-Z0-9\-]{4,18})/);
@@ -774,9 +950,6 @@
     updateFacturaPreview();
   }
 
-  // ---------------------------------------------------------------------------
-  // PROVEEDORES (4 BLOQUES)
-  // ---------------------------------------------------------------------------
   const provById = id => db.proveedores.find(p => p.ID_Proveedor === id);
   function sigCodigo() {
     const n = Math.max(0, ...db.proveedores.map(p => +((/^P-(\d+)$/.exec(p.Codigo) || [0, 0])[1])));
@@ -791,7 +964,8 @@
       Codigo: f.codigo.value.trim(),
       Razon_Social: f.razon.value.trim(),
       Nombre_Comercial: f.comercial.value.trim(),
-      RIF: f.rif.value.trim().toUpperCase(),
+      Cedula: formatCedulaStr(f.cedula.value),
+      RIF: formatRifStr(f.rif.value),
       Tipo_Persona: f.tipo_persona.value,
       Condicion_Fiscal: f.condicion_fiscal.value,
       Direccion_Fiscal: f.dir_fiscal.value.trim(),
@@ -804,10 +978,10 @@
       Tipo_Cuenta: f.tipo_cuenta.value,
       Numero_Cuenta: f.cuenta.value.trim(),
       Titular_Cuenta: f.titular.value.trim(),
-      RIF_CI_Titular: f.rif_titular.value.trim().toUpperCase(),
+      RIF_CI_Titular: formatRifStr(f.rif_titular.value),
       Pago_Movil_Telefono: f.pm_tel.value.trim(),
       Pago_Movil_Banco: f.pm_banco.value.trim(),
-      Pago_Movil_ID: f.pm_id.value.trim().toUpperCase(),
+      Pago_Movil_ID: formatRifStr(f.pm_id.value),
       Cuenta_Divisas: f.divisas.value.trim(),
       Categoria_Rubro: f.rubro.value,
       Condicion_Pago: f.condicion_pago.value,
@@ -827,7 +1001,8 @@
     editProvId = null; $("#fp").reset();
     $("#fp").elements.codigo.value = sigCodigo();
     toggleDiasCredito("Contado");
-    $("#pt").textContent = "Registro de Proveedor (Ficha Integral)";
+    toggleProvDetails(false);
+    $("#pt").textContent = "Registro Rápido de Proveedor";
   }
 
   function editarP(id) {
@@ -837,7 +1012,8 @@
     f.codigo.value = p.Codigo || "";
     f.razon.value = provLegal(p);
     f.comercial.value = p.Nombre_Comercial || "";
-    f.rif.value = p.RIF || "";
+    f.cedula.value = formatCedulaStr(p.Cedula || "");
+    f.rif.value = formatRifStr(p.RIF || "");
     f.tipo_persona.value = p.Tipo_Persona || "Persona Jurídica";
     f.condicion_fiscal.value = p.Condicion_Fiscal || "Contribuyente Ordinario";
     f.dir_fiscal.value = p.Direccion_Fiscal || "";
@@ -865,6 +1041,9 @@
     f.ret_islr.value = p.Retencion_ISLR_Pct || "0";
     f.estatus.value = p.Estatus || "Activo";
 
+    const hasDetails = Boolean(p.Direccion_Fiscal || p.Banco || p.Numero_Cuenta || p.Pago_Movil_Telefono || p.Cuenta_Divisas);
+    toggleProvDetails(hasDetails);
+
     $("#pt").textContent = "Editando Proveedor: " + provLegal(p);
     tab = "p"; render(); window.scrollTo(0, 0);
   }
@@ -878,6 +1057,7 @@
         <h4>🏛️ Datos Fiscales</h4>
         <p><strong>Razón Social:</strong> ${esc(provLegal(p))}</p>
         <p><strong>Nombre Comercial:</strong> ${esc(p.Nombre_Comercial || "-")}</p>
+        <p><strong>Cédula:</strong> ${esc(p.Cedula || "-")}</p>
         <p><strong>RIF:</strong> ${esc(p.RIF || "-")}</p>
         <p><strong>Persona / Condición:</strong> ${esc(p.Tipo_Persona || "-")} · ${esc(p.Condicion_Fiscal || "-")}</p>
         <p><strong>Dir. Fiscal:</strong> ${esc(p.Direccion_Fiscal || "-")}</p>
@@ -917,9 +1097,6 @@
     aviso("Solicitud de eliminación enviada.");
   }
 
-  // ---------------------------------------------------------------------------
-  // CUENTAS POR PAGAR Y ABONOS
-  // ---------------------------------------------------------------------------
   const addD = (f, n) => new Date(Date.parse(f + "T00:00:00Z") + n * 864e5).toISOString().slice(0, 10);
   const dd = (a, b) => Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 864e5);
 
@@ -932,7 +1109,8 @@
       String(p.Codigo || "").toLowerCase() === v ||
       provNombre(p).toLowerCase() === v ||
       provLegal(p).toLowerCase() === v ||
-      (p.RIF && p.RIF.toLowerCase() === v)
+      (p.RIF && p.RIF.toLowerCase() === v) ||
+      (p.Cedula && p.Cedula.toLowerCase() === v)
     );
   }
 
@@ -951,7 +1129,7 @@
     let info = "";
     if (p) {
       if (p.Estatus === "Inactivo") info += "⚠️ PROVEEDOR INACTIVO · ";
-      info += `${provLegal(p)} (${p.RIF || "S/R"}) · ${p.Condicion_Pago || "Contado"} (${p.Dias_Credito || 0}d) · Ret. IVA ${p.Retencion_IVA_Pct || 0}% / ISLR ${p.Retencion_ISLR_Pct || 0}%`;
+      info += `${provLegal(p)} (${p.RIF || p.Cedula || "S/R"}) · ${p.Condicion_Pago || "Contado"} (${p.Dias_Credito || 0}d) · Ret. IVA ${p.Retencion_IVA_Pct || 0}% / ISLR ${p.Retencion_ISLR_Pct || 0}%`;
     }
     if (m > 0) {
       info += (info ? "  |  " : "") + (mon === "USD" ? `Equiv: ${fmtBs(m * bcv)}` : `Equiv: ${fmtUSD(m / bcv)} (BCV ${fmtVE(bcv)})`);
@@ -977,7 +1155,7 @@
     await postProv("saveFactura", {
       factura: {
         ID_Factura: editFacId || "",
-        ID_Proveedor: p.ID_Proveedor, Codigo_Prov: p.Codigo, Proveedor: provNombre(p), RIF: p.RIF,
+        ID_Proveedor: p.ID_Proveedor, Codigo_Prov: p.Codigo, Proveedor: provNombre(p), RIF: p.RIF || p.Cedula,
         Numero_Factura: f.numero.value.trim(), Numero_Control: f.control.value.trim(),
         Fecha_Emision: f.emision.value, Fecha_Vencimiento: f.vence.value,
         Moneda: mon, Tasa_BCV: bcv, Monto_Original: orig, Monto_USD: montoUsd,
@@ -1037,9 +1215,6 @@
     aviso("Abono eliminado.");
   }
 
-  // ---------------------------------------------------------------------------
-  // CAJA: INGRESOS Y EGRESOS (BIMONEDA BS. Y $)
-  // ---------------------------------------------------------------------------
   function valDia(fecha, canalNombre) {
     const m = db.movimientos.find(x => x.Tipo === "ingreso" && x.Fecha === fecha && x.Categoria_Canal === canalNombre);
     return m ? num(m.Monto_Original) : "";
@@ -1113,9 +1288,6 @@
     render();
   }
 
-  // ---------------------------------------------------------------------------
-  // RENDERIZADO GENERAL
-  // ---------------------------------------------------------------------------
   function estFactura(f) {
     const s = num(f.Saldo_USD), d = dd(hoy(), f.Fecha_Vencimiento);
     return { s, d, e: s < 0.01 ? "pag" : d < 0 ? "venc" : d <= 7 ? "prox" : "dia" };
@@ -1210,23 +1382,23 @@
     const q = $("#q").value.toLowerCase();
     const est = $("#qEstatus").value;
     const L = db.proveedores.filter(p => {
-      const text = `${p.Codigo} ${provLegal(p)} ${p.Nombre_Comercial} ${p.RIF} ${p.Categoria_Rubro}`.toLowerCase();
+      const text = `${p.Codigo} ${provLegal(p)} ${p.Nombre_Comercial} ${p.Cedula} ${p.RIF} ${p.Categoria_Rubro}`.toLowerCase();
       const matchQ = !q || text.includes(q);
       const matchE = !est || (p.Estatus || "Activo") === est;
       return matchQ && matchE;
     }).sort((a, b) => String(a.Codigo).localeCompare(String(b.Codigo), "es", { numeric: true }));
 
     $("#cp").textContent = `${L.length} proveedor(es)`;
-    $("#tp").innerHTML = L.length ? `<table><tr><th>Código</th><th>Razón Social / Marca</th><th>RIF</th><th>Rubro</th><th>Condición Pago</th><th>Ret. IVA/ISLR</th><th>Estatus</th><th>Acciones</th></tr>` +
+    $("#tp").innerHTML = L.length ? `<table><tr><th>Código</th><th>Razón Social / Marca</th><th>Cédula / RIF</th><th>Teléfono</th><th>Rubro</th><th>Condición Pago</th><th>Estatus</th><th>Acciones</th></tr>` +
       L.map(p => {
         const estatus = p.Estatus || "Activo";
         return `<tr>
           <td><strong>${esc(p.Codigo)}</strong></td>
           <td><strong>${esc(provNombre(p))}</strong><br><small style="color:var(--muted)">${esc(provLegal(p))}</small></td>
-          <td style="font-family:monospace">${esc(p.RIF)}<br><small style="color:var(--muted)">${esc(p.Condicion_Fiscal || "")}</small></td>
+          <td style="font-family:monospace">${p.Cedula ? esc(p.Cedula) + "<br>" : ""}${esc(p.RIF || "-")}</td>
+          <td style="font-family:monospace">${esc(p.Telefono_Principal || p.Telefono || "-")}</td>
           <td>${esc(p.Categoria_Rubro || "-")}</td>
-          <td>${esc(p.Condicion_Pago || "Contado")} (${esc(p.Dias_Credito || 0)}d)<br><small style="color:var(--muted)">Lím: ${fmtUSD(num(p.Limite_Credito))}</small></td>
-          <td>IVA ${esc(p.Retencion_IVA_Pct || 0)}% · ISLR ${esc(p.Retencion_ISLR_Pct || 0)}%</td>
+          <td>${esc(p.Condicion_Pago || "Contado")} (${esc(p.Dias_Credito || 0)}d)</td>
           <td><span class="tg ${estatus === "Activo" ? "act" : "inact"}">${esc(estatus)}</span></td>
           <td>
             <button class="btn s" onclick="verFichaProv('${p.ID_Proveedor}')" title="Ver Ficha Completa">👁️ Ficha</button>
@@ -1338,24 +1510,39 @@
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Cuentas_Por_Pagar_SLWA_${hoy()}.csv`; a.click();
   }
 
-  function exportarProveedoresCSV() {
+  function getProveedoresExportMatrix() {
     const headers = [
-      "Codigo", "Razon_Social", "Nombre_Comercial", "RIF", "Tipo_Persona", "Condicion_Fiscal", "Direccion_Fiscal",
-      "Telefono", "WhatsApp", "Correo_Facturacion", "Persona_Contacto", "Direccion_Almacen",
+      "Codigo", "Razon_Social", "Nombre_Comercial", "Cedula", "RIF", "Tipo_Persona", "Condicion_Fiscal", "Direccion_Fiscal",
+      "Telefono_Principal", "WhatsApp", "Correo_Facturacion", "Persona_Contacto", "Direccion_Almacen",
       "Banco", "Tipo_Cuenta", "Numero_Cuenta", "Titular_Cuenta", "RIF_CI_Titular",
       "Pago_Movil_Tel", "Pago_Movil_Banco", "Pago_Movil_ID", "Cuenta_Divisas",
-      "Rubro", "Condicion_Pago", "Dias_Credito", "Limite_Credito", "Moneda", "Ret_IVA_Pct", "Ret_ISLR_Pct", "Estatus"
+      "Categoria_Rubro", "Condicion_Pago", "Dias_Credito", "Limite_Credito", "Moneda_Facturacion", "Retencion_IVA_Pct", "Retencion_ISLR_Pct", "Estatus"
     ];
-    const rows = [headers.join(";"), ...db.proveedores.map(p => [
-      p.Codigo, provLegal(p), p.Nombre_Comercial, p.RIF, p.Tipo_Persona, p.Condicion_Fiscal, p.Direccion_Fiscal,
-      p.Telefono_Principal || p.Telefono, p.WhatsApp, p.Correo_Facturacion, p.Persona_Contacto, p.Direccion_Almacen,
-      p.Banco, p.Tipo_Cuenta, p.Numero_Cuenta, p.Titular_Cuenta, p.RIF_CI_Titular,
-      p.Pago_Movil_Telefono, p.Pago_Movil_Banco, p.Pago_Movil_ID, p.Cuenta_Divisas,
-      p.Categoria_Rubro, p.Condicion_Pago, p.Dias_Credito, p.Limite_Credito, p.Moneda_Facturacion,
-      p.Retencion_IVA_Pct, p.Retencion_ISLR_Pct, p.Estatus || "Activo"
-    ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";"))];
-    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const rows = db.proveedores.map(p => [
+      p.Codigo, provLegal(p), p.Nombre_Comercial || "", p.Cedula || "", p.RIF || "", p.Tipo_Persona || "", p.Condicion_Fiscal || "", p.Direccion_Fiscal || "",
+      p.Telefono_Principal || p.Telefono || "", p.WhatsApp || "", p.Correo_Facturacion || "", p.Persona_Contacto || "", p.Direccion_Almacen || "",
+      p.Banco || "", p.Tipo_Cuenta || "", p.Numero_Cuenta || "", p.Titular_Cuenta || "", p.RIF_CI_Titular || "",
+      p.Pago_Movil_Telefono || "", p.Pago_Movil_Banco || "", p.Pago_Movil_ID || "", p.Cuenta_Divisas || "",
+      p.Categoria_Rubro || "", p.Condicion_Pago || "", p.Dias_Credito || "0", p.Limite_Credito || "0", p.Moneda_Facturacion || "",
+      p.Retencion_IVA_Pct || "0", p.Retencion_ISLR_Pct || "0", p.Estatus || "Activo"
+    ]);
+    return [headers, ...rows];
+  }
+
+  function exportarProveedoresCSV() {
+    const aoa = getProveedoresExportMatrix();
+    const csv = "\uFEFF" + aoa.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Directorio_Proveedores_SLWA_${hoy()}.csv`; a.click();
+  }
+
+  function exportarProveedoresExcel() {
+    if (typeof XLSX === "undefined") return exportarProveedoresCSV();
+    const aoa = getProveedoresExportMatrix();
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    XLSX.utils.book_append_sheet(wb, ws, "Proveedores");
+    XLSX.writeFile(wb, `Directorio_Proveedores_SLWA_${hoy()}.xlsx`);
   }
 </script>
 </body>
