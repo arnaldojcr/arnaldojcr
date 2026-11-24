@@ -22,17 +22,10 @@
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
 
-    /* Header compacto corporativo */
     header {
       background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: #fff;
-      padding: 8px 18px;
-      border-bottom: 3px solid var(--gold);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
+      color: #fff; padding: 8px 18px; border-bottom: 3px solid var(--gold);
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
     }
     .header-left { display: flex; flex-direction: column; gap: 5px; }
     .header-title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
@@ -58,7 +51,6 @@
     }
     .bcv-btn { background: var(--gold) !important; color: #1B4D2E !important; border: none !important; padding: 4px 7px !important; font-weight: 700 !important; }
 
-    /* Tabs */
     nav { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 18px 0; border-bottom: 1px solid var(--border); background: #e3ebe5; }
     nav button {
       border: 0; background: none; padding: 8px 16px; font: 600 13px inherit; cursor: pointer;
@@ -68,7 +60,7 @@
     .bd { background: #b8482e; color: #fff; border-radius: 9px; padding: 1px 7px; font-size: 11px; margin-left: 6px; }
     .bd:empty { display: none; }
 
-    main { max-width: 1220px; margin: 0 auto; padding: 16px; }
+    main { max-width: 1260px; margin: 0 auto; padding: 16px; }
     section { display: none; }
     section.on { display: block; }
 
@@ -76,10 +68,15 @@
     .pn.gold-top { border-top-color: var(--gold); }
     .pn h2 { font-size: 15px; margin: 0 0 10px; color: var(--primary); }
 
-    form { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 10px; align-items: end; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; align-items: end; }
+    .sub-block { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fbfdfb; }
+    .sub-block h3 { margin: 0 0 10px; font-size: 13px; color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+
     label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); font-weight: 600; gap: 3px; }
+    .req { color: #dc2626; }
     input, select { font: inherit; padding: 6px 8px; border: 1px solid #b9c4c0; border-radius: 5px; color: var(--text); background: #fff; min-width: 0; }
     input:focus, select:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-light); }
+    input[readonly] { background: #eef2ef; color: #4b5563; }
 
     .btn { font: 600 13px inherit; padding: 7px 14px; border-radius: 5px; border: 1px solid var(--primary); background: var(--primary); color: #fff; cursor: pointer; }
     .btn:hover { background: var(--primary-light); }
@@ -90,9 +87,9 @@
     .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
     .bar input[type=search] { flex: 1; min-width: 220px; max-width: 340px; }
     .tw { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
-    th { font-size: 12px; color: var(--muted); font-weight: 700; background: #f8fafc; }
+    th { font-size: 11.5px; color: var(--muted); font-weight: 700; background: #f8fafc; }
     td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
     .em { color: var(--muted); padding: 14px 4px; }
 
@@ -123,11 +120,13 @@
     .tg.venc { background: #b8482e; }
     .tg.prox { background: #c58a12; }
     .tg.pag { background: #7d8c87; }
+    .tg.act { background: #1B4D2E; }
+    .tg.inact { background: #64748b; }
     .pb { height: 6px; background: #e3e9e7; border-radius: 3px; margin-top: 9px; overflow: hidden; }
     .pb i { display: block; height: 100%; background: var(--primary-light); }
     .ap { border-top: 1px dashed var(--border); margin-top: 10px; padding-top: 10px; }
+    .pay-hint { background: #f0f7f1; border: 1px solid #cce3d0; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--primary); margin-bottom: 10px; }
 
-    /* Escáner OCR */
     .ocr-box {
       display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
       background: #f8faf8; border: 1.5px dashed var(--primary-light); border-radius: 8px; padding: 12px;
@@ -148,10 +147,19 @@
     .lg i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; }
     svg { width: 100%; height: auto; display: block; }
 
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center; z-index: 100; padding: 14px; }
+    .modal-bg.open { display: flex; }
+    .modal-card { background: #fff; border-radius: 10px; max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto; border-top: 4px solid var(--gold); box-shadow: 0 18px 36px rgba(0,0,0,0.25); }
+    .modal-head { background: var(--primary); color: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { padding: 16px; font-size: 13px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .detail-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; }
+    .detail-box h4 { margin: 0 0 6px; color: var(--primary); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+    .detail-box p { margin: 3px 0; font-size: 12px; }
+
     #av { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #1B4D2E; color: #fff; border-bottom: 3px solid var(--gold); padding: 9px 16px; border-radius: 8px; z-index: 99; max-width: 90vw; font-weight: 600; }
     [hidden] { display: none !important; }
     @media print {
-      header button, nav, .btn, .ap form, .ocr-box, form, .bar, .chs { display: none !important; }
+      header button, nav, .btn, .ap form, .ocr-box, form, .bar, .chs, .modal-bg { display: none !important; }
       body { background: #fff; }
       section { display: block !important; }
     }
@@ -167,12 +175,12 @@
     </div>
     <div class="header-actions">
       <button class="gold-btn" onclick="syncAll()">🔄 Sincronizar</button>
-      <button onclick="exportarCSV()">📥 Exportar Excel (CSV)</button>
-      <button onclick="window.print()">🖨️ Imprimir / PDF</button>
+      <button onclick="exportarCSV()">📥 Exportar Facturas</button>
+      <button onclick="exportarProveedoresCSV()">📥 Exportar Proveedores</button>
+      <button onclick="window.print()">🖨️ PDF</button>
     </div>
   </div>
 
-  <!-- Tasa Dólar BCV en la esquina superior derecha -->
   <div class="bcv-widget">
     <label for="bcvRate">💵 Dólar BCV (Bs. / $)</label>
     <div class="bcv-row">
@@ -184,19 +192,16 @@
 
 <nav role="tablist">
   <button role="tab" data-t="c" aria-selected="true">Cuentas por pagar<span class="bd" id="bd"></span></button>
-  <button role="tab" data-t="p">Proveedores</button>
+  <button role="tab" data-t="p">Directorio de Proveedores</button>
   <button role="tab" data-t="m">Ingresos y egresos (Bs. / $)</button>
   <button role="tab" data-t="b">Balance y gráficas</button>
 </nav>
 
 <main>
-  <!-- =================================================================== -->
-  <!-- PESTAÑA 1: CUENTAS POR PAGAR + ESCÁNER AUTOMÁTICO DE FACTURAS       -->
-  <!-- =================================================================== -->
+  <!-- PESTAÑA 1: CUENTAS POR PAGAR + ESCÁNER OCR -->
   <section id="c" class="on">
     <div class="kc" id="kc"></div>
 
-    <!-- ESCÁNER OCR DE FACTURAS (OPCIÓN A - TESSERACT LOCAL GRATUITO) -->
     <div class="pn gold-top">
       <h2>📷 Escaneo Automático de Factura (OCR Local Gratuito)</h2>
       <div class="ocr-box">
@@ -205,7 +210,7 @@
           <button type="button" class="btn gold" onclick="document.getElementById('scanInput').click()">📷 Tomar Foto / Subir Factura</button>
           <div class="ocr-progress" id="ocrProgressBar"><i id="ocrProgressFill"></i></div>
           <small id="ocrStatus" style="display:block;color:var(--muted);margin-top:5px;">
-            Extrae automáticamente RIF, Proveedor, N° Factura, Control, Fecha y Total. Luego revisa y guarda.
+            Detecta automáticamente RIF, Razón Social/Comercial, N° Factura, Control, Fecha y Total.
           </small>
         </div>
         <img id="ocrPreview" class="ocr-preview" alt="Vista previa de factura" />
@@ -218,22 +223,22 @@
 
     <div class="pn">
       <h2 id="ft">Registrar Factura por Pagar</h2>
-      <form id="ff">
-        <label>Proveedor (código, nombre o RIF)*
-          <input name="prov" list="dl" autocomplete="off" required placeholder="Ej: P-0001 o Distribuidora..." />
+      <form id="ff" class="form-grid">
+        <label>Proveedor Activo (código, nombre o RIF)<span class="req">*</span>
+          <input name="prov" list="dl" autocomplete="off" required placeholder="Ej: P-0001 o Marca..." />
         </label>
         <datalist id="dl"></datalist>
-        <label>N.º de Factura* <input name="numero" required placeholder="00012345" /></label>
+        <label>N.º de Factura<span class="req">*</span> <input name="numero" required placeholder="00012345" /></label>
         <label>N.º de Control <input name="control" placeholder="00-0012345" /></label>
-        <label>Fecha de Emisión* <input name="emision" type="date" required /></label>
-        <label>Vencimiento* <input name="vence" type="date" required /></label>
+        <label>Fecha de Emisión<span class="req">*</span> <input name="emision" type="date" required /></label>
+        <label>Vencimiento<span class="req">*</span> <input name="vence" type="date" required /></label>
         <label>Moneda Factura
           <select name="moneda" onchange="updateFacturaPreview()">
             <option value="USD">Dólares ($)</option>
             <option value="Bs">Bolívares (Bs.)</option>
           </select>
         </label>
-        <label>Monto Factura* <input name="monto" type="number" min="0.01" step="0.01" required oninput="updateFacturaPreview()" /></label>
+        <label>Monto Factura<span class="req">*</span> <input name="monto" type="number" min="0.01" step="0.01" required oninput="updateFacturaPreview()" /></label>
         <input type="hidden" name="origen" value="Manual" />
         <div>
           <button class="btn" id="fb">Agregar factura</button>
@@ -250,39 +255,178 @@
     <div id="lf"></div>
   </section>
 
-  <!-- =================================================================== -->
-  <!-- PESTAÑA 2: DIRECTORIO DE PROVEEDORES                                -->
-  <!-- =================================================================== -->
+  <!-- PESTAÑA 2: DIRECTORIO COMPLETO DE PROVEEDORES (4 BLOQUES) -->
   <section id="p">
     <div class="pn">
-      <h2 id="pt">Nuevo Proveedor</h2>
+      <h2 id="pt">Registro de Proveedor (Ficha Integral)</h2>
       <form id="fp">
-        <label>Código (automático) <input name="codigo" readonly /></label>
-        <label>Nombre / Razón Social* <input name="nombre" required /></label>
-        <label>RIF <input name="rif" placeholder="J-00000000-0" oninput="this.value=this.value.toUpperCase()" /></label>
-        <label>Banco <input name="banco" placeholder="Ej: Banesco / Venezuela" /></label>
-        <label>Días de crédito <input name="dias" type="number" min="0" value="0" /></label>
-        <label>N.º de Cuenta <input name="cuenta" inputmode="numeric" maxlength="20" /></label>
-        <label>Teléfono <input name="telefono" placeholder="04XX-0000000" /></label>
-        <div>
-          <button class="btn">Guardar proveedor</button>
-          <button type="button" class="btn s" onclick="cancelarP()">Limpiar</button>
+        <div class="sub-block">
+          <h3>🏛️ 1. Identificación y Datos Fiscales (SENIAT — Obligatorios)</h3>
+          <div class="form-grid">
+            <label>Código (Automático) <input name="codigo" readonly /></label>
+            <label>Razón Social (Nombre Legal)<span class="req">*</span> <input name="razon" required placeholder="Ej: Distribuidora Alimentos C.A." /></label>
+            <label>Nombre Comercial (Marca / Tienda) <input name="comercial" placeholder="Ej: Alimentos El Sol" /></label>
+            <label>RIF<span class="req">*</span> <input name="rif" required placeholder="J-00000000-0" maxlength="12" oninput="formatRif(this)" /></label>
+            <label>Tipo de Persona
+              <select name="tipo_persona">
+                <option value="Persona Jurídica">Persona Jurídica</option>
+                <option value="Persona Natural">Persona Natural</option>
+              </select>
+            </label>
+            <label>Condición Fiscal
+              <select name="condicion_fiscal">
+                <option value="Contribuyente Ordinario">Contribuyente Ordinario</option>
+                <option value="Contribuyente Especial">Contribuyente Especial (Agente Retención)</option>
+                <option value="Contribuyente Formal">Contribuyente Formal</option>
+                <option value="No Sujeto / Exento">No Sujeto / Exento</option>
+              </select>
+            </label>
+            <label style="grid-column: span 2;">Dirección Fiscal Exacta (SENIAT)<span class="req">*</span>
+              <input name="dir_fiscal" required placeholder="Av. / Calle / Edificio / Municipio / Estado" />
+            </label>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <h3>🚚 2. Datos de Contacto y Logística</h3>
+          <div class="form-grid">
+            <label>Teléfono Principal <input name="tel_principal" placeholder="04XX-000.0000" maxlength="13" oninput="formatPhone(this)" /></label>
+            <label>WhatsApp Pedidos <input name="whatsapp" placeholder="04XX-000.0000" maxlength="13" oninput="formatPhone(this)" /></label>
+            <label>Correo Facturación / Cobranzas <input name="correo" type="email" placeholder="cobranzas@proveedor.com" /></label>
+            <label>Persona de Contacto (Nombre y Cargo) <input name="contacto" placeholder="Ej: Ana Pérez (Ejecutiva de Ventas)" /></label>
+            <label style="grid-column: span 2;">Dirección de Almacén o Despacho (si difiere de la fiscal)
+              <input name="dir_almacen" placeholder="Misma dirección fiscal o indique ubicación del galpón" />
+            </label>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <h3>🏦 3. Datos Bancarios (Transferencias, Pago Móvil y Divisas)</h3>
+          <div class="form-grid">
+            <label>Banco Receptor
+              <select name="banco" id="selBancoProv">
+                <option value="">Seleccione un banco...</option>
+                <option value="0102 - Banco de Venezuela">0102 - Banco de Venezuela</option>
+                <option value="0104 - Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
+                <option value="0105 - Banco Mercantil">0105 - Banco Mercantil</option>
+                <option value="0108 - Banco Provincial (BBVA)">0108 - Banco Provincial (BBVA)</option>
+                <option value="0114 - Bancaribe">0114 - Bancaribe</option>
+                <option value="0115 - Banco Exterior">0115 - Banco Exterior</option>
+                <option value="0128 - Banco Caroní">0128 - Banco Caroní</option>
+                <option value="0134 - Banesco Banco Universal">0134 - Banesco Banco Universal</option>
+                <option value="0137 - Banco Sofitasa">0137 - Banco Sofitasa</option>
+                <option value="0138 - Banco Plaza">0138 - Banco Plaza</option>
+                <option value="0151 - BFC Banco Fondo Común">0151 - BFC Banco Fondo Común</option>
+                <option value="0156 - 100% Banco">0156 - 100% Banco</option>
+                <option value="0157 - DelSur Banco Universal">0157 - DelSur Banco Universal</option>
+                <option value="0163 - Banco del Tesoro">0163 - Banco del Tesoro</option>
+                <option value="0168 - Bancrecer">0168 - Bancrecer</option>
+                <option value="0171 - Banco Activo">0171 - Banco Activo</option>
+                <option value="0172 - Bancamiga Banco Universal">0172 - Bancamiga Banco Universal</option>
+                <option value="0174 - Banplus">0174 - Banplus</option>
+                <option value="0175 - Banco Bicentenario">0175 - Banco Bicentenario</option>
+                <option value="0177 - BANFANB">0177 - BANFANB</option>
+                <option value="0178 - N58 Banco Digital">0178 - N58 Banco Digital</option>
+                <option value="0191 - BNC Banco Nacional de Crédito">0191 - BNC Banco Nacional de Crédito</option>
+              </select>
+            </label>
+            <label>Tipo de Cuenta
+              <select name="tipo_cuenta">
+                <option value="Corriente">Corriente</option>
+                <option value="Ahorro">Ahorro</option>
+              </select>
+            </label>
+            <label>Número de Cuenta (20 dígitos)
+              <input name="cuenta" inputmode="numeric" maxlength="20" placeholder="00000000000000000000" oninput="this.value=this.value.replace(/\D/g,'').slice(0,20)" />
+            </label>
+            <label>Titular de la Cuenta <input name="titular" placeholder="Nombre legal o titular" /></label>
+            <label>RIF / Cédula del Titular <input name="rif_titular" placeholder="J-00000000-0 o V-00000000" maxlength="12" oninput="formatRif(this)" /></label>
+            <label>Pago Móvil: Teléfono <input name="pm_tel" placeholder="04XX-000.0000" maxlength="13" oninput="formatPhone(this)" /></label>
+            <label>Pago Móvil: Banco <input name="pm_banco" placeholder="Ej: Banesco / BDV" /></label>
+            <label>Pago Móvil: RIF / Cédula <input name="pm_id" placeholder="J-00000000-0" maxlength="12" oninput="formatRif(this)" /></label>
+            <label style="grid-column: span 2;">Cuentas en Divisas / Zelle / Binance (Opcional)
+              <input name="divisas" placeholder="Ej: Zelle: pagos@empresa.com | Binance ID: 12345678" />
+            </label>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <h3>📋 4. Condiciones Comerciales y Clasificación</h3>
+          <div class="form-grid">
+            <label>Categoría / Rubro
+              <select name="rubro">
+                <option value="Víveres y Alimentos">Víveres y Alimentos</option>
+                <option value="Fruver (Frutas y Verduras)">Fruver (Frutas y Verduras)</option>
+                <option value="Charcutería y Carnicería">Charcutería y Carnicería</option>
+                <option value="Bebidas y Licores">Bebidas y Licores</option>
+                <option value="Limpieza e Higiene">Limpieza e Higiene</option>
+                <option value="Materia Prima e Insumos">Materia Prima e Insumos</option>
+                <option value="Papelería y Oficina">Papelería y Oficina</option>
+                <option value="Transporte y Fletes">Transporte y Fletes</option>
+                <option value="Servicios y Mantenimiento">Servicios y Mantenimiento</option>
+                <option value="Otros">Otros</option>
+              </select>
+            </label>
+            <label>Condición de Pago
+              <select name="condicion_pago" onchange="toggleDiasCredito(this.value)">
+                <option value="Contado">Contado</option>
+                <option value="Crédito">Crédito</option>
+              </select>
+            </label>
+            <label>Días de Crédito
+              <input name="dias" type="number" min="0" value="0" placeholder="0, 7, 15, 30, 60" />
+            </label>
+            <label>Límite de Crédito ($)
+              <input name="limite" type="number" min="0" step="0.01" value="0" />
+            </label>
+            <label>Moneda de Facturación
+              <select name="moneda_fac">
+                <option value="Multimoneda ($ / Bs)">Multimoneda ($ / Bs)</option>
+                <option value="Dólares ($)">Dólares ($)</option>
+                <option value="Bolívares (Bs.)">Bolívares (Bs.)</option>
+              </select>
+            </label>
+            <label>Retención IVA (%)
+              <select name="ret_iva">
+                <option value="75">75%</option>
+                <option value="100">100%</option>
+                <option value="0">0% (No aplica)</option>
+              </select>
+            </label>
+            <label>Retención ISLR (%)
+              <input name="ret_islr" type="number" min="0" max="34" step="0.5" value="0" placeholder="Ej: 1, 2, 3, 5" />
+            </label>
+            <label>Estatus
+              <select name="estatus">
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" class="btn s" onclick="cancelarP()">Limpiar Formulario</button>
+          <button class="btn">💾 Guardar Proveedor</button>
         </div>
       </form>
     </div>
 
     <div class="pn">
       <div class="bar">
-        <input id="q" type="search" placeholder="Buscar por código, nombre o RIF..." oninput="render()" />
+        <input id="q" type="search" placeholder="Buscar por código, razón social, marca, RIF o rubro..." oninput="render()" />
+        <select id="qEstatus" onchange="render()" style="max-width:150px;">
+          <option value="">Todos los estatus</option>
+          <option value="Activo">Solo Activos</option>
+          <option value="Inactivo">Solo Inactivos</option>
+        </select>
         <span id="cp" style="font-size:12px;color:var(--muted);"></span>
       </div>
       <div class="tw" id="tp"></div>
     </div>
   </section>
 
-  <!-- =================================================================== -->
-  <!-- PESTAÑA 3: INGRESOS Y EGRESOS (CANALES EN BS. Y EN $)               -->
-  <!-- =================================================================== -->
+  <!-- PESTAÑA 3: INGRESOS Y EGRESOS (CANALES EN BS. Y EN $) -->
   <section id="m">
     <div class="bar">
       <label style="flex-direction:row;align-items:center;gap:8px">Mes a revisar <input type="month" id="mes" onchange="render()" /></label>
@@ -291,7 +435,7 @@
 
     <div class="pn">
       <h2>Ingresos del Día (Canales en Bs. y en $)</h2>
-      <form id="fi">
+      <form id="fi" class="form-grid">
         <label>Fecha <input name="fecha" type="date" required /></label>
         <div id="ci2"></div>
         <div><button class="btn">Guardar ingresos del día</button></div>
@@ -309,7 +453,7 @@
 
     <div class="pn">
       <h2>Registrar Otro Egreso</h2>
-      <form id="fe">
+      <form id="fe" class="form-grid">
         <label>Fecha <input name="fecha" type="date" required /></label>
         <label>Categoría <select name="cat" id="sc" required></select></label>
         <label>Moneda
@@ -329,7 +473,7 @@
         </label>
         <label>Referencia <input name="ref" placeholder="N° Ref." /></label>
         <label>Concepto <input name="concepto" placeholder="Descripción" /></label>
-        <label>Monto* <input name="monto" type="number" min="0.01" step="0.01" required /></label>
+        <label>Monto<span class="req">*</span> <input name="monto" type="number" min="0.01" step="0.01" required /></label>
         <div><button class="btn">Agregar egreso</button></div>
       </form>
       <div class="bar" style="margin:10px 0 0">
@@ -351,9 +495,7 @@
     </div>
   </section>
 
-  <!-- =================================================================== -->
-  <!-- PESTAÑA 4: BALANCE Y GRÁFICAS                                       -->
-  <!-- =================================================================== -->
+  <!-- PESTAÑA 4: BALANCE Y GRÁFICAS -->
   <section id="b">
     <div class="kp">
       <div><span>Ingresos Totales</span><b class="in" id="ki"></b><small id="kiBs"></small></div>
@@ -365,6 +507,17 @@
     <div class="pn"><h2>Egresos por categoría (en $)</h2><div id="c3"></div></div>
   </section>
 </main>
+
+<!-- MODAL FICHA COMPLETA DEL PROVEEDOR -->
+<div id="provModal" class="modal-bg" onclick="if(event.target===this) closeProvModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <strong id="pmTitle">Ficha del Proveedor</strong>
+      <button onclick="closeProvModal()" style="background:none;border:0;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div class="modal-body" id="pmBody"></div>
+  </div>
+</div>
 
 <div id="av" hidden role="status"></div>
 
@@ -397,11 +550,35 @@
   const fmtUSD = n => "$" + fmtVE(n);
   const fmtBs = n => "Bs. " + fmtVE(n);
   const num = v => parseFloat(String(v || "0").replace(",", ".")) || 0;
+  const provNombre = p => p ? (p.Nombre_Comercial || p.Razon_Social || p.Nombre || "") : "";
+  const provLegal = p => p ? (p.Razon_Social || p.Nombre || "") : "";
 
   let avT;
   function aviso(msg) {
     const a = $("#av"); a.textContent = msg; a.hidden = false;
     clearTimeout(avT); avT = setTimeout(() => a.hidden = true, 6500);
+  }
+
+  function formatRif(input) {
+    let clean = input.value.toUpperCase().replace(/[^VEJPG0-9]/g, "");
+    if (!clean) { input.value = ""; return; }
+    let letter = /^[VEJPG]/.test(clean) ? clean[0] : "J";
+    let nums = (/^[VEJPG]/.test(clean) ? clean.slice(1) : clean).replace(/\D/g, "").slice(0, 9);
+    input.value = nums.length <= 8 ? `${letter}-${nums}` : `${letter}-${nums.slice(0, 8)}-${nums.slice(8)}`;
+  }
+
+  function formatPhone(input) {
+    let d = input.value.replace(/\D/g, "").slice(0, 11);
+    if (!d) { input.value = ""; return; }
+    if (d.length <= 4) input.value = d;
+    else if (d.length <= 7) input.value = `${d.slice(0, 4)}-${d.slice(4)}`;
+    else input.value = `${d.slice(0, 4)}-${d.slice(4, 7)}.${d.slice(7)}`;
+  }
+
+  function toggleDiasCredito(condicion) {
+    const inp = $("#fp").elements.dias;
+    if (condicion === "Contado") { inp.value = "0"; inp.readOnly = true; }
+    else { inp.readOnly = false; if (Number(inp.value) === 0) inp.value = "15"; }
   }
 
   // ---------------------------------------------------------------------------
@@ -416,6 +593,7 @@
     $("#fi").elements.fecha.value = hoy();
     $("#fe").elements.fecha.value = hoy();
     $("#ff").elements.emision.value = hoy();
+    toggleDiasCredito("Contado");
 
     $("#fi").elements.fecha.addEventListener("change", renderDia);
     document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
@@ -550,12 +728,15 @@
       if (matchedProv) break;
     }
     if (!matchedProv) {
-      matchedProv = db.proveedores.find(p => p.Nombre && upper.includes(p.Nombre.toUpperCase()));
+      matchedProv = db.proveedores.find(p =>
+        (provLegal(p) && upper.includes(provLegal(p).toUpperCase())) ||
+        (p.Nombre_Comercial && upper.includes(p.Nombre_Comercial.toUpperCase()))
+      );
     }
     if (matchedProv) {
-      f.prov.value = `${matchedProv.Codigo} · ${matchedProv.Nombre}`;
+      f.prov.value = `${matchedProv.Codigo} · ${provNombre(matchedProv)}`;
     } else if (rifMatches.length > 0) {
-      aviso(`RIF detectado (${rifMatches[0]}). Si es proveedor nuevo, créalo en la pestaña Proveedores.`);
+      aviso(`RIF detectado (${rifMatches[0]}). Si es nuevo, regístralo en Directorio de Proveedores.`);
     }
 
     const mFac = upper.match(/(?:FACTURA|FACT\.?|NRO\.?\s*FACTURA)\s*(?:N[°RO.]*|#|:|\s)*([A-Z0-9\-]{4,18})/);
@@ -568,9 +749,7 @@
     if (mDate) {
       const dd = mDate[1], mm = mDate[2];
       const yyyy = mDate[3].length === 2 ? "20" + mDate[3] : mDate[3];
-      if (+mm >= 1 && +mm <= 12 && +dd >= 1 && +dd <= 31) {
-        f.emision.value = `${yyyy}-${mm}-${dd}`;
-      }
+      if (+mm >= 1 && +mm <= 12 && +dd >= 1 && +dd <= 31) f.emision.value = `${yyyy}-${mm}-${dd}`;
     }
 
     const lines = upper.split(/\r?\n/);
@@ -596,7 +775,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // PROVEEDORES
+  // PROVEEDORES (4 BLOQUES)
   // ---------------------------------------------------------------------------
   const provById = id => db.proveedores.find(p => p.ID_Proveedor === id);
   function sigCodigo() {
@@ -606,31 +785,132 @@
 
   $("#fp").onsubmit = async e => {
     e.preventDefault();
-    const f = new FormData(e.target);
+    const f = e.target.elements;
     const prov = {
       ID_Proveedor: editProvId || "",
-      Codigo: f.get("codigo").trim(),
-      Nombre: f.get("nombre").trim(),
-      RIF: f.get("rif").trim().toUpperCase(),
-      Banco: f.get("banco").trim(),
-      Dias_Credito: f.get("dias") || "0",
-      Numero_Cuenta: f.get("cuenta").trim(),
-      Telefono: f.get("telefono").trim()
+      Codigo: f.codigo.value.trim(),
+      Razon_Social: f.razon.value.trim(),
+      Nombre_Comercial: f.comercial.value.trim(),
+      RIF: f.rif.value.trim().toUpperCase(),
+      Tipo_Persona: f.tipo_persona.value,
+      Condicion_Fiscal: f.condicion_fiscal.value,
+      Direccion_Fiscal: f.dir_fiscal.value.trim(),
+      Telefono_Principal: f.tel_principal.value.trim(),
+      WhatsApp: f.whatsapp.value.trim(),
+      Correo_Facturacion: f.correo.value.trim().toLowerCase(),
+      Persona_Contacto: f.contacto.value.trim(),
+      Direccion_Almacen: f.dir_almacen.value.trim(),
+      Banco: f.banco.value,
+      Tipo_Cuenta: f.tipo_cuenta.value,
+      Numero_Cuenta: f.cuenta.value.trim(),
+      Titular_Cuenta: f.titular.value.trim(),
+      RIF_CI_Titular: f.rif_titular.value.trim().toUpperCase(),
+      Pago_Movil_Telefono: f.pm_tel.value.trim(),
+      Pago_Movil_Banco: f.pm_banco.value.trim(),
+      Pago_Movil_ID: f.pm_id.value.trim().toUpperCase(),
+      Cuenta_Divisas: f.divisas.value.trim(),
+      Categoria_Rubro: f.rubro.value,
+      Condicion_Pago: f.condicion_pago.value,
+      Dias_Credito: f.condicion_pago.value === "Contado" ? "0" : (f.dias.value || "0"),
+      Limite_Credito: f.limite.value || "0",
+      Moneda_Facturacion: f.moneda_fac.value,
+      Retencion_IVA_Pct: f.ret_iva.value,
+      Retencion_ISLR_Pct: f.ret_islr.value || "0",
+      Estatus: f.estatus.value
     };
     await postProv("saveProveedor", { proveedor: prov });
     cancelarP();
     aviso("Proveedor guardado en Google Sheets.");
   };
 
-  function cancelarP() { editProvId = null; $("#fp").reset(); $("#fp").elements.codigo.value = sigCodigo(); $("#pt").textContent = "Nuevo Proveedor"; }
+  function cancelarP() {
+    editProvId = null; $("#fp").reset();
+    $("#fp").elements.codigo.value = sigCodigo();
+    toggleDiasCredito("Contado");
+    $("#pt").textContent = "Registro de Proveedor (Ficha Integral)";
+  }
+
   function editarP(id) {
     const p = provById(id), f = $("#fp").elements;
+    if (!p) return;
     editProvId = id;
-    f.codigo.value = p.Codigo; f.nombre.value = p.Nombre; f.rif.value = p.RIF;
-    f.banco.value = p.Banco; f.dias.value = p.Dias_Credito; f.cuenta.value = p.Numero_Cuenta; f.telefono.value = p.Telefono || "";
-    $("#pt").textContent = "Editando: " + p.Nombre;
+    f.codigo.value = p.Codigo || "";
+    f.razon.value = provLegal(p);
+    f.comercial.value = p.Nombre_Comercial || "";
+    f.rif.value = p.RIF || "";
+    f.tipo_persona.value = p.Tipo_Persona || "Persona Jurídica";
+    f.condicion_fiscal.value = p.Condicion_Fiscal || "Contribuyente Ordinario";
+    f.dir_fiscal.value = p.Direccion_Fiscal || "";
+    f.tel_principal.value = p.Telefono_Principal || p.Telefono || "";
+    f.whatsapp.value = p.WhatsApp || "";
+    f.correo.value = p.Correo_Facturacion || "";
+    f.contacto.value = p.Persona_Contacto || "";
+    f.dir_almacen.value = p.Direccion_Almacen || "";
+    f.banco.value = p.Banco || "";
+    f.tipo_cuenta.value = p.Tipo_Cuenta || "Corriente";
+    f.cuenta.value = p.Numero_Cuenta || "";
+    f.titular.value = p.Titular_Cuenta || "";
+    f.rif_titular.value = p.RIF_CI_Titular || "";
+    f.pm_tel.value = p.Pago_Movil_Telefono || "";
+    f.pm_banco.value = p.Pago_Movil_Banco || "";
+    f.pm_id.value = p.Pago_Movil_ID || "";
+    f.divisas.value = p.Cuenta_Divisas || "";
+    f.rubro.value = p.Categoria_Rubro || "Otros";
+    f.condicion_pago.value = p.Condicion_Pago || (Number(p.Dias_Credito) > 0 ? "Crédito" : "Contado");
+    toggleDiasCredito(f.condicion_pago.value);
+    f.dias.value = p.Dias_Credito || "0";
+    f.limite.value = p.Limite_Credito || "0";
+    f.moneda_fac.value = p.Moneda_Facturacion || "Multimoneda ($ / Bs)";
+    f.ret_iva.value = p.Retencion_IVA_Pct || "75";
+    f.ret_islr.value = p.Retencion_ISLR_Pct || "0";
+    f.estatus.value = p.Estatus || "Activo";
+
+    $("#pt").textContent = "Editando Proveedor: " + provLegal(p);
     tab = "p"; render(); window.scrollTo(0, 0);
   }
+
+  function verFichaProv(id) {
+    const p = provById(id);
+    if (!p) return;
+    $("#pmTitle").textContent = `${p.Codigo} · ${provNombre(p)}`;
+    $("#pmBody").innerHTML = `
+      <div class="detail-box">
+        <h4>🏛️ Datos Fiscales</h4>
+        <p><strong>Razón Social:</strong> ${esc(provLegal(p))}</p>
+        <p><strong>Nombre Comercial:</strong> ${esc(p.Nombre_Comercial || "-")}</p>
+        <p><strong>RIF:</strong> ${esc(p.RIF || "-")}</p>
+        <p><strong>Persona / Condición:</strong> ${esc(p.Tipo_Persona || "-")} · ${esc(p.Condicion_Fiscal || "-")}</p>
+        <p><strong>Dir. Fiscal:</strong> ${esc(p.Direccion_Fiscal || "-")}</p>
+      </div>
+      <div class="detail-box">
+        <h4>🚚 Contacto y Logística</h4>
+        <p><strong>Teléfono:</strong> ${esc(p.Telefono_Principal || p.Telefono || "-")}</p>
+        <p><strong>WhatsApp:</strong> ${esc(p.WhatsApp || "-")}</p>
+        <p><strong>Correo Cobranzas:</strong> ${esc(p.Correo_Facturacion || "-")}</p>
+        <p><strong>Contacto:</strong> ${esc(p.Persona_Contacto || "-")}</p>
+        <p><strong>Dir. Almacén:</strong> ${esc(p.Direccion_Almacen || "Misma dirección fiscal")}</p>
+      </div>
+      <div class="detail-box">
+        <h4>🏦 Datos Bancarios</h4>
+        <p><strong>Banco:</strong> ${esc(p.Banco || "-")}</p>
+        <p><strong>Cuenta (${esc(p.Tipo_Cuenta || "Corriente")}):</strong> ${esc(p.Numero_Cuenta || "-")}</p>
+        <p><strong>Titular / ID:</strong> ${esc(p.Titular_Cuenta || "-")} (${esc(p.RIF_CI_Titular || "-")})</p>
+        <p><strong>Pago Móvil:</strong> ${esc(p.Pago_Movil_Telefono || "-")} · ${esc(p.Pago_Movil_Banco || "-")} · ${esc(p.Pago_Movil_ID || "-")}</p>
+        <p><strong>Divisas / Zelle / Binance:</strong> ${esc(p.Cuenta_Divisas || "-")}</p>
+      </div>
+      <div class="detail-box">
+        <h4>📋 Condiciones Comerciales</h4>
+        <p><strong>Rubro:</strong> ${esc(p.Categoria_Rubro || "-")}</p>
+        <p><strong>Pago:</strong> ${esc(p.Condicion_Pago || "Contado")} (${esc(p.Dias_Credito || 0)} días)</p>
+        <p><strong>Límite Crédito:</strong> ${fmtUSD(num(p.Limite_Credito))}</p>
+        <p><strong>Moneda:</strong> ${esc(p.Moneda_Facturacion || "-")}</p>
+        <p><strong>Retenciones:</strong> IVA ${esc(p.Retencion_IVA_Pct || 0)}% | ISLR ${esc(p.Retencion_ISLR_Pct || 0)}%</p>
+        <p><strong>Estatus:</strong> ${esc(p.Estatus || "Activo")}</p>
+      </div>`;
+    $("#provModal").classList.add("open");
+  }
+  function closeProvModal() { $("#provModal").classList.remove("open"); }
+
   async function borrarP(id) {
     if (!confirm("¿Eliminar este proveedor?")) return;
     await postProv("deleteProveedor", { id_proveedor: id });
@@ -646,22 +926,35 @@
   function buscarProvInput(v) {
     v = String(v || "").trim().toLowerCase();
     if (!v) return null;
-    const lbl = p => `${p.Codigo} · ${p.Nombre}`.toLowerCase();
-    return db.proveedores.find(p => lbl(p) === v || p.Codigo.toLowerCase() === v || p.Nombre.toLowerCase() === v || (p.RIF && p.RIF.toLowerCase() === v));
+    return db.proveedores.find(p =>
+      `${p.Codigo} · ${provNombre(p)}`.toLowerCase() === v ||
+      `${p.Codigo} · ${provLegal(p)}`.toLowerCase() === v ||
+      String(p.Codigo || "").toLowerCase() === v ||
+      provNombre(p).toLowerCase() === v ||
+      provLegal(p).toLowerCase() === v ||
+      (p.RIF && p.RIF.toLowerCase() === v)
+    );
   }
 
   function autoVence() {
     const f = $("#ff").elements, p = buscarProvInput(f.prov.value);
-    if (p && f.emision.value) f.vence.value = addD(f.emision.value, parseInt(p.Dias_Credito || 0, 10));
+    if (p && f.emision.value) {
+      const dias = p.Condicion_Pago === "Contado" ? 0 : parseInt(p.Dias_Credito || 0, 10);
+      f.vence.value = addD(f.emision.value, dias);
+    }
     updateFacturaPreview();
   }
 
   function updateFacturaPreview() {
     const f = $("#ff").elements, p = buscarProvInput(f.prov.value), bcv = getBcv(), m = num(f.monto.value);
     const mon = f.moneda.value;
-    let info = p ? `${p.Nombre} (${p.RIF || "Sin RIF"}) · Crédito: ${p.Dias_Credito} días` : "";
+    let info = "";
+    if (p) {
+      if (p.Estatus === "Inactivo") info += "⚠️ PROVEEDOR INACTIVO · ";
+      info += `${provLegal(p)} (${p.RIF || "S/R"}) · ${p.Condicion_Pago || "Contado"} (${p.Dias_Credito || 0}d) · Ret. IVA ${p.Retencion_IVA_Pct || 0}% / ISLR ${p.Retencion_ISLR_Pct || 0}%`;
+    }
     if (m > 0) {
-      info += (info ? "  |  " : "") + (mon === "USD" ? `Equivalente: ${fmtBs(m * bcv)}` : `Equivalente: ${fmtUSD(m / bcv)} (BCV ${fmtVE(bcv)})`);
+      info += (info ? "  |  " : "") + (mon === "USD" ? `Equiv: ${fmtBs(m * bcv)}` : `Equiv: ${fmtUSD(m / bcv)} (BCV ${fmtVE(bcv)})`);
     }
     $("#ci").textContent = info;
   }
@@ -672,10 +965,11 @@
     e.preventDefault();
     const f = e.target.elements, p = buscarProvInput(f.prov.value);
     if (!p) return alert("Selecciona un proveedor válido de la lista.");
+    if (p.Estatus === "Inactivo" && !editFacId) return alert("Este proveedor está Inactivo. Actívalo primero en el Directorio.");
     if (f.vence.value < f.emision.value) return alert("El vencimiento no puede ser anterior a la emisión.");
 
     const dup = db.facturas.find(x => x.ID_Factura !== editFacId && x.ID_Proveedor === p.ID_Proveedor && String(x.Numero_Factura).toLowerCase() === f.numero.value.trim().toLowerCase());
-    if (dup) return alert(`Ya existe la factura ${f.numero.value} para ${p.Nombre}.`);
+    if (dup) return alert(`Ya existe la factura ${f.numero.value} para ${provLegal(p)}.`);
 
     const bcv = getBcv(), orig = num(f.monto.value), mon = f.moneda.value;
     const montoUsd = mon === "Bs" ? (orig / bcv) : orig;
@@ -683,7 +977,7 @@
     await postProv("saveFactura", {
       factura: {
         ID_Factura: editFacId || "",
-        ID_Proveedor: p.ID_Proveedor, Codigo_Prov: p.Codigo, Proveedor: p.Nombre, RIF: p.RIF,
+        ID_Proveedor: p.ID_Proveedor, Codigo_Prov: p.Codigo, Proveedor: provNombre(p), RIF: p.RIF,
         Numero_Factura: f.numero.value.trim(), Numero_Control: f.control.value.trim(),
         Fecha_Emision: f.emision.value, Fecha_Vencimiento: f.vence.value,
         Moneda: mon, Tasa_BCV: bcv, Monto_Original: orig, Monto_USD: montoUsd,
@@ -839,7 +1133,9 @@
   }
 
   function renderCxP() {
-    $("#dl").innerHTML = db.proveedores.map(p => `<option value="${esc(p.Codigo + " · " + p.Nombre)}">`).join("");
+    const activos = db.proveedores.filter(p => (p.Estatus || "Activo") === "Activo");
+    $("#dl").innerHTML = activos.map(p => `<option value="${esc(p.Codigo + " · " + provNombre(p))}">`).join("");
+
     const bcv = getBcv();
     const F = db.facturas.map(f => ({ f, ...estFactura(f) }));
     const pend = F.filter(x => x.e !== "pag"), V = pend.filter(x => x.e === "venc"), P = pend.filter(x => x.e === "prox");
@@ -870,6 +1166,9 @@
       const mUsd = num(f.Monto_USD), abUsd = num(f.Abonado_USD), pc = mUsd > 0 ? Math.min(100, (abUsd / mUsd) * 100) : 0;
       const txt = e === "pag" ? "Pagada" : d < 0 ? `Vencida (${-d}d)` : d === 0 ? "Vence hoy" : `Vence en ${d}d`;
       const abs = db.abonos.filter(a => a.ID_Factura === f.ID_Factura);
+      const pObj = provById(f.ID_Proveedor);
+      const bankHint = pObj ? `🏦 ${pObj.Banco || "Sin banco"} (${pObj.Numero_Cuenta || "S/C"}) | 📱 PM: ${pObj.Pago_Movil_Telefono || "-"} ${pObj.Pago_Movil_Banco || ""} | 💵 Divisas: ${pObj.Cuenta_Divisas || "-"} | 🏛️ Ret: IVA ${pObj.Retencion_IVA_Pct || 0}% / ISLR ${pObj.Retencion_ISLR_Pct || 0}%` : "";
+
       return `
         <article class="fc ${e}">
           <div class="fh">
@@ -889,10 +1188,11 @@
           <div class="pb"><i style="width:${pc}%"></i></div>
           ${abierta === f.ID_Factura ? `
             <div class="ap">
+              ${bankHint ? `<div class="pay-hint">${esc(bankHint)}</div>` : ""}
               ${s > 0.01 ? `
-                <form onsubmit="abonar('${f.ID_Factura}', event)" style="margin-bottom:10px;">
+                <form onsubmit="abonar('${f.ID_Factura}', event)" class="form-grid" style="margin-bottom:10px;">
                   <label>Fecha <input name="fecha" type="date" value="${hoy()}" required /></label>
-                  <label>Método <select name="metodo"><option>Transferencia</option><option>Pago Móvil</option><option>Efectivo $</option><option>Zelle</option><option>Efectivo Bs</option></select></label>
+                  <label>Método <select name="metodo"><option>Transferencia</option><option>Pago Móvil</option><option>Efectivo $</option><option>Zelle</option><option>Binance</option><option>Efectivo Bs</option></select></label>
                   <label>Referencia <input name="ref" placeholder="N° Ref." /></label>
                   <label>Moneda <select name="moneda" onchange="this.form.monto.value=this.value==='Bs'?'${(s*bcv).toFixed(2)}':'${s.toFixed(2)}'"><option value="USD">Dólares ($)</option><option value="Bs">Bolívares (Bs.)</option></select></label>
                   <label>Monto <input name="monto" type="number" step="0.01" min="0.01" value="${s.toFixed(2)}" required /></label>
@@ -908,12 +1208,34 @@
 
   function renderProveedores() {
     const q = $("#q").value.toLowerCase();
-    const L = db.proveedores.filter(p => `${p.Codigo} ${p.Nombre} ${p.RIF}`.toLowerCase().includes(q))
-                            .sort((a, b) => String(a.Codigo).localeCompare(String(b.Codigo), "es", { numeric: true }));
+    const est = $("#qEstatus").value;
+    const L = db.proveedores.filter(p => {
+      const text = `${p.Codigo} ${provLegal(p)} ${p.Nombre_Comercial} ${p.RIF} ${p.Categoria_Rubro}`.toLowerCase();
+      const matchQ = !q || text.includes(q);
+      const matchE = !est || (p.Estatus || "Activo") === est;
+      return matchQ && matchE;
+    }).sort((a, b) => String(a.Codigo).localeCompare(String(b.Codigo), "es", { numeric: true }));
+
     $("#cp").textContent = `${L.length} proveedor(es)`;
-    $("#tp").innerHTML = L.length ? `<table><tr><th>Código</th><th>Nombre</th><th>RIF</th><th>Banco</th><th class="n">Crédito</th><th>Cuenta</th><th>Teléfono</th><th></th></tr>` +
-      L.map(p => `<tr><td><strong>${esc(p.Codigo)}</strong></td><td>${esc(p.Nombre)}</td><td>${esc(p.RIF)}</td><td>${esc(p.Banco)}</td><td class="n">${esc(p.Dias_Credito)} d</td><td>${esc(p.Numero_Cuenta)}</td><td>${esc(p.Telefono)}</td><td><button class="btn s" onclick="editarP('${p.ID_Proveedor}')">Editar</button> <button class="btn x" onclick="borrarP('${p.ID_Proveedor}')">Eliminar</button></td></tr>`).join("") + `</table>`
-      : `<p class="em">No hay proveedores registrados.</p>`;
+    $("#tp").innerHTML = L.length ? `<table><tr><th>Código</th><th>Razón Social / Marca</th><th>RIF</th><th>Rubro</th><th>Condición Pago</th><th>Ret. IVA/ISLR</th><th>Estatus</th><th>Acciones</th></tr>` +
+      L.map(p => {
+        const estatus = p.Estatus || "Activo";
+        return `<tr>
+          <td><strong>${esc(p.Codigo)}</strong></td>
+          <td><strong>${esc(provNombre(p))}</strong><br><small style="color:var(--muted)">${esc(provLegal(p))}</small></td>
+          <td style="font-family:monospace">${esc(p.RIF)}<br><small style="color:var(--muted)">${esc(p.Condicion_Fiscal || "")}</small></td>
+          <td>${esc(p.Categoria_Rubro || "-")}</td>
+          <td>${esc(p.Condicion_Pago || "Contado")} (${esc(p.Dias_Credito || 0)}d)<br><small style="color:var(--muted)">Lím: ${fmtUSD(num(p.Limite_Credito))}</small></td>
+          <td>IVA ${esc(p.Retencion_IVA_Pct || 0)}% · ISLR ${esc(p.Retencion_ISLR_Pct || 0)}%</td>
+          <td><span class="tg ${estatus === "Activo" ? "act" : "inact"}">${esc(estatus)}</span></td>
+          <td>
+            <button class="btn s" onclick="verFichaProv('${p.ID_Proveedor}')" title="Ver Ficha Completa">👁️ Ficha</button>
+            <button class="btn s" onclick="editarP('${p.ID_Proveedor}')">Editar</button>
+            <button class="btn x" onclick="borrarP('${p.ID_Proveedor}')">✕</button>
+          </td>
+        </tr>`;
+      }).join("") + `</table>`
+      : `<p class="em">No hay proveedores que coincidan con el filtro.</p>`;
   }
 
   function renderDia() {
@@ -934,10 +1256,9 @@
     const MM = db.movimientos.filter(m => String(m.Fecha).startsWith(mes));
     const D = {};
     MM.forEach(m => {
-      const d = D[m.Fecha] ??= { iUsd: 0, eUsd: 0, iBs: 0, eBs: 0 };
-      const usd = num(m.Monto_USD), bs = num(m.Monto_Bs);
-      if (m.Tipo === "ingreso") { d.iUsd += usd; d.iBs += bs; }
-      else { d.eUsd += usd; d.eBs += bs; }
+      const d = D[m.Fecha] ??= { iUsd: 0, eUsd: 0 };
+      if (m.Tipo === "ingreso") d.iUsd += num(m.Monto_USD);
+      else d.eUsd += num(m.Monto_USD);
     });
 
     const ds = Object.keys(D).sort().reverse();
@@ -1015,6 +1336,26 @@
     ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";"))];
     const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Cuentas_Por_Pagar_SLWA_${hoy()}.csv`; a.click();
+  }
+
+  function exportarProveedoresCSV() {
+    const headers = [
+      "Codigo", "Razon_Social", "Nombre_Comercial", "RIF", "Tipo_Persona", "Condicion_Fiscal", "Direccion_Fiscal",
+      "Telefono", "WhatsApp", "Correo_Facturacion", "Persona_Contacto", "Direccion_Almacen",
+      "Banco", "Tipo_Cuenta", "Numero_Cuenta", "Titular_Cuenta", "RIF_CI_Titular",
+      "Pago_Movil_Tel", "Pago_Movil_Banco", "Pago_Movil_ID", "Cuenta_Divisas",
+      "Rubro", "Condicion_Pago", "Dias_Credito", "Limite_Credito", "Moneda", "Ret_IVA_Pct", "Ret_ISLR_Pct", "Estatus"
+    ];
+    const rows = [headers.join(";"), ...db.proveedores.map(p => [
+      p.Codigo, provLegal(p), p.Nombre_Comercial, p.RIF, p.Tipo_Persona, p.Condicion_Fiscal, p.Direccion_Fiscal,
+      p.Telefono_Principal || p.Telefono, p.WhatsApp, p.Correo_Facturacion, p.Persona_Contacto, p.Direccion_Almacen,
+      p.Banco, p.Tipo_Cuenta, p.Numero_Cuenta, p.Titular_Cuenta, p.RIF_CI_Titular,
+      p.Pago_Movil_Telefono, p.Pago_Movil_Banco, p.Pago_Movil_ID, p.Cuenta_Divisas,
+      p.Categoria_Rubro, p.Condicion_Pago, p.Dias_Credito, p.Limite_Credito, p.Moneda_Facturacion,
+      p.Retencion_IVA_Pct, p.Retencion_ISLR_Pct, p.Estatus || "Activo"
+    ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";"))];
+    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Directorio_Proveedores_SLWA_${hoy()}.csv`; a.click();
   }
 </script>
 </body>
