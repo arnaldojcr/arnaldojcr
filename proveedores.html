@@ -123,15 +123,16 @@
     .tg.pag { background: #7d8c87; }
     .tg.act { background: #1B4D2E; }
     .tg.inact { background: #64748b; }
+    .tg.merc { background: #C59B27; color: #1B4D2E; margin-left: 4px; }
     .pb { height: 6px; background: #e3e9e7; border-radius: 3px; margin-top: 9px; overflow: hidden; }
     .pb i { display: block; height: 100%; background: var(--primary-light); }
     .ap { border-top: 1px dashed var(--border); margin-top: 10px; padding-top: 10px; }
     .pay-hint { background: #f0f7f1; border: 1px solid #cce3d0; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--primary); margin-bottom: 10px; }
 
-    .ocr-box {
-      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
-      background: #f8faf8; border: 1.5px dashed var(--primary-light); border-radius: 8px; padding: 12px;
-    }
+    .mercabar-box { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .mercabar-box h3 { margin: 0 0 8px; font-size: 13px; color: var(--primary); }
+
+    .ocr-box { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: #f8faf8; border: 1.5px dashed var(--primary-light); border-radius: 8px; padding: 12px; }
     .ocr-preview { max-height: 110px; border-radius: 6px; border: 1px solid #cbd5e1; display: none; }
     .ocr-progress { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; width: 220px; display: none; margin-top: 6px; }
     .ocr-progress i { display: block; height: 100%; background: var(--gold); width: 0%; transition: width .2s; }
@@ -199,7 +200,7 @@
 </nav>
 
 <main>
-  <!-- PESTAÑA 1: CUENTAS POR PAGAR + ESCÁNER OCR -->
+  <!-- PESTAÑA 1: CUENTAS POR PAGAR -->
   <section id="c" class="on">
     <div class="kc" id="kc"></div>
 
@@ -249,9 +250,7 @@
       <small id="ci" style="color:var(--primary);font-weight:600;display:block;margin-top:6px;"></small>
     </div>
 
-    <div class="bar">
-      <input id="qc" type="search" placeholder="Buscar por proveedor, RIF, código o N° factura..." oninput="render()" />
-    </div>
+    <div class="bar"><input id="qc" type="search" placeholder="Buscar por proveedor, RIF, código o N° factura..." oninput="render()" /></div>
     <div class="chs" id="chs"></div>
     <div id="lf"></div>
   </section>
@@ -271,21 +270,11 @@
           <h3>🏛️ Datos Principales del Proveedor</h3>
           <div class="form-grid">
             <label>Código (Automático) <input name="codigo" readonly /></label>
-            <label>Razón Social (Nombre Legal)<span class="req">*</span>
-              <input name="razon" required placeholder="Ej: Distribuidora Alimentos C.A." />
-            </label>
-            <label>Nombre Comercial (Marca / Tienda)
-              <input name="comercial" placeholder="Ej: Alimentos El Sol" />
-            </label>
-            <label>Cédula (V 00.000.000)
-              <input name="cedula" placeholder="V 00.000.000" maxlength="12" style="font-family:monospace;" oninput="formatCedulaProv(this)" />
-            </label>
-            <label>RIF (J-00000000-0)<span class="req">*</span>
-              <input name="rif" required placeholder="J-00000000-0" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" />
-            </label>
-            <label>Teléfono Principal
-              <input name="tel_principal" placeholder="04XX-000.0000" maxlength="13" style="font-family:monospace;" oninput="formatPhone(this)" />
-            </label>
+            <label>Razón Social (Nombre Legal)<span class="req">*</span> <input name="razon" required placeholder="Ej: Distribuidora Alimentos C.A." /></label>
+            <label>Nombre Comercial (Marca / Tienda) <input name="comercial" placeholder="Ej: Alicia / Alimentos El Sol" /></label>
+            <label>Cédula (V 00.000.000) <input name="cedula" placeholder="V 00.000.000" maxlength="12" style="font-family:monospace;" oninput="formatCedulaProv(this)" /></label>
+            <label>RIF (J-00000000-0)<span class="req">*</span> <input name="rif" required placeholder="J-00000000-0" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" /></label>
+            <label>Teléfono Principal <input name="tel_principal" placeholder="04XX-000.0000" maxlength="13" style="font-family:monospace;" oninput="formatPhone(this)" /></label>
             <label>Categoría / Rubro
               <select name="rubro">
                 <option value="Víveres y Alimentos">Víveres y Alimentos</option>
@@ -306,28 +295,38 @@
                 <option value="Crédito">Crédito</option>
               </select>
             </label>
-            <label>Días de Crédito
-              <input name="dias" type="number" min="0" value="0" placeholder="0, 7, 15, 30, 60" />
-            </label>
+            <label>Días de Crédito <input name="dias" type="number" min="0" value="0" /></label>
             <label>Estatus
               <select name="estatus">
                 <option value="Activo">Activo</option>
                 <option value="Inactivo">Inactivo</option>
               </select>
             </label>
+            <label>¿Es Proveedor de Mercabar?
+              <select name="es_mercabar" onchange="toggleMercabarBox(this.value)">
+                <option value="No">No</option>
+                <option value="Sí">Sí (Enlazar a Compras V5)</option>
+              </select>
+            </label>
           </div>
+        </div>
+
+        <!-- EDITOR DE RUBROS Y % MERMA PARA MERCABAR -->
+        <div id="mercabarRubrosBox" class="mercabar-box" hidden>
+          <h3>🚜 Rubros y % de Merma en Mercabar</h3>
+          <div class="bar" style="margin-bottom:8px;">
+            <input type="text" id="mercNewRubro" placeholder="Nombre del rubro (Ej: Tomate)" style="max-width:210px;" />
+            <input type="number" id="mercNewMerma" placeholder="% Merma" min="0" max="90" step="0.5" style="max-width:110px;" />
+            <button type="button" class="btn" onclick="addMercabarRubro()">+ Añadir Rubro</button>
+          </div>
+          <div class="lst" id="mercRubrosChips"></div>
         </div>
 
         <div id="provDetailedFields" hidden>
           <div class="sub-block">
             <h3>📄 1. Información Fiscal Adicional (SENIAT)</h3>
             <div class="form-grid">
-              <label>Tipo de Persona
-                <select name="tipo_persona">
-                  <option value="Persona Jurídica">Persona Jurídica</option>
-                  <option value="Persona Natural">Persona Natural</option>
-                </select>
-              </label>
+              <label>Tipo de Persona <select name="tipo_persona"><option value="Persona Jurídica">Persona Jurídica</option><option value="Persona Natural">Persona Natural</option></select></label>
               <label>Condición Fiscal
                 <select name="condicion_fiscal">
                   <option value="Contribuyente Ordinario">Contribuyente Ordinario</option>
@@ -336,9 +335,7 @@
                   <option value="No Sujeto / Exento">No Sujeto / Exento</option>
                 </select>
               </label>
-              <label style="grid-column: span 2;">Dirección Fiscal Exacta (SENIAT)
-                <input name="dir_fiscal" placeholder="Av. / Calle / Edificio / Municipio / Estado" />
-              </label>
+              <label style="grid-column: span 2;">Dirección Fiscal Exacta (SENIAT) <input name="dir_fiscal" placeholder="Av. / Calle / Edificio / Municipio / Estado" /></label>
             </div>
           </div>
 
@@ -347,15 +344,13 @@
             <div class="form-grid">
               <label>WhatsApp Pedidos <input name="whatsapp" placeholder="04XX-000.0000" maxlength="13" style="font-family:monospace;" oninput="formatPhone(this)" /></label>
               <label>Correo Facturación / Cobranzas <input name="correo" type="email" placeholder="cobranzas@proveedor.com" /></label>
-              <label>Persona de Contacto (Nombre y Cargo) <input name="contacto" placeholder="Ej: Ana Pérez (Ejecutiva de Ventas)" /></label>
-              <label style="grid-column: span 2;">Dirección de Almacén o Despacho
-                <input name="dir_almacen" placeholder="Misma dirección fiscal o indique ubicación del galpón" />
-              </label>
+              <label>Persona de Contacto <input name="contacto" placeholder="Ej: Ana Pérez (Ejecutiva de Ventas)" /></label>
+              <label style="grid-column: span 2;">Dirección de Almacén o Despacho <input name="dir_almacen" placeholder="Misma dirección fiscal o indique ubicación" /></label>
             </div>
           </div>
 
           <div class="sub-block">
-            <h3>🏦 3. Datos Bancarios (Transferencias, Pago Móvil y Divisas)</h3>
+            <h3>🏦 3. Datos Bancarios</h3>
             <div class="form-grid">
               <label>Banco Receptor
                 <select name="banco" id="selBancoProv">
@@ -384,23 +379,14 @@
                   <option value="0191 - BNC Banco Nacional de Crédito">0191 - BNC Banco Nacional de Crédito</option>
                 </select>
               </label>
-              <label>Tipo de Cuenta
-                <select name="tipo_cuenta">
-                  <option value="Corriente">Corriente</option>
-                  <option value="Ahorro">Ahorro</option>
-                </select>
-              </label>
-              <label>Número de Cuenta (20 dígitos)
-                <input name="cuenta" inputmode="numeric" maxlength="20" placeholder="00000000000000000000" style="font-family:monospace;" oninput="this.value=this.value.replace(/\D/g,'').slice(0,20)" />
-              </label>
-              <label>Titular de la Cuenta <input name="titular" placeholder="Nombre legal o titular" /></label>
-              <label>RIF / Cédula del Titular <input name="rif_titular" placeholder="J-00000000-0" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" /></label>
-              <label>Pago Móvil: Teléfono <input name="pm_tel" placeholder="04XX-000.0000" maxlength="13" style="font-family:monospace;" oninput="formatPhone(this)" /></label>
-              <label>Pago Móvil: Banco <input name="pm_banco" placeholder="Ej: Banesco / BDV" /></label>
-              <label>Pago Móvil: RIF / Cédula <input name="pm_id" placeholder="J-00000000-0" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" /></label>
-              <label style="grid-column: span 2;">Cuentas en Divisas / Zelle / Binance
-                <input name="divisas" placeholder="Ej: Zelle: pagos@empresa.com | Binance ID: 12345678" />
-              </label>
+              <label>Tipo de Cuenta <select name="tipo_cuenta"><option value="Corriente">Corriente</option><option value="Ahorro">Ahorro</option></select></label>
+              <label>Número de Cuenta (20 dígitos) <input name="cuenta" inputmode="numeric" maxlength="20" style="font-family:monospace;" oninput="this.value=this.value.replace(/\D/g,'').slice(0,20)" /></label>
+              <label>Titular de la Cuenta <input name="titular" /></label>
+              <label>RIF / Cédula del Titular <input name="rif_titular" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" /></label>
+              <label>Pago Móvil: Teléfono <input name="pm_tel" maxlength="13" style="font-family:monospace;" oninput="formatPhone(this)" /></label>
+              <label>Pago Móvil: Banco <input name="pm_banco" /></label>
+              <label>Pago Móvil: RIF / Cédula <input name="pm_id" maxlength="12" style="font-family:monospace;" oninput="formatRif(this)" /></label>
+              <label style="grid-column: span 2;">Cuentas en Divisas / Zelle / Binance <input name="divisas" /></label>
             </div>
           </div>
 
@@ -409,19 +395,9 @@
             <div class="form-grid">
               <label>Límite de Crédito ($) <input name="limite" type="number" min="0" step="0.01" value="0" /></label>
               <label>Moneda de Facturación
-                <select name="moneda_fac">
-                  <option value="Multimoneda ($ / Bs)">Multimoneda ($ / Bs)</option>
-                  <option value="Dólares ($)">Dólares ($)</option>
-                  <option value="Bolívares (Bs.)">Bolívares (Bs.)</option>
-                </select>
+                <select name="moneda_fac"><option value="Multimoneda ($ / Bs)">Multimoneda ($ / Bs)</option><option value="Dólares ($)">Dólares ($)</option><option value="Bolívares (Bs.)">Bolívares (Bs.)</option></select>
               </label>
-              <label>Retención IVA (%)
-                <select name="ret_iva">
-                  <option value="75">75%</option>
-                  <option value="100">100%</option>
-                  <option value="0">0% (No aplica)</option>
-                </select>
-              </label>
+              <label>Retención IVA (%) <select name="ret_iva"><option value="75">75%</option><option value="100">100%</option><option value="0">0%</option></select></label>
               <label>Retención ISLR (%) <input name="ret_islr" type="number" min="0" max="34" step="0.5" value="0" /></label>
             </div>
           </div>
@@ -437,20 +413,22 @@
     <div class="pn">
       <div class="bar" style="justify-content:space-between;">
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;flex:1;">
-          <input id="q" type="search" placeholder="Buscar por código, razón social, marca, Cédula, RIF o rubro..." oninput="render()" />
-          <select id="qEstatus" onchange="render()" style="max-width:150px;">
-            <option value="">Todos los estatus</option>
+          <input id="q" type="search" placeholder="Buscar por código, razón social, marca, Cédula, RIF..." oninput="render()" />
+          <select id="qEstatus" onchange="render()" style="max-width:170px;">
+            <option value="">Todos</option>
             <option value="Activo">Solo Activos</option>
+            <option value="Mercabar">Solo Mercabar</option>
             <option value="Inactivo">Solo Inactivos</option>
           </select>
           <span id="cp" style="font-size:12px;color:var(--muted);"></span>
         </div>
 
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+          <button type="button" class="btn s" onclick="cargarCatalogoMercabarInicial()" title="Crear los 10 proveedores base de Mercabar en Google Sheets">🚜 Cargar 10 Prov. Mercabar</button>
           <input type="file" id="importProvInput" accept=".xlsx,.xls,.csv" hidden onchange="importProveedoresFile(this)" />
-          <label for="importProvInput" class="btn-lbl gold" title="Importar Excel o CSV de proveedores">📂 Importar Proveedores</label>
-          <button type="button" class="btn s" onclick="exportarProveedoresExcel()">📥 Exportar Excel (.xlsx)</button>
-          <button type="button" class="btn s" onclick="exportarProveedoresCSV()">📥 Exportar CSV</button>
+          <label for="importProvInput" class="btn-lbl gold">📂 Importar</label>
+          <button type="button" class="btn s" onclick="exportarProveedoresExcel()">📥 Excel (.xlsx)</button>
+          <button type="button" class="btn s" onclick="exportarProveedoresCSV()">📥 CSV</button>
         </div>
       </div>
       <div class="tw" id="tp"></div>
@@ -459,9 +437,7 @@
 
   <!-- PESTAÑA 3: INGRESOS Y EGRESOS -->
   <section id="m">
-    <div class="bar">
-      <label style="flex-direction:row;align-items:center;gap:8px">Mes a revisar <input type="month" id="mes" onchange="render()" /></label>
-    </div>
+    <div class="bar"><label style="flex-direction:row;align-items:center;gap:8px">Mes a revisar <input type="month" id="mes" onchange="render()" /></label></div>
     <div class="kp" id="km"></div>
 
     <div class="pn">
@@ -473,10 +449,7 @@
       </form>
       <div class="bar" style="margin:10px 0 0">
         <input id="nc" placeholder="Nuevo canal (ej. Cashea, Binance)" style="max-width:220px" />
-        <select id="ncMon" style="max-width:120px">
-          <option value="Bs">En Bs.</option>
-          <option value="USD">En Dólares ($)</option>
-        </select>
+        <select id="ncMon" style="max-width:120px"><option value="Bs">En Bs.</option><option value="USD">En Dólares ($)</option></select>
         <button type="button" class="btn s" onclick="addCanal()">Añadir canal</button>
       </div>
       <div class="lst" id="lc"></div>
@@ -487,43 +460,19 @@
       <form id="fe" class="form-grid">
         <label>Fecha <input name="fecha" type="date" required /></label>
         <label>Categoría <select name="cat" id="sc" required></select></label>
-        <label>Moneda
-          <select name="moneda">
-            <option value="Bs">Bolívares (Bs.)</option>
-            <option value="USD">Dólares ($)</option>
-          </select>
-        </label>
-        <label>Método de Pago
-          <select name="metodo">
-            <option value="Transferencia">Transferencia</option>
-            <option value="Pago Móvil">Pago Móvil</option>
-            <option value="Efectivo $">Efectivo $</option>
-            <option value="Zelle">Zelle</option>
-            <option value="Efectivo Bs">Efectivo Bs.</option>
-          </select>
-        </label>
+        <label>Moneda <select name="moneda"><option value="Bs">Bolívares (Bs.)</option><option value="USD">Dólares ($)</option></select></label>
+        <label>Método de Pago <select name="metodo"><option>Transferencia</option><option>Pago Móvil</option><option>Efectivo $</option><option>Zelle</option><option>Efectivo Bs</option></select></label>
         <label>Referencia <input name="ref" placeholder="N° Ref." /></label>
         <label>Concepto <input name="concepto" placeholder="Descripción" /></label>
         <label>Monto<span class="req">*</span> <input name="monto" type="number" min="0.01" step="0.01" required /></label>
         <div><button class="btn">Agregar egreso</button></div>
       </form>
-      <div class="bar" style="margin:10px 0 0">
-        <input id="nk" placeholder="Nueva categoría (ej. Publicidad)" style="max-width:220px" />
-        <button type="button" class="btn s" onclick="addCategoria()">Añadir categoría</button>
-      </div>
+      <div class="bar" style="margin:10px 0 0"><input id="nk" placeholder="Nueva categoría" style="max-width:220px" /><button type="button" class="btn s" onclick="addCategoria()">Añadir categoría</button></div>
       <div class="lst" id="lk"></div>
     </div>
 
-    <div class="pn">
-      <h2>Comparación Diaria del Mes (Consolidado en $)</h2>
-      <div id="cg"></div>
-      <div class="tw" id="cd" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="pn">
-      <h2>Movimientos del Mes</h2>
-      <div class="tw" id="tm"></div>
-    </div>
+    <div class="pn"><h2>Comparación Diaria del Mes (Consolidado en $)</h2><div id="cg"></div><div class="tw" id="cd" style="margin-top:10px;"></div></div>
+    <div class="pn"><h2>Movimientos del Mes</h2><div class="tw" id="tm"></div></div>
   </section>
 
   <!-- PESTAÑA 4: BALANCE Y GRÁFICAS -->
@@ -539,7 +488,6 @@
   </section>
 </main>
 
-<!-- MODAL FICHA COMPLETA DEL PROVEEDOR -->
 <div id="provModal" class="modal-bg" onclick="if(event.target===this) closeProvModal()">
   <div class="modal-card">
     <div class="modal-head">
@@ -556,22 +504,30 @@
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
   const BCV_KEY = "hm_slwa_prov_bcv_v1";
 
+  const BASE_MERCABAR_10 = [
+    { Razon_Social: "Alicia", Nombre_Comercial: "Alicia", Rubros_Mercabar: "Tomate:12 | Cebolla:7 | Pimentón:10" },
+    { Razon_Social: "Chicho", Nombre_Comercial: "Chicho", Rubros_Mercabar: "Melón:10" },
+    { Razon_Social: "Cuty", Nombre_Comercial: "Cuty", Rubros_Mercabar: "Auyama:4 | Ñame:5 | Ocumo:5 | Apio:5" },
+    { Razon_Social: "Daniel Aji", Nombre_Comercial: "Daniel Aji", Rubros_Mercabar: "Ají:12" },
+    { Razon_Social: "Eliomar", Nombre_Comercial: "Eliomar", Rubros_Mercabar: "Fresa:30" },
+    { Razon_Social: "Gary", Nombre_Comercial: "Gary", Rubros_Mercabar: "Cebolla:7 | Cebolla Morada:7" },
+    { Razon_Social: "Joel", Nombre_Comercial: "Joel", Rubros_Mercabar: "Ajo Porro:12 | Apio España:15 | Cebollín:18 | Cilantro:20 | Lechuga:18" },
+    { Razon_Social: "Pelo", Nombre_Comercial: "Pelo", Rubros_Mercabar: "Guayaba:15" },
+    { Razon_Social: "Roger", Nombre_Comercial: "Roger", Rubros_Mercabar: "Apio:5 | Papas:6 | Remolacha:8 | Repollo:7 | Zanahorias:8" },
+    { Razon_Social: "Yanier", Nombre_Comercial: "Yanier", Rubros_Mercabar: "Patilla:8" }
+  ];
+
   let db = {
-    proveedores: [],
-    facturas: [],
-    abonos: [],
-    movimientos: [],
+    proveedores: [], facturas: [], abonos: [], movimientos: [],
     canalesIngreso: [
-      { nombre: "Punto de venta", moneda: "Bs" },
-      { nombre: "Biopago", moneda: "Bs" },
-      { nombre: "Pago Móvil", moneda: "Bs" },
-      { nombre: "Efectivo $", moneda: "USD" },
-      { nombre: "Zelle", moneda: "USD" }
+      { nombre: "Punto de venta", moneda: "Bs" }, { nombre: "Biopago", moneda: "Bs" },
+      { nombre: "Pago Móvil", moneda: "Bs" }, { nombre: "Efectivo $", moneda: "USD" }, { nombre: "Zelle", moneda: "USD" }
     ],
     categoriasEgreso: ["Pago a proveedores", "Fletes", "Servicios", "Mantenimiento", "Nómina", "Otros egresos"]
   };
 
   let tab = "c", fil = "pend", abierta = null, editProvId = null, editFacId = null, detailsOpen = false;
+  let mercabarRubrosList = [];
 
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
@@ -585,10 +541,7 @@
   const provLegal = p => p ? (p.Razon_Social || p.Nombre || "") : "";
 
   let avT;
-  function aviso(msg) {
-    const a = $("#av"); a.textContent = msg; a.hidden = false;
-    clearTimeout(avT); avT = setTimeout(() => a.hidden = true, 6500);
-  }
+  function aviso(msg) { const a = $("#av"); a.textContent = msg; a.hidden = false; clearTimeout(avT); avT = setTimeout(() => a.hidden = true, 6500); }
 
   function formatCedulaStr(str) {
     let raw = String(str || "").toUpperCase().replace(/[^VE0-9]/g, "");
@@ -598,10 +551,7 @@
     if (!digits) return /^[VE]$/.test(raw) ? raw : "";
     return `${letter} ${digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
   }
-
-  function formatCedulaProv(input) {
-    input.value = formatCedulaStr(input.value);
-  }
+  function formatCedulaProv(input) { input.value = formatCedulaStr(input.value); }
 
   function formatRifStr(str) {
     let clean = String(str || "").toUpperCase().replace(/[^JVEGP0-9]/g, "");
@@ -611,10 +561,7 @@
     if (!nums) return /^[JVEGP]$/.test(clean) ? clean : "";
     return nums.length <= 8 ? `${letter}-${nums}` : `${letter}-${nums.slice(0, 8)}-${nums.slice(8)}`;
   }
-
-  function formatRif(input) {
-    input.value = formatRifStr(input.value);
-  }
+  function formatRif(input) { input.value = formatRifStr(input.value); }
 
   function formatPhone(input) {
     let d = input.value.replace(/\D/g, "").slice(0, 11);
@@ -633,9 +580,65 @@
   function toggleProvDetails(forceState) {
     detailsOpen = typeof forceState === "boolean" ? forceState : !detailsOpen;
     $("#provDetailedFields").hidden = !detailsOpen;
-    $("#btnToggleDetails").textContent = detailsOpen
-      ? "➖ Ocultar Información Detallada"
-      : "➕ Mostrar Información Detallada";
+    $("#btnToggleDetails").textContent = detailsOpen ? "➖ Ocultar Información Detallada" : "➕ Mostrar Información Detallada";
+  }
+
+  function toggleMercabarBox(val) {
+    $("#mercabarRubrosBox").hidden = (val !== "Sí");
+    renderMercabarRubrosChips();
+  }
+
+  function parseRubrosMercabarStr(raw) {
+    return String(raw || "").split("|").map(part => {
+      const s = part.trim();
+      if (!s) return null;
+      const m = s.match(/^(.+?):\s*(\d+(?:[.,]\d+)?)$/);
+      return m ? { nombre: m[1].trim(), merma: parseFloat(m[2].replace(",", ".")) || 0 } : { nombre: s, merma: 10 };
+    }).filter(Boolean);
+  }
+
+  function serializeMercabarRubros() {
+    return mercabarRubrosList.map(r => `${r.nombre}:${r.merma}`).join(" | ");
+  }
+
+  function addMercabarRubro() {
+    const nombre = $("#mercNewRubro").value.trim();
+    const merma = parseFloat($("#mercNewMerma").value);
+    if (!nombre) return aviso("Escribe el nombre del rubro.");
+    const mVal = isNaN(merma) ? 10 : merma;
+    const existing = mercabarRubrosList.find(r => r.nombre.toLowerCase() === nombre.toLowerCase());
+    if (existing) existing.merma = mVal;
+    else mercabarRubrosList.push({ nombre, merma: mVal });
+    $("#mercNewRubro").value = ""; $("#mercNewMerma").value = "";
+    renderMercabarRubrosChips();
+  }
+
+  function removeMercabarRubro(idx) {
+    mercabarRubrosList.splice(idx, 1);
+    renderMercabarRubrosChips();
+  }
+
+  function renderMercabarRubrosChips() {
+    $("#mercRubrosChips").innerHTML = mercabarRubrosList.length
+      ? mercabarRubrosList.map((r, i) => `<span class="ch2">${esc(r.nombre)} (${r.merma}%)<button type="button" onclick="removeMercabarRubro(${i})">×</button></span>`).join("")
+      : `<small style="color:var(--muted);">Sin rubros aún. Agrega los productos y su % de merma.</small>`;
+  }
+
+  async function cargarCatalogoMercabarInicial() {
+    if (!confirm("Se crearán/actualizarán los 10 proveedores base de Mercabar (Alicia, Chicho, Cuty, Roger, etc.) con sus rubros y mermas en Google Sheets. ¿Continuar?")) return;
+    const payloadList = BASE_MERCABAR_10.map(item => ({
+      Razon_Social: item.Razon_Social,
+      Nombre_Comercial: item.Nombre_Comercial,
+      Categoria_Rubro: "Fruver (Frutas y Verduras)",
+      Condicion_Pago: "Contado",
+      Dias_Credito: "0",
+      Moneda_Facturacion: "Multimoneda ($ / Bs)",
+      Estatus: "Activo",
+      Proveedor_Mercabar: "Sí",
+      Rubros_Mercabar: item.Rubros_Mercabar
+    }));
+    aviso("Cargando proveedores de Mercabar en Google Sheets...");
+    await postProv("importProveedores", { proveedores: payloadList }, 1500);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -723,94 +726,60 @@
       if (!aoa || aoa.length < 2) return aviso("❌ El archivo no contiene filas de proveedores.");
       const headers = aoa[0].map(normHeaderKey);
       const col = (...names) => {
-        for (const n of names) {
-          const idx = headers.findIndex(h => h === n || h.includes(n));
-          if (idx !== -1) return idx;
-        }
+        for (const n of names) { const idx = headers.findIndex(h => h === n || h.includes(n)); if (idx !== -1) return idx; }
         return -1;
       };
 
-      const iCod = col("codigo");
-      const iRaz = col("razon_social", "nombre_legal", "nombre");
-      const iCom = col("nombre_comercial", "marca", "tienda");
-      const iCed = col("cedula", "ci");
-      const iRif = col("rif");
-      const iDirF = col("direccion_fiscal", "direccion");
-      const iTipoP = col("tipo_persona");
-      const iCondF = col("condicion_fiscal");
-      const iTel = col("telefono_principal", "telefono");
-      const iWha = col("whatsapp");
-      const iCor = col("correo_facturacion", "correo", "email");
-      const iCont = col("persona_contacto", "contacto");
-      const iDirA = col("direccion_almacen", "almacen");
-      const iBan = col("banco");
-      const iTipC = col("tipo_cuenta");
-      const iCue = col("numero_cuenta", "cuenta");
-      const iTit = col("titular_cuenta", "titular");
-      const iRifT = col("rif_ci_titular");
-      const iPmTel = col("pago_movil_tel", "pago_movil_telefono");
-      const iPmBan = col("pago_movil_banco");
-      const iPmId = col("pago_movil_id");
-      const iDiv = col("cuenta_divisas", "divisas", "zelle", "binance");
-      const iRub = col("categoria_rubro", "rubro", "categoria");
-      const iCondP = col("condicion_pago");
-      const iDias = col("dias_credito", "dias");
-      const iLim = col("limite_credito", "limite");
-      const iMon = col("moneda_facturacion", "moneda");
-      const iIva = col("retencion_iva_pct", "ret_iva");
-      const iIslr = col("retencion_islr_pct", "ret_islr");
-      const iEst = col("estatus", "estado");
+      const iCod = col("codigo"), iRaz = col("razon_social", "nombre_legal", "nombre"), iCom = col("nombre_comercial", "marca", "tienda");
+      const iCed = col("cedula", "ci"), iRif = col("rif"), iDirF = col("direccion_fiscal", "direccion");
+      const iTipoP = col("tipo_persona"), iCondF = col("condicion_fiscal"), iTel = col("telefono_principal", "telefono");
+      const iWha = col("whatsapp"), iCor = col("correo_facturacion", "correo", "email"), iCont = col("persona_contacto", "contacto");
+      const iDirA = col("direccion_almacen", "almacen"), iBan = col("banco"), iTipC = col("tipo_cuenta");
+      const iCue = col("numero_cuenta", "cuenta"), iTit = col("titular_cuenta", "titular"), iRifT = col("rif_ci_titular");
+      const iPmTel = col("pago_movil_tel", "pago_movil_telefono"), iPmBan = col("pago_movil_banco"), iPmId = col("pago_movil_id");
+      const iDiv = col("cuenta_divisas", "divisas", "zelle", "binance"), iRub = col("categoria_rubro", "rubro", "categoria");
+      const iCondP = col("condicion_pago"), iDias = col("dias_credito", "dias"), iLim = col("limite_credito", "limite");
+      const iMon = col("moneda_facturacion", "moneda"), iIva = col("retencion_iva_pct", "ret_iva"), iIslr = col("retencion_islr_pct", "ret_islr");
+      const iEst = col("estatus", "estado"), iMerc = col("proveedor_mercabar", "mercabar"), iMercRub = col("rubros_mercabar");
 
-      if (iRaz === -1 && iCom === -1) {
-        return aviso("❌ El archivo debe tener al menos la columna Razón Social o Nombre.");
-      }
+      if (iRaz === -1 && iCom === -1) return aviso("❌ El archivo debe tener al menos la columna Razón Social o Nombre.");
 
       const lista = [];
       for (let r = 1; r < aoa.length; r++) {
         const row = aoa[r];
         if (!row || !row.length) continue;
-        const raz = iRaz >= 0 ? String(row[iRaz] || "").trim() : "";
-        const com = iCom >= 0 ? String(row[iCom] || "").trim() : "";
+        const raz = iRaz >= 0 ? String(row[iRaz] || "").trim() : "", com = iCom >= 0 ? String(row[iCom] || "").trim() : "";
         if (!raz && !com) continue;
-
         const diasVal = iDias >= 0 ? parseInt(row[iDias] || "0", 10) || 0 : 0;
         const condPago = iCondP >= 0 && row[iCondP] ? String(row[iCondP]).trim() : (diasVal > 0 ? "Crédito" : "Contado");
 
         lista.push({
-          Codigo: iCod >= 0 ? String(row[iCod] || "").trim() : "",
-          Razon_Social: raz || com,
-          Nombre_Comercial: com,
-          Cedula: iCed >= 0 ? formatCedulaStr(row[iCed]) : "",
-          RIF: iRif >= 0 ? formatRifStr(row[iRif]) : "",
+          Codigo: iCod >= 0 ? String(row[iCod] || "").trim() : "", Razon_Social: raz || com, Nombre_Comercial: com,
+          Cedula: iCed >= 0 ? formatCedulaStr(row[iCed]) : "", RIF: iRif >= 0 ? formatRifStr(row[iRif]) : "",
           Direccion_Fiscal: iDirF >= 0 ? String(row[iDirF] || "").trim() : "",
           Tipo_Persona: iTipoP >= 0 && row[iTipoP] ? String(row[iTipoP]).trim() : "Persona Jurídica",
           Condicion_Fiscal: iCondF >= 0 && row[iCondF] ? String(row[iCondF]).trim() : "Contribuyente Ordinario",
-          Telefono_Principal: iTel >= 0 ? String(row[iTel] || "").trim() : "",
-          WhatsApp: iWha >= 0 ? String(row[iWha] || "").trim() : "",
-          Correo_Facturacion: iCor >= 0 ? String(row[iCor] || "").trim().toLowerCase() : "",
-          Persona_Contacto: iCont >= 0 ? String(row[iCont] || "").trim() : "",
-          Direccion_Almacen: iDirA >= 0 ? String(row[iDirA] || "").trim() : "",
-          Banco: iBan >= 0 ? String(row[iBan] || "").trim() : "",
+          Telefono_Principal: iTel >= 0 ? String(row[iTel] || "").trim() : "", WhatsApp: iWha >= 0 ? String(row[iWha] || "").trim() : "",
+          Correo_Facturacion: iCor >= 0 ? String(row[iCor] || "").trim().toLowerCase() : "", Persona_Contacto: iCont >= 0 ? String(row[iCont] || "").trim() : "",
+          Direccion_Almacen: iDirA >= 0 ? String(row[iDirA] || "").trim() : "", Banco: iBan >= 0 ? String(row[iBan] || "").trim() : "",
           Tipo_Cuenta: iTipC >= 0 && row[iTipC] ? String(row[iTipC]).trim() : "Corriente",
           Numero_Cuenta: iCue >= 0 ? String(row[iCue] || "").replace(/\D/g, "").slice(0, 20) : "",
-          Titular_Cuenta: iTit >= 0 ? String(row[iTit] || "").trim() : "",
-          RIF_CI_Titular: iRifT >= 0 ? formatRifStr(row[iRifT]) : "",
-          Pago_Movil_Telefono: iPmTel >= 0 ? String(row[iPmTel] || "").trim() : "",
-          Pago_Movil_Banco: iPmBan >= 0 ? String(row[iPmBan] || "").trim() : "",
-          Pago_Movil_ID: iPmId >= 0 ? formatRifStr(row[iPmId]) : "",
-          Cuenta_Divisas: iDiv >= 0 ? String(row[iDiv] || "").trim() : "",
+          Titular_Cuenta: iTit >= 0 ? String(row[iTit] || "").trim() : "", RIF_CI_Titular: iRifT >= 0 ? formatRifStr(row[iRifT]) : "",
+          Pago_Movil_Telefono: iPmTel >= 0 ? String(row[iPmTel] || "").trim() : "", Pago_Movil_Banco: iPmBan >= 0 ? String(row[iPmBan] || "").trim() : "",
+          Pago_Movil_ID: iPmId >= 0 ? formatRifStr(row[iPmId]) : "", Cuenta_Divisas: iDiv >= 0 ? String(row[iDiv] || "").trim() : "",
           Categoria_Rubro: iRub >= 0 && row[iRub] ? String(row[iRub]).trim() : "Otros",
-          Condicion_Pago: condPago,
-          Dias_Credito: String(condPago === "Contado" ? 0 : diasVal),
+          Condicion_Pago: condPago, Dias_Credito: String(condPago === "Contado" ? 0 : diasVal),
           Limite_Credito: iLim >= 0 ? String(row[iLim] || "0") : "0",
           Moneda_Facturacion: iMon >= 0 && row[iMon] ? String(row[iMon]).trim() : "Multimoneda ($ / Bs)",
           Retencion_IVA_Pct: iIva >= 0 && row[iIva] !== "" ? String(row[iIva]) : "75",
           Retencion_ISLR_Pct: iIslr >= 0 && row[iIslr] !== "" ? String(row[iIslr]) : "0",
-          Estatus: iEst >= 0 && row[iEst] ? String(row[iEst]).trim() : "Activo"
+          Estatus: iEst >= 0 && row[iEst] ? String(row[iEst]).trim() : "Activo",
+          Proveedor_Mercabar: iMerc >= 0 && row[iMerc] ? String(row[iMerc]).trim() : "No",
+          Rubros_Mercabar: iMercRub >= 0 ? String(row[iMercRub] || "").trim() : ""
         });
       }
 
-      if (!lista.length) return aviso("❌ No se encontraron proveedores válidos para importar.");
+      if (!lista.length) return aviso("❌ No se encontraron proveedores válidos.");
       aviso(`Importando ${lista.length} proveedores a Google Sheets...`);
       await postProv("importProveedores", { proveedores: lista }, 1800);
     };
@@ -820,15 +789,13 @@
       reader.onload = ev => {
         const lines = ev.target.result.replace(/\r\n/g, "\n").split("\n").filter(l => l.trim());
         const sep = lines[0] && lines[0].split(";").length > lines[0].split(",").length ? ";" : ",";
-        const aoa = lines.map(l => l.split(sep).map(c => c.replace(/^"|"$/g, "").replace(/""/g, '"').trim()));
-        processAoa(aoa);
+        processAoa(lines.map(l => l.split(sep).map(c => c.replace(/^"|"$/g, "").replace(/""/g, '"').trim())));
       };
       reader.readAsText(file, "UTF-8");
     } else {
       reader.onload = ev => {
         const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        processAoa(XLSX.utils.sheet_to_json(ws, { header: 1, raw: false }));
+        processAoa(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false }));
       };
       reader.readAsArrayBuffer(file);
     }
@@ -838,159 +805,85 @@
   async function scanInvoiceImage(input) {
     const file = input.files[0];
     if (!file) return;
-
-    const preview = $("#ocrPreview");
-    preview.src = URL.createObjectURL(file);
-    preview.style.display = "block";
-
+    const preview = $("#ocrPreview"); preview.src = URL.createObjectURL(file); preview.style.display = "block";
     const bar = $("#ocrProgressBar"), fill = $("#ocrProgressFill"), status = $("#ocrStatus");
-    bar.style.display = "block"; fill.style.width = "10%";
-    status.textContent = "Iniciando escáner OCR en español...";
-
+    bar.style.display = "block"; fill.style.width = "10%"; status.textContent = "Iniciando escáner OCR en español...";
     try {
       const worker = await Tesseract.createWorker("spa", 1, {
-        logger: m => {
-          if (m.status === "recognizing text" && typeof m.progress === "number") {
-            const pct = Math.round(m.progress * 100);
-            fill.style.width = pct + "%";
-            status.textContent = `Leyendo factura... ${pct}%`;
-          }
-        }
+        logger: m => { if (m.status === "recognizing text" && typeof m.progress === "number") { const pct = Math.round(m.progress * 100); fill.style.width = pct + "%"; status.textContent = `Leyendo factura... ${pct}%`; } }
       });
-
       const { data: { text } } = await worker.recognize(file);
       await worker.terminate();
-
-      $("#ocrRawText").textContent = text;
-      $("#ocrRawWrap").hidden = false;
+      $("#ocrRawText").textContent = text; $("#ocrRawWrap").hidden = false;
       parseAndFillInvoiceOCR(text);
       status.textContent = "✅ Lectura completada. Verifica los datos abajo antes de guardar.";
     } catch (err) {
-      console.error(err);
-      status.textContent = "❌ No se pudo leer la imagen. Intenta con mejor iluminación.";
-    } finally {
-      input.value = "";
-    }
+      status.textContent = "❌ No se pudo leer la imagen.";
+    } finally { input.value = ""; }
   }
 
   function parseOcrAmount(raw) {
     let s = String(raw || "").replace(/[^\d.,]/g, "");
     if (!s) return 0;
-    if (s.includes(",") && s.includes(".")) {
-      if (s.lastIndexOf(",") > s.lastIndexOf(".")) s = s.replace(/\./g, "").replace(",", ".");
-      else s = s.replace(/,/g, "");
-    } else if (s.includes(",")) {
-      const parts = s.split(",");
-      if (parts[parts.length - 1].length <= 2) s = s.replace(",", ".");
-      else s = s.replace(/,/g, "");
-    }
+    if (s.includes(",") && s.includes(".")) s = s.lastIndexOf(",") > s.lastIndexOf(".") ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
+    else if (s.includes(",")) { const parts = s.split(","); s = parts[parts.length - 1].length <= 2 ? s.replace(",", ".") : s.replace(/,/g, ""); }
     return parseFloat(s) || 0;
   }
 
   function parseAndFillInvoiceOCR(text) {
-    const f = $("#ff").elements;
-    const upper = text.toUpperCase();
-
-    const rifMatches = [...upper.matchAll(/\b([JVEGP])[-\s.]?(\d{7,9})[-\s.]?(\d)?\b/g)]
-      .map(m => `${m[1]}-${m[2]}${m[3] ? "-" + m[3] : ""}`);
-
+    const f = $("#ff").elements, upper = text.toUpperCase();
+    const rifMatches = [...upper.matchAll(/\b([JVEGP])[-\s.]?(\d{7,9})[-\s.]?(\d)?\b/g)].map(m => `${m[1]}-${m[2]}${m[3] ? "-" + m[3] : ""}`);
     let matchedProv = null;
     for (const r of rifMatches) {
       const rDigits = r.replace(/\D/g, "");
-      matchedProv = db.proveedores.find(p =>
-        (p.RIF && String(p.RIF).replace(/\D/g, "") === rDigits) ||
-        (p.Cedula && String(p.Cedula).replace(/\D/g, "") === rDigits)
-      );
+      matchedProv = db.proveedores.find(p => (p.RIF && String(p.RIF).replace(/\D/g, "") === rDigits) || (p.Cedula && String(p.Cedula).replace(/\D/g, "") === rDigits));
       if (matchedProv) break;
     }
-    if (!matchedProv) {
-      matchedProv = db.proveedores.find(p =>
-        (provLegal(p) && upper.includes(provLegal(p).toUpperCase())) ||
-        (p.Nombre_Comercial && upper.includes(p.Nombre_Comercial.toUpperCase()))
-      );
-    }
-    if (matchedProv) {
-      f.prov.value = `${matchedProv.Codigo} · ${provNombre(matchedProv)}`;
-    } else if (rifMatches.length > 0) {
-      aviso(`RIF/CI detectado (${rifMatches[0]}). Si es nuevo, regístralo en Directorio de Proveedores.`);
-    }
+    if (!matchedProv) matchedProv = db.proveedores.find(p => (provLegal(p) && upper.includes(provLegal(p).toUpperCase())) || (p.Nombre_Comercial && upper.includes(p.Nombre_Comercial.toUpperCase())));
+    if (matchedProv) f.prov.value = `${matchedProv.Codigo} · ${provNombre(matchedProv)}`;
+    else if (rifMatches.length > 0) aviso(`RIF/CI detectado (${rifMatches[0]}). Regístralo en Directorio de Proveedores.`);
 
     const mFac = upper.match(/(?:FACTURA|FACT\.?|NRO\.?\s*FACTURA)\s*(?:N[°RO.]*|#|:|\s)*([A-Z0-9\-]{4,18})/);
     if (mFac && mFac[1]) f.numero.value = mFac[1].trim();
-
     const mCtrl = upper.match(/(?:CONTROL|NRO\.?\s*CONTROL)\s*(?:N[°RO.]*|#|:|\s)*([0-9\-]{4,20})/);
     if (mCtrl && mCtrl[1]) f.control.value = mCtrl[1].trim();
-
     const mDate = text.match(/\b(\d{2})[\/\-](\d{2})[\/\-](\d{2,4})\b/);
-    if (mDate) {
-      const dd = mDate[1], mm = mDate[2];
-      const yyyy = mDate[3].length === 2 ? "20" + mDate[3] : mDate[3];
-      if (+mm >= 1 && +mm <= 12 && +dd >= 1 && +dd <= 31) f.emision.value = `${yyyy}-${mm}-${dd}`;
-    }
-
+    if (mDate) { const yyyy = mDate[3].length === 2 ? "20" + mDate[3] : mDate[3]; if (+mDate[2] >= 1 && +mDate[2] <= 12) f.emision.value = `${yyyy}-${mDate[2]}-${mDate[1]}`; }
     const lines = upper.split(/\r?\n/);
-    let totalFound = 0;
     for (let i = lines.length - 1; i >= 0; i--) {
-      const line = lines[i];
-      if (line.includes("TOTAL") && !line.includes("SUBTOTAL") && !line.includes("EXENTO")) {
-        const nums = line.match(/[\d.,]{3,}/g);
-        if (nums && nums.length) {
-          const val = parseOcrAmount(nums[nums.length - 1]);
-          if (val > 0) { totalFound = val; break; }
-        }
+      if (lines[i].includes("TOTAL") && !lines[i].includes("SUBTOTAL") && !lines[i].includes("EXENTO")) {
+        const nums = lines[i].match(/[\d.,]{3,}/g);
+        if (nums && nums.length) { const val = parseOcrAmount(nums[nums.length - 1]); if (val > 0) { f.monto.value = val.toFixed(2); break; } }
       }
     }
-    if (totalFound > 0) f.monto.value = totalFound.toFixed(2);
-
     if (/\b(USD|\$|DIVISA|D[OÓ]LAR)\b/.test(upper)) f.moneda.value = "USD";
     else if (/\b(BS\.?|BOL[IÍ]VAR)\b/.test(upper)) f.moneda.value = "Bs";
-
-    f.origen.value = "Escaneo";
-    autoVence();
-    updateFacturaPreview();
+    f.origen.value = "Escaneo"; autoVence(); updateFacturaPreview();
   }
 
   const provById = id => db.proveedores.find(p => p.ID_Proveedor === id);
-  function sigCodigo() {
-    const n = Math.max(0, ...db.proveedores.map(p => +((/^P-(\d+)$/.exec(p.Codigo) || [0, 0])[1])));
-    return "P-" + String(n + 1).padStart(4, "0");
-  }
+  function sigCodigo() { return "P-" + String(Math.max(0, ...db.proveedores.map(p => +((/^P-(\d+)$/.exec(p.Codigo) || [0, 0])[1]))) + 1).padStart(4, "0"); }
 
   $("#fp").onsubmit = async e => {
     e.preventDefault();
     const f = e.target.elements;
     const prov = {
-      ID_Proveedor: editProvId || "",
-      Codigo: f.codigo.value.trim(),
-      Razon_Social: f.razon.value.trim(),
-      Nombre_Comercial: f.comercial.value.trim(),
-      Cedula: formatCedulaStr(f.cedula.value),
-      RIF: formatRifStr(f.rif.value),
-      Tipo_Persona: f.tipo_persona.value,
-      Condicion_Fiscal: f.condicion_fiscal.value,
-      Direccion_Fiscal: f.dir_fiscal.value.trim(),
-      Telefono_Principal: f.tel_principal.value.trim(),
-      WhatsApp: f.whatsapp.value.trim(),
-      Correo_Facturacion: f.correo.value.trim().toLowerCase(),
-      Persona_Contacto: f.contacto.value.trim(),
-      Direccion_Almacen: f.dir_almacen.value.trim(),
-      Banco: f.banco.value,
-      Tipo_Cuenta: f.tipo_cuenta.value,
-      Numero_Cuenta: f.cuenta.value.trim(),
-      Titular_Cuenta: f.titular.value.trim(),
-      RIF_CI_Titular: formatRifStr(f.rif_titular.value),
-      Pago_Movil_Telefono: f.pm_tel.value.trim(),
-      Pago_Movil_Banco: f.pm_banco.value.trim(),
-      Pago_Movil_ID: formatRifStr(f.pm_id.value),
-      Cuenta_Divisas: f.divisas.value.trim(),
-      Categoria_Rubro: f.rubro.value,
-      Condicion_Pago: f.condicion_pago.value,
-      Dias_Credito: f.condicion_pago.value === "Contado" ? "0" : (f.dias.value || "0"),
-      Limite_Credito: f.limite.value || "0",
-      Moneda_Facturacion: f.moneda_fac.value,
-      Retencion_IVA_Pct: f.ret_iva.value,
-      Retencion_ISLR_Pct: f.ret_islr.value || "0",
-      Estatus: f.estatus.value
+      ID_Proveedor: editProvId || "", Codigo: f.codigo.value.trim(),
+      Razon_Social: f.razon.value.trim(), Nombre_Comercial: f.comercial.value.trim(),
+      Cedula: formatCedulaStr(f.cedula.value), RIF: formatRifStr(f.rif.value),
+      Tipo_Persona: f.tipo_persona.value, Condicion_Fiscal: f.condicion_fiscal.value, Direccion_Fiscal: f.dir_fiscal.value.trim(),
+      Telefono_Principal: f.tel_principal.value.trim(), WhatsApp: f.whatsapp.value.trim(),
+      Correo_Facturacion: f.correo.value.trim().toLowerCase(), Persona_Contacto: f.contacto.value.trim(), Direccion_Almacen: f.dir_almacen.value.trim(),
+      Banco: f.banco.value, Tipo_Cuenta: f.tipo_cuenta.value, Numero_Cuenta: f.cuenta.value.trim(),
+      Titular_Cuenta: f.titular.value.trim(), RIF_CI_Titular: formatRifStr(f.rif_titular.value),
+      Pago_Movil_Telefono: f.pm_tel.value.trim(), Pago_Movil_Banco: f.pm_banco.value.trim(), Pago_Movil_ID: formatRifStr(f.pm_id.value),
+      Cuenta_Divisas: f.divisas.value.trim(), Categoria_Rubro: f.rubro.value,
+      Condicion_Pago: f.condicion_pago.value, Dias_Credito: f.condicion_pago.value === "Contado" ? "0" : (f.dias.value || "0"),
+      Limite_Credito: f.limite.value || "0", Moneda_Facturacion: f.moneda_fac.value,
+      Retencion_IVA_Pct: f.ret_iva.value, Retencion_ISLR_Pct: f.ret_islr.value || "0",
+      Estatus: f.estatus.value,
+      Proveedor_Mercabar: f.es_mercabar.value,
+      Rubros_Mercabar: f.es_mercabar.value === "Sí" ? serializeMercabarRubros() : ""
     };
     await postProv("saveProveedor", { proveedor: prov });
     cancelarP();
@@ -1000,6 +893,8 @@
   function cancelarP() {
     editProvId = null; $("#fp").reset();
     $("#fp").elements.codigo.value = sigCodigo();
+    mercabarRubrosList = [];
+    toggleMercabarBox("No");
     toggleDiasCredito("Contado");
     toggleProvDetails(false);
     $("#pt").textContent = "Registro Rápido de Proveedor";
@@ -1009,41 +904,26 @@
     const p = provById(id), f = $("#fp").elements;
     if (!p) return;
     editProvId = id;
-    f.codigo.value = p.Codigo || "";
-    f.razon.value = provLegal(p);
-    f.comercial.value = p.Nombre_Comercial || "";
-    f.cedula.value = formatCedulaStr(p.Cedula || "");
-    f.rif.value = formatRifStr(p.RIF || "");
-    f.tipo_persona.value = p.Tipo_Persona || "Persona Jurídica";
-    f.condicion_fiscal.value = p.Condicion_Fiscal || "Contribuyente Ordinario";
-    f.dir_fiscal.value = p.Direccion_Fiscal || "";
-    f.tel_principal.value = p.Telefono_Principal || p.Telefono || "";
-    f.whatsapp.value = p.WhatsApp || "";
-    f.correo.value = p.Correo_Facturacion || "";
-    f.contacto.value = p.Persona_Contacto || "";
-    f.dir_almacen.value = p.Direccion_Almacen || "";
-    f.banco.value = p.Banco || "";
-    f.tipo_cuenta.value = p.Tipo_Cuenta || "Corriente";
-    f.cuenta.value = p.Numero_Cuenta || "";
-    f.titular.value = p.Titular_Cuenta || "";
-    f.rif_titular.value = p.RIF_CI_Titular || "";
-    f.pm_tel.value = p.Pago_Movil_Telefono || "";
-    f.pm_banco.value = p.Pago_Movil_Banco || "";
-    f.pm_id.value = p.Pago_Movil_ID || "";
-    f.divisas.value = p.Cuenta_Divisas || "";
-    f.rubro.value = p.Categoria_Rubro || "Otros";
+    f.codigo.value = p.Codigo || ""; f.razon.value = provLegal(p); f.comercial.value = p.Nombre_Comercial || "";
+    f.cedula.value = formatCedulaStr(p.Cedula || ""); f.rif.value = formatRifStr(p.RIF || "");
+    f.tipo_persona.value = p.Tipo_Persona || "Persona Jurídica"; f.condicion_fiscal.value = p.Condicion_Fiscal || "Contribuyente Ordinario";
+    f.dir_fiscal.value = p.Direccion_Fiscal || ""; f.tel_principal.value = p.Telefono_Principal || p.Telefono || "";
+    f.whatsapp.value = p.WhatsApp || ""; f.correo.value = p.Correo_Facturacion || ""; f.contacto.value = p.Persona_Contacto || "";
+    f.dir_almacen.value = p.Direccion_Almacen || ""; f.banco.value = p.Banco || ""; f.tipo_cuenta.value = p.Tipo_Cuenta || "Corriente";
+    f.cuenta.value = p.Numero_Cuenta || ""; f.titular.value = p.Titular_Cuenta || ""; f.rif_titular.value = p.RIF_CI_Titular || "";
+    f.pm_tel.value = p.Pago_Movil_Telefono || ""; f.pm_banco.value = p.Pago_Movil_Banco || ""; f.pm_id.value = p.Pago_Movil_ID || "";
+    f.divisas.value = p.Cuenta_Divisas || ""; f.rubro.value = p.Categoria_Rubro || "Otros";
     f.condicion_pago.value = p.Condicion_Pago || (Number(p.Dias_Credito) > 0 ? "Crédito" : "Contado");
-    toggleDiasCredito(f.condicion_pago.value);
-    f.dias.value = p.Dias_Credito || "0";
-    f.limite.value = p.Limite_Credito || "0";
-    f.moneda_fac.value = p.Moneda_Facturacion || "Multimoneda ($ / Bs)";
-    f.ret_iva.value = p.Retencion_IVA_Pct || "75";
-    f.ret_islr.value = p.Retencion_ISLR_Pct || "0";
-    f.estatus.value = p.Estatus || "Activo";
+    toggleDiasCredito(f.condicion_pago.value); f.dias.value = p.Dias_Credito || "0"; f.limite.value = p.Limite_Credito || "0";
+    f.moneda_fac.value = p.Moneda_Facturacion || "Multimoneda ($ / Bs)"; f.ret_iva.value = p.Retencion_IVA_Pct || "75";
+    f.ret_islr.value = p.Retencion_ISLR_Pct || "0"; f.estatus.value = p.Estatus || "Activo";
+
+    f.es_mercabar.value = p.Proveedor_Mercabar || "No";
+    mercabarRubrosList = parseRubrosMercabarStr(p.Rubros_Mercabar);
+    toggleMercabarBox(f.es_mercabar.value);
 
     const hasDetails = Boolean(p.Direccion_Fiscal || p.Banco || p.Numero_Cuenta || p.Pago_Movil_Telefono || p.Cuenta_Divisas);
     toggleProvDetails(hasDetails);
-
     $("#pt").textContent = "Editando Proveedor: " + provLegal(p);
     tab = "p"; render(); window.scrollTo(0, 0);
   }
@@ -1059,16 +939,16 @@
         <p><strong>Nombre Comercial:</strong> ${esc(p.Nombre_Comercial || "-")}</p>
         <p><strong>Cédula:</strong> ${esc(p.Cedula || "-")}</p>
         <p><strong>RIF:</strong> ${esc(p.RIF || "-")}</p>
-        <p><strong>Persona / Condición:</strong> ${esc(p.Tipo_Persona || "-")} · ${esc(p.Condicion_Fiscal || "-")}</p>
+        <p><strong>Condición:</strong> ${esc(p.Tipo_Persona || "-")} · ${esc(p.Condicion_Fiscal || "-")}</p>
         <p><strong>Dir. Fiscal:</strong> ${esc(p.Direccion_Fiscal || "-")}</p>
       </div>
       <div class="detail-box">
-        <h4>🚚 Contacto y Logística</h4>
+        <h4>🚚 Contacto y Mercabar</h4>
         <p><strong>Teléfono:</strong> ${esc(p.Telefono_Principal || p.Telefono || "-")}</p>
         <p><strong>WhatsApp:</strong> ${esc(p.WhatsApp || "-")}</p>
-        <p><strong>Correo Cobranzas:</strong> ${esc(p.Correo_Facturacion || "-")}</p>
-        <p><strong>Contacto:</strong> ${esc(p.Persona_Contacto || "-")}</p>
-        <p><strong>Dir. Almacén:</strong> ${esc(p.Direccion_Almacen || "Misma dirección fiscal")}</p>
+        <p><strong>Correo:</strong> ${esc(p.Correo_Facturacion || "-")}</p>
+        <p><strong>Mercabar:</strong> ${esc(p.Proveedor_Mercabar || "No")}</p>
+        <p><strong>Rubros Mercabar:</strong> ${esc(p.Rubros_Mercabar || "-")}</p>
       </div>
       <div class="detail-box">
         <h4>🏦 Datos Bancarios</h4>
@@ -1076,14 +956,12 @@
         <p><strong>Cuenta (${esc(p.Tipo_Cuenta || "Corriente")}):</strong> ${esc(p.Numero_Cuenta || "-")}</p>
         <p><strong>Titular / ID:</strong> ${esc(p.Titular_Cuenta || "-")} (${esc(p.RIF_CI_Titular || "-")})</p>
         <p><strong>Pago Móvil:</strong> ${esc(p.Pago_Movil_Telefono || "-")} · ${esc(p.Pago_Movil_Banco || "-")} · ${esc(p.Pago_Movil_ID || "-")}</p>
-        <p><strong>Divisas / Zelle / Binance:</strong> ${esc(p.Cuenta_Divisas || "-")}</p>
+        <p><strong>Divisas:</strong> ${esc(p.Cuenta_Divisas || "-")}</p>
       </div>
       <div class="detail-box">
         <h4>📋 Condiciones Comerciales</h4>
         <p><strong>Rubro:</strong> ${esc(p.Categoria_Rubro || "-")}</p>
-        <p><strong>Pago:</strong> ${esc(p.Condicion_Pago || "Contado")} (${esc(p.Dias_Credito || 0)} días)</p>
-        <p><strong>Límite Crédito:</strong> ${fmtUSD(num(p.Limite_Credito))}</p>
-        <p><strong>Moneda:</strong> ${esc(p.Moneda_Facturacion || "-")}</p>
+        <p><strong>Pago:</strong> ${esc(p.Condicion_Pago || "Contado")} (${esc(p.Dias_Credito || 0)}d)</p>
         <p><strong>Retenciones:</strong> IVA ${esc(p.Retencion_IVA_Pct || 0)}% | ISLR ${esc(p.Retencion_ISLR_Pct || 0)}%</p>
         <p><strong>Estatus:</strong> ${esc(p.Estatus || "Activo")}</p>
       </div>`;
@@ -1104,36 +982,22 @@
     v = String(v || "").trim().toLowerCase();
     if (!v) return null;
     return db.proveedores.find(p =>
-      `${p.Codigo} · ${provNombre(p)}`.toLowerCase() === v ||
-      `${p.Codigo} · ${provLegal(p)}`.toLowerCase() === v ||
-      String(p.Codigo || "").toLowerCase() === v ||
-      provNombre(p).toLowerCase() === v ||
-      provLegal(p).toLowerCase() === v ||
-      (p.RIF && p.RIF.toLowerCase() === v) ||
-      (p.Cedula && p.Cedula.toLowerCase() === v)
+      `${p.Codigo} · ${provNombre(p)}`.toLowerCase() === v || `${p.Codigo} · ${provLegal(p)}`.toLowerCase() === v ||
+      String(p.Codigo || "").toLowerCase() === v || provNombre(p).toLowerCase() === v || provLegal(p).toLowerCase() === v ||
+      (p.RIF && p.RIF.toLowerCase() === v) || (p.Cedula && p.Cedula.toLowerCase() === v)
     );
   }
 
   function autoVence() {
     const f = $("#ff").elements, p = buscarProvInput(f.prov.value);
-    if (p && f.emision.value) {
-      const dias = p.Condicion_Pago === "Contado" ? 0 : parseInt(p.Dias_Credito || 0, 10);
-      f.vence.value = addD(f.emision.value, dias);
-    }
+    if (p && f.emision.value) f.vence.value = addD(f.emision.value, p.Condicion_Pago === "Contado" ? 0 : parseInt(p.Dias_Credito || 0, 10));
     updateFacturaPreview();
   }
 
   function updateFacturaPreview() {
-    const f = $("#ff").elements, p = buscarProvInput(f.prov.value), bcv = getBcv(), m = num(f.monto.value);
-    const mon = f.moneda.value;
-    let info = "";
-    if (p) {
-      if (p.Estatus === "Inactivo") info += "⚠️ PROVEEDOR INACTIVO · ";
-      info += `${provLegal(p)} (${p.RIF || p.Cedula || "S/R"}) · ${p.Condicion_Pago || "Contado"} (${p.Dias_Credito || 0}d) · Ret. IVA ${p.Retencion_IVA_Pct || 0}% / ISLR ${p.Retencion_ISLR_Pct || 0}%`;
-    }
-    if (m > 0) {
-      info += (info ? "  |  " : "") + (mon === "USD" ? `Equiv: ${fmtBs(m * bcv)}` : `Equiv: ${fmtUSD(m / bcv)} (BCV ${fmtVE(bcv)})`);
-    }
+    const f = $("#ff").elements, p = buscarProvInput(f.prov.value), bcv = getBcv(), m = num(f.monto.value), mon = f.moneda.value;
+    let info = p ? `${p.Estatus === "Inactivo" ? "⚠️ INACTIVO · " : ""}${provLegal(p)} (${p.RIF || p.Cedula || "S/R"}) · ${p.Condicion_Pago || "Contado"} (${p.Dias_Credito || 0}d) · Ret. IVA ${p.Retencion_IVA_Pct || 0}%` : "";
+    if (m > 0) info += (info ? "  |  " : "") + (mon === "USD" ? `Equiv: ${fmtBs(m * bcv)}` : `Equiv: ${fmtUSD(m / bcv)} (BCV ${fmtVE(bcv)})`);
     $("#ci").textContent = info;
   }
 
@@ -1142,266 +1006,116 @@
   $("#ff").onsubmit = async e => {
     e.preventDefault();
     const f = e.target.elements, p = buscarProvInput(f.prov.value);
-    if (!p) return alert("Selecciona un proveedor válido de la lista.");
-    if (p.Estatus === "Inactivo" && !editFacId) return alert("Este proveedor está Inactivo. Actívalo primero en el Directorio.");
+    if (!p) return alert("Selecciona un proveedor válido.");
+    if (p.Estatus === "Inactivo" && !editFacId) return alert("Este proveedor está Inactivo.");
     if (f.vence.value < f.emision.value) return alert("El vencimiento no puede ser anterior a la emisión.");
+    if (db.facturas.find(x => x.ID_Factura !== editFacId && x.ID_Proveedor === p.ID_Proveedor && String(x.Numero_Factura).toLowerCase() === f.numero.value.trim().toLowerCase())) return alert("Ya existe ese N° de factura para este proveedor.");
 
-    const dup = db.facturas.find(x => x.ID_Factura !== editFacId && x.ID_Proveedor === p.ID_Proveedor && String(x.Numero_Factura).toLowerCase() === f.numero.value.trim().toLowerCase());
-    if (dup) return alert(`Ya existe la factura ${f.numero.value} para ${provLegal(p)}.`);
-
-    const bcv = getBcv(), orig = num(f.monto.value), mon = f.moneda.value;
-    const montoUsd = mon === "Bs" ? (orig / bcv) : orig;
-
-    await postProv("saveFactura", {
-      factura: {
-        ID_Factura: editFacId || "",
-        ID_Proveedor: p.ID_Proveedor, Codigo_Prov: p.Codigo, Proveedor: provNombre(p), RIF: p.RIF || p.Cedula,
-        Numero_Factura: f.numero.value.trim(), Numero_Control: f.control.value.trim(),
-        Fecha_Emision: f.emision.value, Fecha_Vencimiento: f.vence.value,
-        Moneda: mon, Tasa_BCV: bcv, Monto_Original: orig, Monto_USD: montoUsd,
-        Origen: f.origen.value || "Manual"
-      }
-    });
-    cancelarF();
-    aviso("Factura guardada en Google Sheets.");
+    const bcv = getBcv(), orig = num(f.monto.value), mon = f.moneda.value, montoUsd = mon === "Bs" ? (orig / bcv) : orig;
+    await postProv("saveFactura", { factura: { ID_Factura: editFacId || "", ID_Proveedor: p.ID_Proveedor, Codigo_Prov: p.Codigo, Proveedor: provNombre(p), RIF: p.RIF || p.Cedula, Numero_Factura: f.numero.value.trim(), Numero_Control: f.control.value.trim(), Fecha_Emision: f.emision.value, Fecha_Vencimiento: f.vence.value, Moneda: mon, Tasa_BCV: bcv, Monto_Original: orig, Monto_USD: montoUsd, Origen: f.origen.value || "Manual" } });
+    cancelarF(); aviso("Factura guardada en Google Sheets.");
   };
 
-  function cancelarF() {
-    editFacId = null; const f = $("#ff"); f.reset(); f.elements.emision.value = hoy(); f.elements.origen.value = "Manual";
-    $("#ft").textContent = "Registrar Factura por Pagar"; $("#fb").textContent = "Agregar factura"; $("#fc").hidden = true; $("#ci").textContent = "";
-  }
-
+  function cancelarF() { editFacId = null; const f = $("#ff"); f.reset(); f.elements.emision.value = hoy(); f.elements.origen.value = "Manual"; $("#ft").textContent = "Registrar Factura por Pagar"; $("#fb").textContent = "Agregar factura"; $("#fc").hidden = true; $("#ci").textContent = ""; }
   function editarF(id) {
-    const x = db.facturas.find(y => y.ID_Factura === id), f = $("#ff").elements;
-    if (!x) return;
-    editFacId = id;
-    f.prov.value = `${x.Codigo_Prov} · ${x.Proveedor}`;
-    f.numero.value = x.Numero_Factura; f.control.value = x.Numero_Control || "";
-    f.emision.value = x.Fecha_Emision; f.vence.value = x.Fecha_Vencimiento;
-    f.moneda.value = x.Moneda || "USD"; f.monto.value = x.Monto_Original;
-    $("#ft").textContent = "Editando Factura " + x.Numero_Factura; $("#fb").textContent = "Guardar cambios"; $("#fc").hidden = false;
-    window.scrollTo(0, 0);
+    const x = db.facturas.find(y => y.ID_Factura === id), f = $("#ff").elements; if (!x) return; editFacId = id;
+    f.prov.value = `${x.Codigo_Prov} · ${x.Proveedor}`; f.numero.value = x.Numero_Factura; f.control.value = x.Numero_Control || "";
+    f.emision.value = x.Fecha_Emision; f.vence.value = x.Fecha_Vencimiento; f.moneda.value = x.Moneda || "USD"; f.monto.value = x.Monto_Original;
+    $("#ft").textContent = "Editando Factura " + x.Numero_Factura; $("#fb").textContent = "Guardar cambios"; $("#fc").hidden = false; window.scrollTo(0, 0);
   }
-
-  async function borrarF(id) {
-    if (!confirm("¿Eliminar esta factura y todos sus abonos asociados?")) return;
-    await postProv("deleteFactura", { id_factura: id });
-    abierta = null;
-    aviso("Factura eliminada.");
-  }
-
+  async function borrarF(id) { if (confirm("¿Eliminar esta factura y sus abonos?")) { await postProv("deleteFactura", { id_factura: id }); abierta = null; aviso("Factura eliminada."); } }
   async function abonar(facId, e) {
     e.preventDefault();
-    const fac = db.facturas.find(f => f.ID_Factura === facId);
-    const el = e.target.elements, bcv = getBcv();
-    const mon = el.moneda.value, orig = num(el.monto.value);
-    const usd = mon === "Bs" ? (orig / bcv) : orig;
-    const saldo = num(fac.Saldo_USD);
-    if (usd > saldo + 0.02) return alert(`El abono (${fmtUSD(usd)}) supera el saldo pendiente (${fmtUSD(saldo)}).`);
-
-    await postProv("saveAbono", {
-      abono: {
-        ID_Factura: facId, ID_Proveedor: fac.ID_Proveedor, Proveedor: fac.Proveedor, Numero_Factura: fac.Numero_Factura,
-        Fecha_Abono: el.fecha.value, Metodo_Pago: el.metodo.value, Referencia: el.ref.value.trim(),
-        Moneda: mon, Tasa_BCV: bcv, Monto_Original: orig
-      }
-    });
-    aviso("Abono registrado y enviado a egresos.");
+    const fac = db.facturas.find(f => f.ID_Factura === facId), el = e.target.elements, bcv = getBcv(), mon = el.moneda.value, orig = num(el.monto.value), usd = mon === "Bs" ? (orig / bcv) : orig, saldo = num(fac.Saldo_USD);
+    if (usd > saldo + 0.02) return alert(`Supera el saldo pendiente (${fmtUSD(saldo)}).`);
+    await postProv("saveAbono", { abono: { ID_Factura: facId, ID_Proveedor: fac.ID_Proveedor, Proveedor: fac.Proveedor, Numero_Factura: fac.Numero_Factura, Fecha_Abono: el.fecha.value, Metodo_Pago: el.metodo.value, Referencia: el.ref.value.trim(), Moneda: mon, Tasa_BCV: bcv, Monto_Original: orig } });
+    aviso("Abono registrado.");
   }
+  async function borrarAb(idAbono) { if (confirm("¿Eliminar este abono?")) { await postProv("deleteAbono", { id_abono: idAbono }); aviso("Abono eliminado."); } }
 
-  async function borrarAb(idAbono) {
-    if (!confirm("¿Eliminar este abono? También se descontará de egresos.")) return;
-    await postProv("deleteAbono", { id_abono: idAbono });
-    aviso("Abono eliminado.");
-  }
-
-  function valDia(fecha, canalNombre) {
-    const m = db.movimientos.find(x => x.Tipo === "ingreso" && x.Fecha === fecha && x.Categoria_Canal === canalNombre);
-    return m ? num(m.Monto_Original) : "";
-  }
-
+  function valDia(fecha, canalNombre) { const m = db.movimientos.find(x => x.Tipo === "ingreso" && x.Fecha === fecha && x.Categoria_Canal === canalNombre); return m ? num(m.Monto_Original) : ""; }
   $("#fi").onsubmit = async e => {
-    e.preventDefault();
-    const fecha = e.target.elements.fecha.value;
-    const items = [];
-    e.target.querySelectorAll("[data-c]").forEach(inp => {
-      const c = db.canalesIngreso[+inp.dataset.c];
-      items.push({ canal: c.nombre, moneda: c.moneda, monto: num(inp.value) });
-    });
-    await postProv("saveIngresosDia", { fecha, tasaBCV: getBcv(), items });
-    aviso("Ingresos del " + fecha + " guardados.");
+    e.preventDefault(); const fecha = e.target.elements.fecha.value, items = [];
+    e.target.querySelectorAll("[data-c]").forEach(inp => { const c = db.canalesIngreso[+inp.dataset.c]; items.push({ canal: c.nombre, moneda: c.moneda, monto: num(inp.value) }); });
+    await postProv("saveIngresosDia", { fecha, tasaBCV: getBcv(), items }); aviso("Ingresos guardados.");
   };
-
   $("#fe").onsubmit = async e => {
-    e.preventDefault();
-    const f = new FormData(e.target);
-    await postProv("saveEgreso", {
-      egreso: {
-        Fecha: f.get("fecha"), Categoria: f.get("cat"), Moneda: f.get("moneda"),
-        Metodo_Pago: f.get("metodo"), Referencia: f.get("ref").trim(),
-        Concepto: f.get("concepto").trim(), Tasa_BCV: getBcv(), Monto_Original: num(f.get("monto"))
-      }
-    });
-    e.target.elements.concepto.value = ""; e.target.elements.ref.value = ""; e.target.elements.monto.value = "";
-    aviso("Egreso guardado en Google Sheets.");
+    e.preventDefault(); const f = new FormData(e.target);
+    await postProv("saveEgreso", { egreso: { Fecha: f.get("fecha"), Categoria: f.get("cat"), Moneda: f.get("moneda"), Metodo_Pago: f.get("metodo"), Referencia: f.get("ref").trim(), Concepto: f.get("concepto").trim(), Tasa_BCV: getBcv(), Monto_Original: num(f.get("monto")) } });
+    e.target.elements.concepto.value = ""; e.target.elements.ref.value = ""; e.target.elements.monto.value = ""; aviso("Egreso guardado.");
   };
+  async function borrarM(idMov) { if (confirm("¿Eliminar este movimiento?")) { await postProv("deleteMovimiento", { id_movimiento: idMov }); aviso("Movimiento eliminado."); } }
+  async function addCanal() { const nombre = $("#nc").value.trim(), moneda = $("#ncMon").value; if (!nombre) return; if (db.canalesIngreso.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) return alert("Ya existe."); db.canalesIngreso.push({ nombre, moneda }); $("#nc").value = ""; await postProv("saveListas", { canalesIngreso: db.canalesIngreso }); render(); }
+  async function quitarCanal(idx) { const c = db.canalesIngreso[idx]; if (db.movimientos.some(m => m.Tipo === "ingreso" && m.Categoria_Canal === c.nombre)) return alert("Tiene movimientos."); db.canalesIngreso.splice(idx, 1); await postProv("saveListas", { canalesIngreso: db.canalesIngreso }); render(); }
+  async function addCategoria() { const cat = $("#nk").value.trim(); if (!cat) return; if (db.categoriasEgreso.some(x => x.toLowerCase() === cat.toLowerCase())) return alert("Ya existe."); db.categoriasEgreso.push(cat); $("#nk").value = ""; await postProv("saveListas", { categoriasEgreso: db.categoriasEgreso }); render(); }
+  async function quitarCategoria(idx) { const cat = db.categoriasEgreso[idx]; if (db.movimientos.some(m => m.Tipo === "egreso" && m.Categoria_Canal === cat)) return alert("Tiene movimientos."); db.categoriasEgreso.splice(idx, 1); await postProv("saveListas", { categoriasEgreso: db.categoriasEgreso }); render(); }
 
-  async function borrarM(idMov) {
-    if (!confirm("¿Eliminar este movimiento?")) return;
-    await postProv("deleteMovimiento", { id_movimiento: idMov });
-    aviso("Movimiento eliminado.");
-  }
-
-  async function addCanal() {
-    const nombre = $("#nc").value.trim(), moneda = $("#ncMon").value;
-    if (!nombre) return;
-    if (db.canalesIngreso.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) return alert("Ese canal ya existe.");
-    db.canalesIngreso.push({ nombre, moneda });
-    $("#nc").value = "";
-    await postProv("saveListas", { canalesIngreso: db.canalesIngreso });
-    render();
-  }
-
-  async function quitarCanal(idx) {
-    const c = db.canalesIngreso[idx];
-    if (db.movimientos.some(m => m.Tipo === "ingreso" && m.Categoria_Canal === c.nombre)) return alert("Este canal ya tiene movimientos.");
-    db.canalesIngreso.splice(idx, 1);
-    await postProv("saveListas", { canalesIngreso: db.canalesIngreso });
-    render();
-  }
-
-  async function addCategoria() {
-    const cat = $("#nk").value.trim();
-    if (!cat) return;
-    if (db.categoriasEgreso.some(x => x.toLowerCase() === cat.toLowerCase())) return alert("Ya existe esa categoría.");
-    db.categoriasEgreso.push(cat);
-    $("#nk").value = "";
-    await postProv("saveListas", { categoriasEgreso: db.categoriasEgreso });
-    render();
-  }
-
-  async function quitarCategoria(idx) {
-    const cat = db.categoriasEgreso[idx];
-    if (db.movimientos.some(m => m.Tipo === "egreso" && m.Categoria_Canal === cat)) return alert("Esta categoría ya tiene movimientos.");
-    db.categoriasEgreso.splice(idx, 1);
-    await postProv("saveListas", { categoriasEgreso: db.categoriasEgreso });
-    render();
-  }
-
-  function estFactura(f) {
-    const s = num(f.Saldo_USD), d = dd(hoy(), f.Fecha_Vencimiento);
-    return { s, d, e: s < 0.01 ? "pag" : d < 0 ? "venc" : d <= 7 ? "prox" : "dia" };
-  }
+  function estFactura(f) { const s = num(f.Saldo_USD), d = dd(hoy(), f.Fecha_Vencimiento); return { s, d, e: s < 0.01 ? "pag" : d < 0 ? "venc" : d <= 7 ? "prox" : "dia" }; }
 
   function render() {
     document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-selected", b.dataset.t === tab));
     document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === tab));
     if (!editProvId) $("#fp").elements.codigo.value = sigCodigo();
-
-    renderCxP();
-    renderProveedores();
-    renderDia();
-    renderBalance();
+    renderCxP(); renderProveedores(); renderDia(); renderBalance();
   }
 
   function renderCxP() {
     const activos = db.proveedores.filter(p => (p.Estatus || "Activo") === "Activo");
     $("#dl").innerHTML = activos.map(p => `<option value="${esc(p.Codigo + " · " + provNombre(p))}">`).join("");
-
-    const bcv = getBcv();
-    const F = db.facturas.map(f => ({ f, ...estFactura(f) }));
-    const pend = F.filter(x => x.e !== "pag"), V = pend.filter(x => x.e === "venc"), P = pend.filter(x => x.e === "prox");
+    const bcv = getBcv(), F = db.facturas.map(f => ({ f, ...estFactura(f) })), pend = F.filter(x => x.e !== "pag"), V = pend.filter(x => x.e === "venc"), P = pend.filter(x => x.e === "prox");
     const sumUsd = arr => arr.reduce((t, x) => t + x.s, 0);
-
     $("#bd").textContent = V.length || "";
     $("#kc").innerHTML = `
       <button class="kb out" onclick="fil='venc';render()"><span>Vencido · ${V.length} fact.</span><b>${fmtUSD(sumUsd(V))}</b><small>${fmtBs(sumUsd(V) * bcv)}</small></button>
       <button class="kb" style="border-top-color:#c58a12" onclick="fil='prox';render()"><span>Vence en 7 días · ${P.length} fact.</span><b style="color:#9a6a08">${fmtUSD(sumUsd(P))}</b><small>${fmtBs(sumUsd(P) * bcv)}</small></button>
-      <button class="kb" onclick="fil='pend';render()"><span>Total Pendiente · ${pend.length} fact.</span><b>${fmtUSD(sumUsd(pend))}</b><small>${fmtBs(sumUsd(pend) * bcv)}</small></button>
-    `;
-
-    const chips = [
-      ["pend", "Pendientes", x => x.e !== "pag"],
-      ["venc", "Vencidas", x => x.e === "venc"],
-      ["prox", "Vencen en 7 días", x => x.e === "prox"],
-      ["dia", "Al día", x => x.e === "dia"],
-      ["pag", "Pagadas", x => x.e === "pag"],
-      ["todas", "Todas", () => true]
-    ];
+      <button class="kb" onclick="fil='pend';render()"><span>Total Pendiente · ${pend.length} fact.</span><b>${fmtUSD(sumUsd(pend))}</b><small>${fmtBs(sumUsd(pend) * bcv)}</small></button>`;
+    const chips = [["pend", "Pendientes", x => x.e !== "pag"], ["venc", "Vencidas", x => x.e === "venc"], ["prox", "Vencen en 7 días", x => x.e === "prox"], ["dia", "Al día", x => x.e === "dia"], ["pag", "Pagadas", x => x.e === "pag"], ["todas", "Todas", () => true]];
     $("#chs").innerHTML = chips.map(c => `<button class="ch${fil === c[0] ? " on" : ""}" onclick="fil='${c[0]}';render()">${c[1]} (${F.filter(c[2]).length})</button>`).join("");
-
     const q = $("#qc").value.toLowerCase(), cf = chips.find(c => c[0] === fil)[2];
-    const L = F.filter(x => cf(x) && `${x.f.Proveedor} ${x.f.Codigo_Prov} ${x.f.RIF} ${x.f.Numero_Factura}`.toLowerCase().includes(q))
-               .sort((a, b) => (a.e === "pag") - (b.e === "pag") || String(a.f.Fecha_Vencimiento).localeCompare(String(b.f.Fecha_Vencimiento)));
-
+    const L = F.filter(x => cf(x) && `${x.f.Proveedor} ${x.f.Codigo_Prov} ${x.f.RIF} ${x.f.Numero_Factura}`.toLowerCase().includes(q)).sort((a, b) => (a.e === "pag") - (b.e === "pag") || String(a.f.Fecha_Vencimiento).localeCompare(String(b.f.Fecha_Vencimiento)));
     $("#lf").innerHTML = L.length ? L.map(({ f, s, d, e }) => {
-      const mUsd = num(f.Monto_USD), abUsd = num(f.Abonado_USD), pc = mUsd > 0 ? Math.min(100, (abUsd / mUsd) * 100) : 0;
-      const txt = e === "pag" ? "Pagada" : d < 0 ? `Vencida (${-d}d)` : d === 0 ? "Vence hoy" : `Vence en ${d}d`;
-      const abs = db.abonos.filter(a => a.ID_Factura === f.ID_Factura);
-      const pObj = provById(f.ID_Proveedor);
+      const mUsd = num(f.Monto_USD), abUsd = num(f.Abonado_USD), pc = mUsd > 0 ? Math.min(100, (abUsd / mUsd) * 100) : 0, txt = e === "pag" ? "Pagada" : d < 0 ? `Vencida (${-d}d)` : d === 0 ? "Vence hoy" : `Vence en ${d}d`, abs = db.abonos.filter(a => a.ID_Factura === f.ID_Factura), pObj = provById(f.ID_Proveedor);
       const bankHint = pObj ? `🏦 ${pObj.Banco || "Sin banco"} (${pObj.Numero_Cuenta || "S/C"}) | 📱 PM: ${pObj.Pago_Movil_Telefono || "-"} ${pObj.Pago_Movil_Banco || ""} | 💵 Divisas: ${pObj.Cuenta_Divisas || "-"} | 🏛️ Ret: IVA ${pObj.Retencion_IVA_Pct || 0}% / ISLR ${pObj.Retencion_ISLR_Pct || 0}%` : "";
-
       return `
         <article class="fc ${e}">
           <div class="fh">
-            <div>
-              <b>${esc(f.Proveedor)}</b>
-              <small>${esc(f.Codigo_Prov)} · ${esc(f.RIF || "S/R")} · Fact: <strong>${esc(f.Numero_Factura)}</strong> · Vence: ${esc(f.Fecha_Vencimiento)} (${esc(f.Origen)})</small>
-            </div>
+            <div><b>${esc(f.Proveedor)}</b><small>${esc(f.Codigo_Prov)} · ${esc(f.RIF || "S/R")} · Fact: <strong>${esc(f.Numero_Factura)}</strong> · Vence: ${esc(f.Fecha_Vencimiento)} (${esc(f.Origen)})</small></div>
             <span class="tg ${e}">${txt}</span>
-            <div class="fm">
-              <b>${fmtUSD(s)}</b>
-              <small>${fmtBs(s * bcv)} (de ${fmtUSD(mUsd)})</small>
-            </div>
+            <div class="fm"><b>${fmtUSD(s)}</b><small>${fmtBs(s * bcv)} (de ${fmtUSD(mUsd)})</small></div>
             <button class="btn s" onclick="abierta=abierta==='${f.ID_Factura}'?null:'${f.ID_Factura}';render()">${abierta === f.ID_Factura ? "Cerrar" : e === "pag" ? "Ver abonos" : "Abonar"}</button>
             <button class="btn s" onclick="editarF('${f.ID_Factura}')">Editar</button>
             <button class="btn x" onclick="borrarF('${f.ID_Factura}')">Eliminar</button>
           </div>
           <div class="pb"><i style="width:${pc}%"></i></div>
-          ${abierta === f.ID_Factura ? `
-            <div class="ap">
-              ${bankHint ? `<div class="pay-hint">${esc(bankHint)}</div>` : ""}
-              ${s > 0.01 ? `
-                <form onsubmit="abonar('${f.ID_Factura}', event)" class="form-grid" style="margin-bottom:10px;">
-                  <label>Fecha <input name="fecha" type="date" value="${hoy()}" required /></label>
-                  <label>Método <select name="metodo"><option>Transferencia</option><option>Pago Móvil</option><option>Efectivo $</option><option>Zelle</option><option>Binance</option><option>Efectivo Bs</option></select></label>
-                  <label>Referencia <input name="ref" placeholder="N° Ref." /></label>
-                  <label>Moneda <select name="moneda" onchange="this.form.monto.value=this.value==='Bs'?'${(s*bcv).toFixed(2)}':'${s.toFixed(2)}'"><option value="USD">Dólares ($)</option><option value="Bs">Bolívares (Bs.)</option></select></label>
-                  <label>Monto <input name="monto" type="number" step="0.01" min="0.01" value="${s.toFixed(2)}" required /></label>
-                  <div><button class="btn">Registrar abono</button></div>
-                </form>` : ""}
-              ${abs.length ? `<table><tr><th>Fecha</th><th>Método</th><th>Ref.</th><th class="n">Original</th><th class="n">USD</th><th class="n">Bs.</th><th></th></tr>` +
-                abs.map(a => `<tr><td>${esc(a.Fecha_Abono)}</td><td>${esc(a.Metodo_Pago)}</td><td>${esc(a.Referencia)}</td><td class="n">${esc(a.Moneda)} ${fmtVE(num(a.Monto_Original))}</td><td class="n">${fmtUSD(num(a.Monto_USD))}</td><td class="n">${fmtBs(num(a.Monto_Bs))}</td><td><button class="btn x" onclick="borrarAb('${a.ID_Abono}')">✕</button></td></tr>`).join("") + `</table>`
-                : `<p class="em">Sin abonos registrados.</p>`}
-            </div>` : ""}
+          ${abierta === f.ID_Factura ? `<div class="ap">${bankHint ? `<div class="pay-hint">${esc(bankHint)}</div>` : ""}${s > 0.01 ? `<form onsubmit="abonar('${f.ID_Factura}', event)" class="form-grid" style="margin-bottom:10px;"><label>Fecha <input name="fecha" type="date" value="${hoy()}" required /></label><label>Método <select name="metodo"><option>Transferencia</option><option>Pago Móvil</option><option>Efectivo $</option><option>Zelle</option><option>Binance</option><option>Efectivo Bs</option></select></label><label>Referencia <input name="ref" placeholder="N° Ref." /></label><label>Moneda <select name="moneda" onchange="this.form.monto.value=this.value==='Bs'?'${(s*bcv).toFixed(2)}':'${s.toFixed(2)}'"><option value="USD">Dólares ($)</option><option value="Bs">Bolívares (Bs.)</option></select></label><label>Monto <input name="monto" type="number" step="0.01" min="0.01" value="${s.toFixed(2)}" required /></label><div><button class="btn">Registrar abono</button></div></form>` : ""}${abs.length ? `<table><tr><th>Fecha</th><th>Método</th><th>Ref.</th><th class="n">Original</th><th class="n">USD</th><th class="n">Bs.</th><th></th></tr>` + abs.map(a => `<tr><td>${esc(a.Fecha_Abono)}</td><td>${esc(a.Metodo_Pago)}</td><td>${esc(a.Referencia)}</td><td class="n">${esc(a.Moneda)} ${fmtVE(num(a.Monto_Original))}</td><td class="n">${fmtUSD(num(a.Monto_USD))}</td><td class="n">${fmtBs(num(a.Monto_Bs))}</td><td><button class="btn x" onclick="borrarAb('${a.ID_Abono}')">✕</button></td></tr>`).join("") + `</table>` : `<p class="em">Sin abonos registrados.</p>`}</div>` : ""}
         </article>`;
     }).join("") : `<p class="em">No hay facturas en este filtro.</p>`;
   }
 
   function renderProveedores() {
-    const q = $("#q").value.toLowerCase();
-    const est = $("#qEstatus").value;
+    const q = $("#q").value.toLowerCase(), est = $("#qEstatus").value;
     const L = db.proveedores.filter(p => {
       const text = `${p.Codigo} ${provLegal(p)} ${p.Nombre_Comercial} ${p.Cedula} ${p.RIF} ${p.Categoria_Rubro}`.toLowerCase();
       const matchQ = !q || text.includes(q);
-      const matchE = !est || (p.Estatus || "Activo") === est;
+      const matchE = !est ? true : est === "Mercabar" ? (p.Proveedor_Mercabar === "Sí") : ((p.Estatus || "Activo") === est);
       return matchQ && matchE;
     }).sort((a, b) => String(a.Codigo).localeCompare(String(b.Codigo), "es", { numeric: true }));
 
     $("#cp").textContent = `${L.length} proveedor(es)`;
-    $("#tp").innerHTML = L.length ? `<table><tr><th>Código</th><th>Razón Social / Marca</th><th>Cédula / RIF</th><th>Teléfono</th><th>Rubro</th><th>Condición Pago</th><th>Estatus</th><th>Acciones</th></tr>` +
+    $("#tp").innerHTML = L.length ? `<table><tr><th>Código</th><th>Razón Social / Marca</th><th>Cédula / RIF</th><th>Teléfono</th><th>Rubro</th><th>Condición</th><th>Estatus</th><th>Acciones</th></tr>` +
       L.map(p => {
         const estatus = p.Estatus || "Activo";
+        const isMerc = p.Proveedor_Mercabar === "Sí";
         return `<tr>
           <td><strong>${esc(p.Codigo)}</strong></td>
-          <td><strong>${esc(provNombre(p))}</strong><br><small style="color:var(--muted)">${esc(provLegal(p))}</small></td>
+          <td><strong>${esc(provNombre(p))}</strong>${isMerc ? `<span class="tg merc">🚜 Mercabar</span>` : ""}<br><small style="color:var(--muted)">${esc(provLegal(p))}</small></td>
           <td style="font-family:monospace">${p.Cedula ? esc(p.Cedula) + "<br>" : ""}${esc(p.RIF || "-")}</td>
           <td style="font-family:monospace">${esc(p.Telefono_Principal || p.Telefono || "-")}</td>
-          <td>${esc(p.Categoria_Rubro || "-")}</td>
+          <td>${esc(p.Categoria_Rubro || "-")}${isMerc && p.Rubros_Mercabar ? `<br><small style="color:var(--primary)">${esc(p.Rubros_Mercabar)}</small>` : ""}</td>
           <td>${esc(p.Condicion_Pago || "Contado")} (${esc(p.Dias_Credito || 0)}d)</td>
           <td><span class="tg ${estatus === "Activo" ? "act" : "inact"}">${esc(estatus)}</span></td>
           <td>
-            <button class="btn s" onclick="verFichaProv('${p.ID_Proveedor}')" title="Ver Ficha Completa">👁️ Ficha</button>
+            <button class="btn s" onclick="verFichaProv('${p.ID_Proveedor}')">👁️ Ficha</button>
             <button class="btn s" onclick="editarP('${p.ID_Proveedor}')">Editar</button>
             <button class="btn x" onclick="borrarP('${p.ID_Proveedor}')">✕</button>
           </td>
@@ -1412,87 +1126,36 @@
 
   function renderDia() {
     const fe = $("#fi").elements.fecha.value;
-    $("#ci2").innerHTML = db.canalesIngreso.map((c, i) => `
-      <label>${esc(c.nombre)} (${esc(c.moneda)})
-        <input type="number" min="0" step="0.01" data-c="${i}" value="${valDia(fe, c.nombre)}" placeholder="0.00" />
-      </label>`).join("");
-
+    $("#ci2").innerHTML = db.canalesIngreso.map((c, i) => `<label>${esc(c.nombre)} (${esc(c.moneda)})<input type="number" min="0" step="0.01" data-c="${i}" value="${valDia(fe, c.nombre)}" placeholder="0.00" /></label>`).join("");
     const sc = $("#sc"), curCat = sc.value;
     sc.innerHTML = db.categoriasEgreso.map(c => `<option>${esc(c)}</option>`).join("");
     if (db.categoriasEgreso.includes(curCat)) sc.value = curCat;
-
     $("#lc").innerHTML = db.canalesIngreso.map((c, i) => `<span class="ch2">${esc(c.nombre)} (${esc(c.moneda)})<button onclick="quitarCanal(${i})">×</button></span>`).join("");
     $("#lk").innerHTML = db.categoriasEgreso.map((c, i) => `<span class="ch2">${esc(c)}<button onclick="quitarCategoria(${i})">×</button></span>`).join("");
-
-    const mes = $("#mes").value || hoy().slice(0, 7), bcv = getBcv();
-    const MM = db.movimientos.filter(m => String(m.Fecha).startsWith(mes));
-    const D = {};
-    MM.forEach(m => {
-      const d = D[m.Fecha] ??= { iUsd: 0, eUsd: 0 };
-      if (m.Tipo === "ingreso") d.iUsd += num(m.Monto_USD);
-      else d.eUsd += num(m.Monto_USD);
-    });
-
-    const ds = Object.keys(D).sort().reverse();
-    const I_usd = ds.reduce((t, k) => t + D[k].iUsd, 0), E_usd = ds.reduce((t, k) => t + D[k].eUsd, 0);
-    const rojos = ds.filter(k => D[k].eUsd > D[k].iUsd).length;
-
-    $("#km").innerHTML = `
-      <div><span>Ingresos del mes</span><b class="in">${fmtUSD(I_usd)}</b><small>${fmtBs(I_usd * bcv)}</small></div>
-      <div><span>Egresos del mes</span><b class="out">${fmtUSD(E_usd)}</b><small>${fmtBs(E_usd * bcv)}</small></div>
-      <div><span>Saldo del mes</span><b class="${I_usd - E_usd < 0 ? "out" : "in"}">${fmtUSD(I_usd - E_usd)}</b><small>${fmtBs((I_usd - E_usd) * bcv)}</small></div>
-      <div><span>Días en déficit</span><b class="${rojos ? "out" : ""}">${rojos}</b><small>Egresos &gt; Ingresos</small></div>
-    `;
-
+    const mes = $("#mes").value || hoy().slice(0, 7), bcv = getBcv(), MM = db.movimientos.filter(m => String(m.Fecha).startsWith(mes)), D = {};
+    MM.forEach(m => { const d = D[m.Fecha] ??= { iUsd: 0, eUsd: 0 }; if (m.Tipo === "ingreso") d.iUsd += num(m.Monto_USD); else d.eUsd += num(m.Monto_USD); });
+    const ds = Object.keys(D).sort().reverse(), I_usd = ds.reduce((t, k) => t + D[k].iUsd, 0), E_usd = ds.reduce((t, k) => t + D[k].eUsd, 0), rojos = ds.filter(k => D[k].eUsd > D[k].iUsd).length;
+    $("#km").innerHTML = `<div><span>Ingresos del mes</span><b class="in">${fmtUSD(I_usd)}</b><small>${fmtBs(I_usd * bcv)}</small></div><div><span>Egresos del mes</span><b class="out">${fmtUSD(E_usd)}</b><small>${fmtBs(E_usd * bcv)}</small></div><div><span>Saldo del mes</span><b class="${I_usd - E_usd < 0 ? "out" : "in"}">${fmtUSD(I_usd - E_usd)}</b><small>${fmtBs((I_usd - E_usd) * bcv)}</small></div><div><span>Días en déficit</span><b class="${rojos ? "out" : ""}">${rojos}</b><small>Egresos &gt; Ingresos</small></div>`;
     barras("#cg", ds.slice().reverse().map(d => ({ t: d, l: d.slice(8), i: D[d].iUsd, e: D[d].eUsd })));
-
-    $("#cd").innerHTML = ds.length ? `<table><tr><th>Fecha</th><th class="n">Ingresos ($)</th><th class="n">Egresos ($)</th><th class="n">Diferencia ($)</th><th class="n">Diferencia (Bs.)</th></tr>` +
-      ds.map(d => {
-        const dif = D[d].iUsd - D[d].eUsd;
-        return `<tr><td>${d}</td><td class="n in">${fmtUSD(D[d].iUsd)}</td><td class="n out">${fmtUSD(D[d].eUsd)}</td><td class="n ${dif < 0 ? "out" : "in"}"><b>${fmtUSD(dif)}</b></td><td class="n">${fmtBs(dif * bcv)}</td></tr>`;
-      }).join("") + `</table>` : `<p class="em">Sin movimientos en este mes.</p>`;
-
+    $("#cd").innerHTML = ds.length ? `<table><tr><th>Fecha</th><th class="n">Ingresos ($)</th><th class="n">Egresos ($)</th><th class="n">Diferencia ($)</th><th class="n">Diferencia (Bs.)</th></tr>` + ds.map(d => { const dif = D[d].iUsd - D[d].eUsd; return `<tr><td>${d}</td><td class="n in">${fmtUSD(D[d].iUsd)}</td><td class="n out">${fmtUSD(D[d].eUsd)}</td><td class="n ${dif < 0 ? "out" : "in"}"><b>${fmtUSD(dif)}</b></td><td class="n">${fmtBs(dif * bcv)}</td></tr>`; }).join("") + `</table>` : `<p class="em">Sin movimientos en este mes.</p>`;
     const M = [...MM].sort((a, b) => String(b.Fecha).localeCompare(String(a.Fecha)));
-    $("#tm").innerHTML = M.length ? `<table><tr><th>Fecha</th><th>Tipo</th><th>Canal / Categoría</th><th>Concepto</th><th>Ref.</th><th class="n">Original</th><th class="n">Equiv. $</th><th class="n">Equiv. Bs.</th><th></th></tr>` +
-      M.map(m => `<tr><td>${esc(m.Fecha)}</td><td class="${m.Tipo === "ingreso" ? "in" : "out"}"><b>${m.Tipo === "ingreso" ? "Ingreso" : "Egreso"}</b></td><td>${esc(m.Categoria_Canal)}</td><td>${esc(m.Concepto)}</td><td>${esc(m.Referencia)}</td><td class="n">${esc(m.Moneda_Canal)} ${fmtVE(num(m.Monto_Original))}</td><td class="n">${fmtUSD(num(m.Monto_USD))}</td><td class="n">${fmtBs(num(m.Monto_Bs))}</td><td><button class="btn x" onclick="borrarM('${m.ID_Movimiento}')">✕</button></td></tr>`).join("") + `</table>`
-      : `<p class="em">Sin movimientos en este mes.</p>`;
+    $("#tm").innerHTML = M.length ? `<table><tr><th>Fecha</th><th>Tipo</th><th>Canal / Categoría</th><th>Concepto</th><th>Ref.</th><th class="n">Original</th><th class="n">Equiv. $</th><th class="n">Equiv. Bs.</th><th></th></tr>` + M.map(m => `<tr><td>${esc(m.Fecha)}</td><td class="${m.Tipo === "ingreso" ? "in" : "out"}"><b>${m.Tipo === "ingreso" ? "Ingreso" : "Egreso"}</b></td><td>${esc(m.Categoria_Canal)}</td><td>${esc(m.Concepto)}</td><td>${esc(m.Referencia)}</td><td class="n">${esc(m.Moneda_Canal)} ${fmtVE(num(m.Monto_Original))}</td><td class="n">${fmtUSD(num(m.Monto_USD))}</td><td class="n">${fmtBs(num(m.Monto_Bs))}</td><td><button class="btn x" onclick="borrarM('${m.ID_Movimiento}')">✕</button></td></tr>`).join("") + `</table>` : `<p class="em">Sin movimientos en este mes.</p>`;
   }
 
   function renderBalance() {
-    const bcv = getBcv();
-    const I = db.movimientos.filter(m => m.Tipo === "ingreso").reduce((t, m) => t + num(m.Monto_USD), 0);
-    const E = db.movimientos.filter(m => m.Tipo === "egreso").reduce((t, m) => t + num(m.Monto_USD), 0);
-    $("#ki").textContent = fmtUSD(I); $("#kiBs").textContent = fmtBs(I * bcv);
-    $("#ke").textContent = fmtUSD(E); $("#keBs").textContent = fmtBs(E * bcv);
-    $("#ks").textContent = fmtUSD(I - E); $("#ks").className = I - E < 0 ? "out" : "in"; $("#ksBs").textContent = fmtBs((I - E) * bcv);
-
-    const mMap = {};
-    db.movimientos.forEach(x => {
-      const k = String(x.Fecha || "").slice(0, 7);
-      if (!k) return;
-      (mMap[k] ??= { i: 0, e: 0 })[x.Tipo === "ingreso" ? "i" : "e"] += num(x.Monto_USD);
-    });
+    const bcv = getBcv(), I = db.movimientos.filter(m => m.Tipo === "ingreso").reduce((t, m) => t + num(m.Monto_USD), 0), E = db.movimientos.filter(m => m.Tipo === "egreso").reduce((t, m) => t + num(m.Monto_USD), 0);
+    $("#ki").textContent = fmtUSD(I); $("#kiBs").textContent = fmtBs(I * bcv); $("#ke").textContent = fmtUSD(E); $("#keBs").textContent = fmtBs(E * bcv); $("#ks").textContent = fmtUSD(I - E); $("#ks").className = I - E < 0 ? "out" : "in"; $("#ksBs").textContent = fmtBs((I - E) * bcv);
+    const mMap = {}; db.movimientos.forEach(x => { const k = String(x.Fecha || "").slice(0, 7); if (!k) return; (mMap[k] ??= { i: 0, e: 0 })[x.Tipo === "ingreso" ? "i" : "e"] += num(x.Monto_USD); });
     barras("#c1", Object.keys(mMap).sort().slice(-12).map(k => ({ t: k, l: k.slice(5) + "/" + k.slice(2, 4), i: mMap[k].i, e: mMap[k].e })));
-
-    const pMap = {}, cMap = {};
-    db.movimientos.filter(m => m.Tipo === "egreso").forEach(m => {
-      if (m.Proveedor) pMap[m.Proveedor] = (pMap[m.Proveedor] || 0) + num(m.Monto_USD);
-      cMap[m.Categoria_Canal] = (cMap[m.Categoria_Canal] || 0) + num(m.Monto_USD);
-    });
-    hbars("#c2", pMap, "Sin pagos a proveedores.");
-    hbars("#c3", cMap, "Sin egresos registrados.");
+    const pMap = {}, cMap = {}; db.movimientos.filter(m => m.Tipo === "egreso").forEach(m => { if (m.Proveedor) pMap[m.Proveedor] = (pMap[m.Proveedor] || 0) + num(m.Monto_USD); cMap[m.Categoria_Canal] = (cMap[m.Categoria_Canal] || 0) + num(m.Monto_USD); });
+    hbars("#c2", pMap, "Sin pagos a proveedores."); hbars("#c3", cMap, "Sin egresos registrados.");
   }
 
   function barras(id, K) {
     if (!K.length) return $(id).innerHTML = `<p class="em">Sin datos para graficar.</p>`;
     const mx = Math.max(...K.flatMap(k => [k.i, k.e])) || 1, W = 720, H = 240, P = 30, bw = (W - P * 1.5) / K.length, A = H - 2 * P, st = Math.ceil(K.length / 14);
     let s = `<div class="lg"><span><i style="background:var(--in)"></i>Ingresos ($)</span><span><i style="background:var(--out)"></i>Egresos ($)</span></div><svg viewBox="0 0 ${W} ${H}"><line x1="${P}" y1="${H - P}" x2="${W - 8}" y2="${H - P}" stroke="#d3dbd8"/>`;
-    K.forEach((k, j) => {
-      const x = P + j * bw, a = (k.i / mx) * A, b = (k.e / mx) * A, w = bw * 0.36;
-      s += `<rect x="${x + bw * 0.08}" y="${H - P - a}" width="${w}" height="${a}" fill="#1B4D2E"><title>Ingresos ${k.t}: ${fmtUSD(k.i)}</title></rect>` +
-           `<rect x="${x + bw * 0.08 + w + 1}" y="${H - P - b}" width="${w}" height="${b}" fill="#b8482e"><title>Egresos ${k.t}: ${fmtUSD(k.e)}</title></rect>` +
-           (j % st ? "" : `<text x="${x + bw / 2}" y="${H - P + 16}" text-anchor="middle" font-size="11" fill="#5f706a">${k.l}</text>`);
-    });
+    K.forEach((k, j) => { const x = P + j * bw, a = (k.i / mx) * A, b = (k.e / mx) * A, w = bw * 0.36; s += `<rect x="${x + bw * 0.08}" y="${H - P - a}" width="${w}" height="${a}" fill="#1B4D2E"><title>Ingresos ${k.t}: ${fmtUSD(k.i)}</title></rect><rect x="${x + bw * 0.08 + w + 1}" y="${H - P - b}" width="${w}" height="${b}" fill="#b8482e"><title>Egresos ${k.t}: ${fmtUSD(k.e)}</title></rect>${j % st ? "" : `<text x="${x + bw / 2}" y="${H - P + 16}" text-anchor="middle" font-size="11" fill="#5f706a">${k.l}</text>`}`; });
     $(id).innerHTML = s + `</svg>`;
   }
 
@@ -1503,45 +1166,25 @@
 
   function exportarCSV() {
     const headers = ["ID_Factura", "Codigo_Prov", "Proveedor", "RIF", "Nro_Factura", "Emision", "Vencimiento", "Moneda", "Monto_USD", "Abonado_USD", "Saldo_USD", "Estado"];
-    const rows = [headers.join(";"), ...db.facturas.map(f => [
-      f.ID_Factura, f.Codigo_Prov, f.Proveedor, f.RIF, f.Numero_Factura, f.Fecha_Emision, f.Fecha_Vencimiento, f.Moneda, f.Monto_USD, f.Abonado_USD, f.Saldo_USD, f.Estado
-    ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";"))];
+    const rows = [headers.join(";"), ...db.facturas.map(f => [f.ID_Factura, f.Codigo_Prov, f.Proveedor, f.RIF, f.Numero_Factura, f.Fecha_Emision, f.Fecha_Vencimiento, f.Moneda, f.Monto_USD, f.Abonado_USD, f.Saldo_USD, f.Estado].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";"))];
     const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Cuentas_Por_Pagar_SLWA_${hoy()}.csv`; a.click();
   }
 
   function getProveedoresExportMatrix() {
-    const headers = [
-      "Codigo", "Razon_Social", "Nombre_Comercial", "Cedula", "RIF", "Tipo_Persona", "Condicion_Fiscal", "Direccion_Fiscal",
-      "Telefono_Principal", "WhatsApp", "Correo_Facturacion", "Persona_Contacto", "Direccion_Almacen",
-      "Banco", "Tipo_Cuenta", "Numero_Cuenta", "Titular_Cuenta", "RIF_CI_Titular",
-      "Pago_Movil_Tel", "Pago_Movil_Banco", "Pago_Movil_ID", "Cuenta_Divisas",
-      "Categoria_Rubro", "Condicion_Pago", "Dias_Credito", "Limite_Credito", "Moneda_Facturacion", "Retencion_IVA_Pct", "Retencion_ISLR_Pct", "Estatus"
-    ];
-    const rows = db.proveedores.map(p => [
-      p.Codigo, provLegal(p), p.Nombre_Comercial || "", p.Cedula || "", p.RIF || "", p.Tipo_Persona || "", p.Condicion_Fiscal || "", p.Direccion_Fiscal || "",
-      p.Telefono_Principal || p.Telefono || "", p.WhatsApp || "", p.Correo_Facturacion || "", p.Persona_Contacto || "", p.Direccion_Almacen || "",
-      p.Banco || "", p.Tipo_Cuenta || "", p.Numero_Cuenta || "", p.Titular_Cuenta || "", p.RIF_CI_Titular || "",
-      p.Pago_Movil_Telefono || "", p.Pago_Movil_Banco || "", p.Pago_Movil_ID || "", p.Cuenta_Divisas || "",
-      p.Categoria_Rubro || "", p.Condicion_Pago || "", p.Dias_Credito || "0", p.Limite_Credito || "0", p.Moneda_Facturacion || "",
-      p.Retencion_IVA_Pct || "0", p.Retencion_ISLR_Pct || "0", p.Estatus || "Activo"
-    ]);
+    const headers = ["Codigo", "Razon_Social", "Nombre_Comercial", "Cedula", "RIF", "Tipo_Persona", "Condicion_Fiscal", "Direccion_Fiscal", "Telefono_Principal", "WhatsApp", "Correo_Facturacion", "Persona_Contacto", "Direccion_Almacen", "Banco", "Tipo_Cuenta", "Numero_Cuenta", "Titular_Cuenta", "RIF_CI_Titular", "Pago_Movil_Tel", "Pago_Movil_Banco", "Pago_Movil_ID", "Cuenta_Divisas", "Categoria_Rubro", "Condicion_Pago", "Dias_Credito", "Limite_Credito", "Moneda_Facturacion", "Retencion_IVA_Pct", "Retencion_ISLR_Pct", "Estatus", "Proveedor_Mercabar", "Rubros_Mercabar"];
+    const rows = db.proveedores.map(p => [p.Codigo, provLegal(p), p.Nombre_Comercial || "", p.Cedula || "", p.RIF || "", p.Tipo_Persona || "", p.Condicion_Fiscal || "", p.Direccion_Fiscal || "", p.Telefono_Principal || p.Telefono || "", p.WhatsApp || "", p.Correo_Facturacion || "", p.Persona_Contacto || "", p.Direccion_Almacen || "", p.Banco || "", p.Tipo_Cuenta || "", p.Numero_Cuenta || "", p.Titular_Cuenta || "", p.RIF_CI_Titular || "", p.Pago_Movil_Telefono || "", p.Pago_Movil_Banco || "", p.Pago_Movil_ID || "", p.Cuenta_Divisas || "", p.Categoria_Rubro || "", p.Condicion_Pago || "", p.Dias_Credito || "0", p.Limite_Credito || "0", p.Moneda_Facturacion || "", p.Retencion_IVA_Pct || "0", p.Retencion_ISLR_Pct || "0", p.Estatus || "Activo", p.Proveedor_Mercabar || "No", p.Rubros_Mercabar || ""]);
     return [headers, ...rows];
   }
 
   function exportarProveedoresCSV() {
-    const aoa = getProveedoresExportMatrix();
-    const csv = "\uFEFF" + aoa.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Directorio_Proveedores_SLWA_${hoy()}.csv`; a.click();
+    const aoa = getProveedoresExportMatrix(), csv = "\uFEFF" + aoa.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";")).join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = `Directorio_Proveedores_SLWA_${hoy()}.csv`; a.click();
   }
 
   function exportarProveedoresExcel() {
     if (typeof XLSX === "undefined") return exportarProveedoresCSV();
-    const aoa = getProveedoresExportMatrix();
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
-    XLSX.utils.book_append_sheet(wb, ws, "Proveedores");
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(getProveedoresExportMatrix()), "Proveedores");
     XLSX.writeFile(wb, `Directorio_Proveedores_SLWA_${hoy()}.xlsx`);
   }
 </script>
