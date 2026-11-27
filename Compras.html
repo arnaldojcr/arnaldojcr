@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1B4D2E">
+  <title>Compras Mercabar - HyperMarket SLWA C.A.</title>
+  <style>
+    :root {
+      --primary: #1B4D2E;
+      --primary-dark: #133821;
+      --primary-med: #3C8038;
+      --primary-light: #e6f2e8;
+      --gold: #C59B27;
+      --gold-light: #E5C558;
+      --surface: #ffffff;
+      --bg: #f3f6f4;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --accent: #C59B27;
+      --accent-light: #fef3c7;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg); color: var(--text);
+      display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1B4D2E 0%, #3C8038 100%);
+      color: white; padding: 10px 14px; padding-top: max(10px, env(safe-area-inset-top));
+      border-bottom: 3px solid var(--gold);
+      display: flex; flex-direction: column; gap: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15); flex-shrink: 0; z-index: 20;
+    }
+
+    .header-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .header-titles h1 { font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+    .header-titles p { font-size: 0.7rem; color: var(--gold-light); display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+
+    .net-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 1px 7px; border-radius: 99px; font-size: 0.65rem; font-weight: 800;
+      background: rgba(0,0,0,0.28); color: #fff;
+    }
+
+    .header-tasa-box {
+      background: rgba(0, 0, 0, 0.28); border: 1.5px solid var(--gold-light);
+      border-radius: 10px; padding: 4px 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .tasa-content { cursor: pointer; }
+    .tasa-content span { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: var(--gold-light); display: block; }
+    .tasa-content strong { font-size: 0.92rem; font-weight: 800; color: #ffffff; }
+
+    .btn-refresh-tasa {
+      background: var(--gold); border: none; width: 28px; height: 28px; border-radius: 6px;
+      color: var(--primary-dark); font-size: 0.85rem; font-weight: bold;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.25s;
+    }
+
+    .header-totals-bar {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
+      background: rgba(0, 0, 0, 0.24); border-radius: 8px; padding: 6px 8px; text-align: center;
+    }
+    .h-total-col span { display: block; font-size: 0.6rem; text-transform: uppercase; color: #dcfce7; font-weight: 600; }
+    .h-total-col strong { font-size: 0.88rem; font-weight: 800; color: #ffffff; }
+
+    .main-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px; padding-bottom: 85px; }
+
+    .sync-banner {
+      background: #fff; border: 1.5px solid var(--gold); border-radius: 12px;
+      padding: 8px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      font-size: 0.78rem;
+    }
+    .sync-banner strong { color: var(--primary); }
+
+    .search-box { margin-bottom: 10px; position: relative; }
+    .search-box input {
+      width: 100%; height: 44px; background: #fff; border: 1.5px solid var(--border-light);
+      border-radius: 12px; padding: 0 16px 0 38px; font-size: 0.9rem; color: var(--text); outline: none;
+    }
+    .search-box input:focus { border-color: var(--primary); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem; }
+
+    .providers-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (min-width: 600px) { .providers-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .provider-btn {
+      background: #fff; border: 1.5px solid var(--border-light); border-radius: var(--radius);
+      padding: 12px 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+      cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04); position: relative; text-align: left;
+    }
+    .provider-btn:active { transform: scale(0.97); background-color: #f1f5f9; border-color: var(--primary); }
+    .provider-avatar {
+      width: 38px; height: 38px; border-radius: 10px; background: var(--primary-light); color: var(--primary-dark);
+      display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+    }
+    .provider-name { font-size: 0.93rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .provider-rubros-count { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
+    .provider-badge-pesadas {
+      position: absolute; top: 8px; right: 8px; background: var(--primary); color: white;
+      font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 20px;
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.62); backdrop-filter: blur(4px);
+      z-index: 100; display: none; align-items: flex-end; opacity: 0; transition: opacity 0.2s ease;
+    }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    .modal-sheet {
+      background: #ffffff; width: 100%; max-height: 95vh; border-radius: 22px 22px 0 0;
+      display: flex; flex-direction: column; transform: translateY(100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 -4px 20px rgba(0,0,0,0.18);
+    }
+    .modal-overlay.active .modal-sheet { transform: translateY(0); }
+
+    .sheet-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border-light);
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f8fafc; border-radius: 22px 22px 0 0; flex-shrink: 0;
+    }
+    .sheet-title { font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .sheet-title small { font-size: 0.72rem; color: var(--text-muted); font-weight: normal; display: block; }
+    .btn-close-sheet {
+      background: #e2e8f0; border: none; width: 32px; height: 32px; border-radius: 50%;
+      font-size: 1.1rem; font-weight: bold; color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .sheet-body { padding: 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; }
+
+    .rubros-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .rubro-pill {
+      background: #f1f5f9; border: 1.5px solid var(--border-light); padding: 6px 11px; border-radius: 12px;
+      font-size: 0.83rem; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 5px;
+    }
+    .rubro-pill span.merma-tag { background: var(--accent-light); color: #92400e; font-size: 0.68rem; padding: 1px 5px; border-radius: 6px; font-weight: 800; }
+    .rubro-pill.active { background: var(--primary); color: white; border-color: var(--primary-dark); }
+    .rubro-pill.active span.merma-tag { background: rgba(255, 255, 255, 0.25); color: #ffffff; }
+
+    .tipo-cobro-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+    .tipo-btn {
+      height: 38px; border: 1.5px solid var(--border-light); background: #f8fafc; border-radius: 10px;
+      font-size: 0.72rem; font-weight: 700; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .tipo-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); }
+
+    .input-card { background: #f8fafc; border: 1.5px solid var(--border-light); border-radius: 16px; padding: 12px; margin-bottom: 12px; }
+    .input-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .touch-input-wrap { position: relative; margin-bottom: 10px; }
+    .touch-input {
+      width: 100%; height: 44px; border-radius: 10px; border: 2px solid var(--border); background: #fff;
+      padding: 0 40px 0 12px; font-size: 1.15rem; font-weight: 800; color: var(--text); outline: none;
+    }
+    .touch-input:focus { border-color: var(--primary); }
+    .unit-tag { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--text-muted); font-size: 0.85rem; pointer-events: none; }
+
+    .multi-lotes-box { background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 10px; margin-top: 8px; }
+    .multi-lotes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .moneda-pill-toggle { display: flex; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+    .moneda-pill-btn { padding: 4px 10px; font-size: 0.75rem; font-weight: 800; border: none; background: #f1f5f9; color: #64748b; cursor: pointer; }
+    .moneda-pill-btn.active { background: var(--primary); color: white; }
+
+    .lote-item-row {
+      background: #f8fafc; border: 1px solid var(--border-light); border-radius: 10px; padding: 8px;
+      margin-bottom: 8px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: flex-end;
+    }
+    .lote-field { display: flex; flex-direction: column; }
+    .lote-field label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px; }
+    .lote-input { width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 8px; font-size: 1rem; font-weight: 800; text-align: center; }
+    .btn-remove-lote {
+      width: 34px; height: 40px; background: var(--danger-light); border: 1px solid #fecaca; border-radius: 8px;
+      color: var(--danger); font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .btn-add-lote {
+      width: 100%; height: 36px; background: #f0fdf4; border: 1.5px dashed var(--primary); border-radius: 8px;
+      color: var(--primary-dark); font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .lotes-subtotal-summary { border-top: 1px solid var(--border-light); padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; }
+
+    .calc-box-result {
+      background: linear-gradient(145deg, #133821, #1B4D2E); color: white;
+      border-radius: 16px; padding: 14px; margin-bottom: 12px; border-bottom: 3px solid var(--gold);
+    }
+    .calc-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+    .calc-net-title { font-size: 0.65rem; text-transform: uppercase; color: #bbf7d0; font-weight: 700; }
+    .calc-net-val { font-size: 1.55rem; font-weight: 900; line-height: 1.1; }
+    .calc-money-box { text-align: right; }
+    .calc-money-title { font-size: 0.65rem; text-transform: uppercase; color: var(--gold-light); font-weight: 700; }
+    .calc-money-usd { font-size: 1.55rem; font-weight: 900; color: var(--gold-light); line-height: 1.1; }
+    .calc-money-bs { font-size: 0.85rem; color: #ffffff; font-weight: 700; }
+    .calc-sub-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .calc-sub-item span:first-child { display: block; font-size: 0.6rem; color: #bbf7d0; text-transform: uppercase; font-weight: 600; }
+    .calc-sub-item span:last-child { font-size: 0.8rem; font-weight: 700; }
+
+    .btn-add-item {
+      width: 100%; height: 50px; background: var(--primary); color: white; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+
+    .provider-history-title { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin: 14px 0 8px 0; display: flex; justify-content: space-between; }
+    .pesada-item-card {
+      background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 10px 12px;
+      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    }
+    .pesada-item-left .p-rubro { font-weight: 800; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .badge-modalidad { font-size: 0.62rem; background: #e2e8f0; color: #334155; padding: 1px 5px; border-radius: 4px; font-weight: 700; }
+    .badge-sync-ok { font-size: 0.62rem; background: #dcfce7; color: #166534; padding: 1px 5px; border-radius: 4px; font-weight: 700; }
+    .badge-sync-pend { font-size: 0.62rem; background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 4px; font-weight: 700; }
+    .pesada-item-left .p-details { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+    .pesada-lotes-breakdown { margin-top: 4px; padding: 4px 6px; background: #f8fafc; border-radius: 6px; font-size: 0.72rem; color: #334155; border-left: 3px solid var(--primary); }
+    .pesada-item-right { text-align: right; }
+    .pesada-item-right .p-monto-usd { font-size: 1rem; font-weight: 900; color: var(--primary-dark); }
+    .pesada-item-right .p-monto-bs { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); }
+    .btn-del-mini { background: none; border: none; color: var(--danger); font-size: 0.72rem; font-weight: 700; margin-top: 2px; cursor: pointer; }
+
+    .sheet-footer-actions {
+      padding: 10px 14px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border-light); background: #f8fafc; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .btn-action-outline {
+      height: 40px; border: 1.5px solid #cbd5e1; background: #fff; border-radius: 10px;
+      font-size: 0.78rem; font-weight: 700; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer;
+    }
+    .btn-whatsapp {
+      height: 40px; background: #25d366; border: none; border-radius: 10px; color: white;
+      font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer;
+    }
+    .btn-gold {
+      height: 40px; background: var(--gold); border: none; border-radius: 10px; color: var(--primary-dark);
+      font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer;
+    }
+
+    .rubro-summary-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 12px; }
+    .rubro-summary-table th, .rubro-summary-table td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+    .rubro-summary-table th { background: var(--primary); color: #fff; font-size: 0.74rem; text-transform: uppercase; }
+    .rubro-summary-table td.num, .rubro-summary-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .rubro-summary-table tfoot td { background: #e6f2e8; font-weight: 900; color: var(--primary-dark); border-top: 2px solid var(--primary); }
+
+    .modal-tasa-box { background: white; border-radius: 16px; padding: 18px; width: 90%; max-width: 380px; margin: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 4px solid var(--gold); }
+    .toast {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-100px);
+      background: #0f172a; color: white; padding: 10px 18px; border-radius: 30px; font-size: 0.82rem; font-weight: 700;
+      z-index: 250; opacity: 0; transition: all 0.25s ease; box-shadow: 0 4px 14px rgba(0,0,0,0.25); pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: calc(58px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: #ffffff; border-top: 2px solid var(--gold);
+      display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px;
+      align-items: center; z-index: 30; padding-left: 10px; padding-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="toast" class="toast"><span id="toast-msg">Mensaje</span></div>
+
+  <header>
+    <div class="header-top">
+      <div class="header-titles">
+        <h1>🚜 Compras Mercabar — SLWA</h1>
+        <p>
+          <span id="fecha-header">Carga del día</span>
+          <span id="net-status-badge" class="net-badge">🟢 En línea</span>
+        </p>
+      </div>
+
+      <div class="header-tasa-box">
+        <div class="tasa-content" onclick="abrirConfigTasa()">
+          <span>BCV (DolarApi)</span>
+          <strong><span id="txt-tasa-bdv">--.--</span> Bs/$</strong>
+        </div>
+        <button class="btn-refresh-tasa" onclick="obtenerTasaDolarApi(true)" title="Actualizar Tasa">🔄</button>
+      </div>
+    </div>
+
+    <div class="header-totals-bar">
+      <div class="h-total-col"><span>Total Neto</span><strong><span id="bar-total-neto">0.0</span> kg</strong></div>
+      <div class="h-total-col"><span>Total a Pagar $</span><strong style="color: #E5C558;">$<span id="bar-total-usd">0.00</span></strong></div>
+      <div class="h-total-col"><span>Total en Bs</span><strong><span id="bar-total-bs">0.00</span> Bs</strong></div>
+    </div>
+  </header>
+
+  <main class="main-scroll">
+    <div class="sync-banner">
+      <div>
+        <strong>Cola de Envío:</strong>
+        <span id="txt-pendientes-sync">0 compras pendientes</span>
+      </div>
+      <button type="button" class="btn-action-outline" style="height:30px;padding:0 10px;font-size:0.72rem;" onclick="sincronizarProveedoresDesdeSheets(true)">
+        🔄 Act. Prov.
+      </button>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="input-buscar-prov" placeholder="Buscar proveedor de Mercabar o rubro..." oninput="filtrarProveedores()">
+    </div>
+
+    <div id="empty-provs-notice" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:12px;padding:12px;margin-bottom:10px;font-size:0.8rem;color:#92400e;">
+      ⚠️ No hay proveedores marcados como <strong>Mercabar = Sí</strong> en Google Sheets. Entra a <strong>Proveedores y CxP &gt; Directorio</strong> y presiona <em>"🚜 Cargar 10 Prov. Mercabar"</em> o marca tus proveedores como Mercabar.
+    </div>
+
+    <div class="providers-grid" id="providers-container"></div>
+  </main>
+
+  <nav class="bottom-bar">
+    <button class="btn-gold" onclick="abrirResumenRubros()">📊 Resumen</button>
+    <button id="btn-enviar-sheets" class="btn-add-item" style="height:40px;font-size:0.78rem;border-radius:10px;" onclick="abrirModalEnvio()">
+      ☁️ Enviar (<span id="count-pend-btn">0</span>)
+    </button>
+    <button class="btn-whatsapp" onclick="compartirResumenGlobalWhatsApp()">📲 WhatsApp</button>
+  </nav>
+
+  <!-- MODAL PESAJE DEL PROVEEDOR -->
+  <div class="modal-overlay" id="modal-proveedor" onclick="cerrarModalSiClickFuera(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <div class="sheet-title">
+          <span style="font-size:1.5rem;">🧑‍🌾</span>
+          <div>
+            <div id="modal-prov-nombre">Nombre Proveedor</div>
+            <small id="modal-prov-sub">Total: $0.00 | 0.00 Bs</small>
+          </div>
+        </div>
+        <button class="btn-close-sheet" onclick="cerrarModal()">✕</button>
+      </div>
+
+      <div class="sheet-body">
+        <div class="input-label">
+          <span>Rubro a liquidar</span>
+          <button type="button" onclick="agregarRubroRapido()" style="background:none;border:none;color:var(--primary);font-weight:800;font-size:0.72rem;cursor:pointer;">+ Otro rubro</button>
+        </div>
+        <div class="rubros-pills" id="modal-rubros-container"></div>
+
+        <div class="input-label"><span>Modalidad de Cobro</span></div>
+        <div class="tipo-cobro-bar">
+          <button type="button" class="tipo-btn active" id="btn-tipo-cesta" onclick="cambiarTipoCobro('cesta')">📦 Cesta</button>
+          <button type="button" class="tipo-btn" id="btn-tipo-peso" onclick="cambiarTipoCobro('peso')">⚖️ Peso (kg)</button>
+          <button type="button" class="tipo-btn" id="btn-tipo-paquete" onclick="cambiarTipoCobro('paquete')">🎒 Paquete</button>
+          <button type="button" class="tipo-btn" id="btn-tipo-unidad" onclick="cambiarTipoCobro('unidad')">🔢 Unidad</button>
+        </div>
+
+        <div class="input-card">
+          <div class="input-label">
+            <span>Peso Total Bruto (kg con cestas)</span>
+            <span style="font-size:0.7rem; color:var(--text-muted);">Tara: 2.65 kg c/u</span>
+          </div>
+          <div class="touch-input-wrap" style="margin-bottom:6px;">
+            <input type="number" id="m-peso-bruto" class="touch-input" placeholder="0.00" inputmode="decimal" step="any" oninput="calcularEnModal()">
+            <span class="unit-tag">kg</span>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:6px 12px; border-radius:10px; border:1px solid #cbd5e1; margin-top:6px;">
+            <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">% Merma establecido:</span>
+            <div style="font-size:1rem; font-weight:900; color:var(--accent);">
+              <span id="m-pct-merma-txt">0.0</span>%
+            </div>
+          </div>
+
+          <div class="multi-lotes-box">
+            <div class="multi-lotes-header">
+              <div>
+                <span style="font-size:0.76rem; font-weight:800; color:#1e293b; text-transform:uppercase;">Lotes y Precios</span>
+                <div style="font-size:0.68rem; color:var(--text-muted);" id="txt-hint-lotes">Cantidades y precio:</div>
+              </div>
+              <div class="moneda-pill-toggle">
+                <button type="button" class="moneda-pill-btn active" id="btn-moneda-usd" onclick="cambiarMoneda('USD')">$</button>
+                <button type="button" class="moneda-pill-btn" id="btn-moneda-bs" onclick="cambiarMoneda('BS')">Bs</button>
+              </div>
+            </div>
+
+            <div id="lotes-rows-container"></div>
+
+            <button type="button" class="btn-add-lote" onclick="agregarFilaLote()">➕ Agregar otro lote / precio</button>
+
+            <div class="lotes-subtotal-summary">
+              <span>Total Cant: <strong id="sum-cant-lotes">0</strong> <span id="label-unit-sum">cestas</span></span>
+              <span>Subtotal: <strong style="color:var(--primary-dark);" id="sum-monto-lotes">$0.00</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-box-result">
+          <div class="calc-top-row">
+            <div>
+              <div class="calc-net-title">Peso Neto Liquidable</div>
+              <div class="calc-net-val"><span id="m-res-neto">0.00</span> <small style="font-size:0.85rem">kg</small></div>
+            </div>
+            <div class="calc-money-box">
+              <div class="calc-money-title">Total a Pagar</div>
+              <div class="calc-money-usd">$<span id="m-res-total-usd">0.00</span></div>
+              <div class="calc-money-bs"><span id="m-res-total-bs">0.00</span> Bs</div>
+            </div>
+          </div>
+
+          <div class="calc-sub-grid">
+            <div class="calc-sub-item"><span>Tara (<span id="m-res-num-cestas">0</span>×2.65)</span><span id="m-res-tara">- 0.00 kg</span></div>
+            <div class="calc-sub-item"><span>s/ Cestas</span><span id="m-res-sin-cestas">0.00 kg</span></div>
+            <div class="calc-sub-item"><span>Dcto. Merma</span><span id="m-res-merma">- 0.00 kg</span></div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-add-item" onclick="guardarPesadaEnModal()">
+          ➕ REGISTRAR COMPRA (OFFLINE)
+        </button>
+
+        <div class="provider-history-title">
+          <span>Compras de este Proveedor</span>
+          <span id="m-count-pesadas">0</span>
+        </div>
+        <div id="m-lista-pesadas"></div>
+      </div>
+
+      <div class="sheet-footer-actions">
+        <button class="btn-action-outline" onclick="limpiarPesadasDeEsteProveedor()">🗑️ Vaciar Prov.</button>
+        <button class="btn-whatsapp" onclick="enviarWhatsAppProveedor()">📲 Ticket WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL RESUMEN FINAL POR RUBRO -->
+  <div class="modal-overlay" id="modal-resumen-rubros" onclick="if(event.target.id==='modal-resumen-rubros') cerrarResumenRubros()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <div class="sheet-title">
+          <span>📊</span>
+          <div>
+            <div>Resumen Final por Rubro</div>
+            <small>Solo pesos netos y costo total por producto</small>
+          </div>
+        </div>
+        <button class="btn-close-sheet" onclick="cerrarResumenRubros()">✕</button>
+      </div>
+
+      <div class="sheet-body">
+        <table class="rubro-summary-table">
+          <thead>
+            <tr>
+              <th>Rubro</th>
+              <th class="num">Peso Neto (kg)</th>
+              <th class="num">Total ($)</th>
+              <th class="num">Total (Bs.)</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-resumen-rubros"></tbody>
+          <tfoot id="tfoot-resumen-rubros"></tfoot>
+        </table>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+          <button type="button" class="btn-action-outline" onclick="exportarResumenRubrosCSV()">📥 Excel Resumen Rubros</button>
+          <button type="button" class="btn-action-outline" onclick="exportarExcelGlobal()">📥 Excel Detallado</button>
+          <button type="button" class="btn-whatsapp" onclick="enviarWhatsAppResumenRubros()">📲 WhatsApp Rubros</button>
+          <button type="button" class="btn-gold" onclick="limpiarJornadaSincronizada()">🧹 Limpiar Enviadas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR ENVÍO A SHEETS -->
+  <div class="modal-overlay" id="modal-confirmar-envio" onclick="if(event.target.id==='modal-confirmar-envio') cerrarModalEnvio()">
+    <div class="modal-tasa-box" onclick="event.stopPropagation()">
+      <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:6px;color:var(--primary-dark);">☁️ Enviar Compras a Google Sheets</h3>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">
+        Se subirán <strong id="envio-cant-txt">0</strong> compra(s) pendientes a la hoja <strong>Compras_Mercabar</strong>. ¿Deseas generar también las facturas en <strong>Cuentas por Pagar</strong>?
+      </p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button type="button" class="btn-add-item" style="height:44px;font-size:0.86rem;" onclick="ejecutarEnvioSheets(true)">
+          ✅ Enviar a Compras + Cuentas por Pagar
+        </button>
+        <button type="button" class="btn-gold" style="height:42px;font-size:0.84rem;" onclick="ejecutarEnvioSheets(false)">
+          📦 Guardar Solo en Compras_Mercabar
+        </button>
+        <button type="button" class="btn-action-outline" onclick="cerrarModalEnvio()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Tasa BCV -->
+  <div class="modal-overlay" id="modal-tasa-config" onclick="if(event.target.id==='modal-tasa-config') cerrarConfigTasa()">
+    <div class="modal-tasa-box" onclick="event.stopPropagation()">
+      <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:6px;color:var(--primary-dark);">💵 Tasa Dólar Oficial</h3>
+      <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:12px;">
+        Consultada en tiempo real de <strong>dolarapi.com</strong> (BCV). Puedes ajustarla manualmente si estás sin señal:
+      </p>
+      <div class="touch-input-wrap">
+        <input type="number" id="input-edit-tasa" class="touch-input" step="0.01" inputmode="decimal">
+        <span class="unit-tag">Bs/$</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn-action-outline" style="flex:1;" onclick="obtenerTasaDolarApi(true); cerrarConfigTasa();">🔄 Consultar API</button>
+        <button class="btn-add-item" style="flex:1;height:42px;font-size:0.9rem;" onclick="guardarTasaManual()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
+    const KEY_PESADAS = "hm_slwa_mercabar_pesadas_v1";
+    const KEY_PROVS_CACHE = "hm_slwa_mercabar_only_provs_v2";
+    const KEY_TASA = "tasa_bdv_oficial";
+
+    const RUBROS_GENERALES = [
+      { nombre: "Tomate", merma: 12 }, { nombre: "Cebolla", merma: 7 }, { nombre: "Papas", merma: 6 },
+      { nombre: "Pimentón", merma: 10 }, { nombre: "Zanahorias", merma: 8 }, { nombre: "Cambur", merma: 15 },
+      { nombre: "Patilla", merma: 8 }, { nombre: "Melón", merma: 10 }, { nombre: "Repollo", merma: 7 },
+      { nombre: "Ají", merma: 12 }, { nombre: "Cilantro", merma: 20 }, { nombre: "Lechuga", merma: 18 },
+      { nombre: "Auyama", merma: 4 }, { nombre: "Piña", merma: 10 }, { nombre: "Guayaba", merma: 15 }
+    ];
+
+    let CATALOGO_PROVEEDORES = [];
+    let pesadas = JSON.parse(localStorage.getItem(KEY_PESADAS) || "[]");
+    let tasaBDV = parseFloat(localStorage.getItem(KEY_TASA)) || 78.50;
+
+    let proveedorActivo = null, rubroSeleccionado = null, tipoCobroActual = "cesta", monedaActual = "USD";
+    let lotesActuales = [{ id: 1, cantidad: "", precio: "" }];
+
+    const fmt = (n, dec = 2) => Number(n || 0).toLocaleString("es-ES", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    const normStr = s => String(s || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    function vibrar(ms = 35) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+    function whatsappToVePhone(raw) {
+      let d = String(raw || "").replace(/\D/g, "");
+      if (!d) return "";
+      if (d.startsWith("0") && d.length === 11) d = "58" + d.slice(1);
+      return d.length >= 11 ? d : "";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("fecha-header").textContent = new Date().toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" });
+      document.getElementById("txt-tasa-bdv").textContent = fmt(tasaBDV, 2);
+
+      try {
+        const cached = JSON.parse(localStorage.getItem(KEY_PROVS_CACHE) || "[]");
+        if (Array.isArray(cached) && cached.length > 0) aplicarProveedoresMercabar(cached);
+      } catch (e) {}
+
+      actualizarEstadoRed();
+      window.addEventListener("online", () => { actualizarEstadoRed(); sincronizarProveedoresDesdeSheets(false); obtenerTasaDolarApi(false); });
+      window.addEventListener("offline", actualizarEstadoRed);
+
+      if (navigator.onLine) {
+        obtenerTasaDolarApi(false);
+        sincronizarProveedoresDesdeSheets(false);
+      }
+
+      renderizarProveedores();
+      actualizarTotalesGlobales();
+    });
+
+    function actualizarEstadoRed() {
+      document.getElementById("net-status-badge").textContent = navigator.onLine ? "🟢 En línea" : "🔴 Offline (Guardado local)";
+    }
+
+    function aplicarProveedoresMercabar(lista) {
+      CATALOGO_PROVEEDORES = (lista || []).map(p => ({
+        idProveedor: p.id || "",
+        codigoProveedor: p.codigo || "",
+        nombre: p.nombre || p.razonSocial || "",
+        whatsapp: p.whatsapp || "",
+        emoji: "🧑‍🌾",
+        rubros: (Array.isArray(p.rubros) && p.rubros.length > 0) ? p.rubros : JSON.parse(JSON.stringify(RUBROS_GENERALES))
+      }));
+      renderizarProveedores(document.getElementById("input-buscar-prov").value);
+    }
+
+    async function sincronizarProveedoresDesdeSheets(showMsg = false) {
+      if (!navigator.onLine) {
+        if (showMsg) mostrarToast("⚠️ Sin internet. Usando caché local de Mercabar.");
+        return;
+      }
+      try {
+        const res = await fetch(`${SCRIPT_URL}?module=compras&action=getProveedores&_t=${Date.now()}`);
+        const json = await res.json();
+        if (json.status === "ok" && Array.isArray(json.proveedores)) {
+          localStorage.setItem(KEY_PROVS_CACHE, JSON.stringify(json.proveedores));
+          aplicarProveedoresMercabar(json.proveedores);
+          if (showMsg) mostrarToast(`✅ ${json.proveedores.length} proveedores Mercabar sincronizados`);
+        }
+      } catch (e) {
+        if (showMsg) mostrarToast("⚠️ No se pudo conectar con Google Sheets.");
+      }
+    }
+
+    async function obtenerTasaDolarApi(mostrarNotificacion = false) {
+      const btnRefresh = document.querySelector(".btn-refresh-tasa");
+      if (btnRefresh) btnRefresh.style.transform = "rotate(180deg)";
+      try {
+        const respuesta = await fetch("https://ve.dolarapi.com/v1/dolares/oficial");
+        if (!respuesta.ok) throw new Error("Error API");
+        const data = await respuesta.json();
+        const valorTasa = data.promedio || data.venta || data.precio;
+        if (valorTasa && !isNaN(valorTasa)) {
+          tasaBDV = parseFloat(valorTasa);
+          localStorage.setItem(KEY_TASA, tasaBDV);
+          document.getElementById("txt-tasa-bdv").textContent = fmt(tasaBDV, 2);
+          calcularEnModal(); actualizarTotalesGlobales();
+          if (mostrarNotificacion) { mostrarToast(`✅ Tasa BCV: ${fmt(tasaBDV, 2)} Bs/$`); vibrar(40); }
+        }
+      } catch (err) {
+        if (mostrarNotificacion) { mostrarToast("⚠️ Sin señal para BCV. Usando tasa guardada."); vibrar(80); }
+      } finally {
+        if (btnRefresh) setTimeout(() => btnRefresh.style.transform = "none", 300);
+      }
+    }
+
+    function renderizarProveedores(filtro = "") {
+      const container = document.getElementById("providers-container");
+      const notice = document.getElementById("empty-provs-notice");
+      container.innerHTML = "";
+      notice.style.display = CATALOGO_PROVEEDORES.length === 0 ? "block" : "none";
+
+      const term = normStr(filtro);
+      CATALOGO_PROVEEDORES.forEach(p => {
+        const coincideProv = normStr(p.nombre).includes(term) || normStr(p.codigoProveedor).includes(term);
+        const coincideRubro = p.rubros.some(r => normStr(r.nombre).includes(term));
+        if (term && !coincideProv && !coincideRubro) return;
+
+        const cantPesadas = pesadas.filter(item => item.proveedor === p.nombre).length;
+        const btn = document.createElement("button");
+        btn.type = "button"; btn.className = "provider-btn";
+        btn.onclick = () => abrirModalProveedor(p.nombre);
+        btn.innerHTML = `
+          <div class="provider-avatar">${p.emoji}</div>
+          <div class="provider-name">${p.nombre}</div>
+          <div class="provider-rubros-count">${p.codigoProveedor ? p.codigoProveedor + " · " : ""}${p.rubros.length} rubros</div>
+          ${cantPesadas > 0 ? `<div class="provider-badge-pesadas">${cantPesadas}</div>` : ""}
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function filtrarProveedores() { renderizarProveedores(document.getElementById("input-buscar-prov").value); }
+
+    function abrirModalProveedor(nombreProveedor) {
+      vibrar(25);
+      const prov = CATALOGO_PROVEEDORES.find(p => p.nombre === nombreProveedor);
+      if (!prov) return;
+      proveedorActivo = prov;
+      document.getElementById("modal-prov-nombre").textContent = prov.nombre;
+      renderizarPillsRubros();
+
+      lotesActuales = [{ id: Date.now(), cantidad: "", precio: "" }];
+      document.getElementById("m-peso-bruto").value = "";
+      cambiarTipoCobro("cesta"); cambiarMoneda("USD");
+      renderizarFilasLotes(); actualizarListaPesadasModal(); calcularEnModal();
+      document.getElementById("modal-proveedor").classList.add("active");
+    }
+
+    function renderizarPillsRubros() {
+      const container = document.getElementById("modal-rubros-container");
+      container.innerHTML = "";
+      proveedorActivo.rubros.forEach((r, idx) => {
+        const pill = document.createElement("div");
+        pill.className = `rubro-pill ${idx === 0 ? "active" : ""}`;
+        pill.innerHTML = `<span>${r.nombre}</span><span class="merma-tag">${r.merma}%</span>`;
+        pill.onclick = () => seleccionarRubroEnModal(r, pill);
+        container.appendChild(pill);
+      });
+      seleccionarRubroEnModal(proveedorActivo.rubros[0]);
+    }
+
+    function agregarRubroRapido() {
+      if (!proveedorActivo) return;
+      const nombre = prompt("Nombre del rubro:");
+      if (!nombre || !nombre.trim()) return;
+      const merma = parseFloat(prompt("Porcentaje de merma (%):", "10")) || 0;
+      const nuevo = { nombre: nombre.trim(), merma };
+      proveedorActivo.rubros.push(nuevo);
+      renderizarPillsRubros();
+      const pills = document.querySelectorAll(".rubro-pill");
+      seleccionarRubroEnModal(nuevo, pills[pills.length - 1]);
+    }
+
+    function seleccionarRubroEnModal(rubro, elementoPill = null) {
+      vibrar(15); rubroSeleccionado = rubro;
+      document.getElementById("m-pct-merma-txt").textContent = rubro ? rubro.merma : 0;
+      if (!elementoPill) elementoPill = document.querySelector(".rubro-pill");
+      document.querySelectorAll(".rubro-pill").forEach(p => p.classList.remove("active"));
+      if (elementoPill) elementoPill.classList.add("active");
+      calcularEnModal();
+    }
+
+    function cambiarTipoCobro(tipo) {
+      vibrar(15); tipoCobroActual = tipo;
+      document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(`btn-tipo-${tipo}`).classList.add("active");
+      const labelUnit = document.getElementById("label-unit-sum"), hint = document.getElementById("txt-hint-lotes");
+      if (tipo === "cesta") { labelUnit.textContent = "cestas"; hint.textContent = "Cestas y precio por cesta:"; }
+      else if (tipo === "peso") { labelUnit.textContent = "kilos"; hint.textContent = "Kilos netos y precio por kilo:"; }
+      else if (tipo === "paquete") { labelUnit.textContent = "paquetes"; hint.textContent = "Paquetes y precio por paquete:"; }
+      else { labelUnit.textContent = "unidades"; hint.textContent = "Unidades y precio por unidad:"; }
+      renderizarFilasLotes(); calcularEnModal();
+    }
+
+    function cambiarMoneda(moneda) {
+      vibrar(15); monedaActual = moneda;
+      document.getElementById("btn-moneda-usd").classList.toggle("active", moneda === "USD");
+      document.getElementById("btn-moneda-bs").classList.toggle("active", moneda === "BS");
+      renderizarFilasLotes(); calcularEnModal();
+    }
+
+    function renderizarFilasLotes() {
+      const container = document.getElementById("lotes-rows-container"); container.innerHTML = "";
+      let labelCantidad = tipoCobroActual === "peso" ? "Kilos" : tipoCobroActual === "paquete" ? "Paquetes" : tipoCobroActual === "unidad" ? "Unidades" : "Cant. Cestas";
+      const monSimbolo = monedaActual === "USD" ? "$" : "Bs";
+      lotesActuales.forEach((lote, index) => {
+        const row = document.createElement("div"); row.className = "lote-item-row";
+        row.innerHTML = `
+          <div class="lote-field"><label>${labelCantidad} (Lote ${index + 1})</label><input type="number" class="lote-input" placeholder="Ej: 3" value="${lote.cantidad !== "" ? lote.cantidad : ""}" inputmode="decimal" step="any" oninput="actualizarValorLote(${lote.id}, 'cantidad', this.value)"></div>
+          <div class="lote-field"><label>Precio (${monSimbolo} c/u)</label><input type="number" class="lote-input" placeholder="Ej: 60" value="${lote.precio !== "" ? lote.precio : ""}" inputmode="decimal" step="any" oninput="actualizarValorLote(${lote.id}, 'precio', this.value)"></div>
+          <div>${lotesActuales.length > 1 ? `<button type="button" class="btn-remove-lote" onclick="eliminarFilaLote(${lote.id})">✕</button>` : `<div style="width:34px;"></div>`}</div>`;
+        container.appendChild(row);
+      });
+    }
+
+    function agregarFilaLote() { vibrar(20); lotesActuales.push({ id: Date.now(), cantidad: "", precio: "" }); renderizarFilasLotes(); calcularEnModal(); }
+    function eliminarFilaLote(id) { vibrar(20); lotesActuales = lotesActuales.filter(l => l.id !== id); renderizarFilasLotes(); calcularEnModal(); }
+    function actualizarValorLote(id, campo, valor) { const item = lotesActuales.find(l => l.id === id); if (item) { item[campo] = valor === "" ? "" : parseFloat(valor); calcularEnModal(); } }
+
+    function calcularEnModal() {
+      const totalBruto = parseFloat(document.getElementById("m-peso-bruto").value) || 0, pesoCesta = 2.65, pctMerma = rubroSeleccionado ? rubroSeleccionado.merma : 0;
+      let totalCantidadLotes = 0, totalMontoMoneda = 0;
+      lotesActuales.forEach(l => { const cant = parseFloat(l.cantidad) || 0, prec = parseFloat(l.precio) || 0; totalCantidadLotes += cant; totalMontoMoneda += (cant * prec); });
+      const cestasTotal = tipoCobroActual === "cesta" ? totalCantidadLotes : (Math.round(totalBruto / 25) || 0);
+      const tara = cestasTotal * pesoCesta, sinCestas = Math.max(0, totalBruto - tara), mermaKg = sinCestas * (pctMerma / 100), netoFinal = Math.max(0, sinCestas - mermaKg);
+      let totalUSD = 0, totalBS = 0;
+      if (monedaActual === "USD") { totalUSD = totalMontoMoneda; totalBS = totalUSD * tasaBDV; }
+      else { totalBS = totalMontoMoneda; totalUSD = tasaBDV > 0 ? (totalBS / tasaBDV) : 0; }
+
+      document.getElementById("sum-cant-lotes").textContent = fmt(totalCantidadLotes, 1);
+      document.getElementById("sum-monto-lotes").textContent = `${monedaActual === "USD" ? "$" : "Bs"} ${fmt(totalMontoMoneda)}`;
+      document.getElementById("m-res-neto").textContent = fmt(netoFinal);
+      document.getElementById("m-res-num-cestas").textContent = cestasTotal;
+      document.getElementById("m-res-tara").textContent = `- ${fmt(tara)} kg`;
+      document.getElementById("m-res-sin-cestas").textContent = `${fmt(sinCestas)} kg`;
+      document.getElementById("m-res-merma").textContent = `- ${fmt(mermaKg)} kg`;
+      document.getElementById("m-res-total-usd").textContent = fmt(totalUSD);
+      document.getElementById("m-res-total-bs").textContent = fmt(totalBS);
+
+      return { totalBruto, cestasTotal, pesoCesta, tara, sinCestas, pctMerma, mermaKg, netoFinal, tipoCobro: tipoCobroActual, moneda: monedaActual, totalCantidadLotes, lotes: JSON.parse(JSON.stringify(lotesActuales)), totalUSD, totalBS };
+    }
+
+    function guardarPesadaEnModal() {
+      const calc = calcularEnModal();
+      if (calc.totalCantidadLotes <= 0) { mostrarToast("⚠️ Ingresa al menos una cantidad en los lotes"); vibrar(80); return; }
+
+      const now = new Date();
+      const fechaStr = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
+      const horaStr = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+
+      const item = {
+        id: Date.now(),
+        clientId: "CMP-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase(),
+        fecha: fechaStr, hora: horaStr,
+        idProveedor: proveedorActivo.idProveedor || "",
+        codigoProveedor: proveedorActivo.codigoProveedor || "",
+        proveedor: proveedorActivo.nombre,
+        rubro: rubroSeleccionado.nombre,
+        tipoCobro: calc.tipoCobro,
+        bruto: calc.totalBruto, cestas: calc.cestasTotal, tara: calc.tara, sinCestas: calc.sinCestas,
+        pctMerma: calc.pctMerma, mermaKg: calc.mermaKg, neto: calc.netoFinal,
+        moneda: calc.moneda, lotes: calc.lotes, totalUSD: calc.totalUSD, totalBS: calc.totalBS,
+        tasaBDV: tasaBDV, synced: false
+      };
+
+      pesadas.unshift(item);
+      localStorage.setItem(KEY_PESADAS, JSON.stringify(pesadas));
+
+      vibrar([40, 60, 40]);
+      mostrarToast(`✅ Guardado offline: ${item.rubro} ($${fmt(item.totalUSD)})`);
+
+      document.getElementById("m-peso-bruto").value = "";
+      lotesActuales = [{ id: Date.now(), cantidad: "", precio: "" }];
+      renderizarFilasLotes(); calcularEnModal(); actualizarListaPesadasModal(); actualizarTotalesGlobales();
+      renderizarProveedores(document.getElementById("input-buscar-prov").value);
+    }
+
+    function eliminarPesada(id) {
+      vibrar(40);
+      if (confirm("¿Eliminar esta compra?")) {
+        pesadas = pesadas.filter(p => p.id !== id);
+        localStorage.setItem(KEY_PESADAS, JSON.stringify(pesadas));
+        actualizarListaPesadasModal(); actualizarTotalesGlobales();
+        renderizarProveedores(document.getElementById("input-buscar-prov").value);
+        mostrarToast("Compra eliminada");
+      }
+    }
+
+    function limpiarPesadasDeEsteProveedor() {
+      if (!proveedorActivo) return;
+      if (confirm(`¿Borrar todas las compras locales de ${proveedorActivo.nombre}?`)) {
+        pesadas = pesadas.filter(p => p.proveedor !== proveedorActivo.nombre);
+        localStorage.setItem(KEY_PESADAS, JSON.stringify(pesadas));
+        actualizarListaPesadasModal(); actualizarTotalesGlobales();
+        renderizarProveedores(document.getElementById("input-buscar-prov").value);
+        mostrarToast("Compras eliminadas");
+      }
+    }
+
+    function actualizarListaPesadasModal() {
+      if (!proveedorActivo) return;
+      const container = document.getElementById("m-lista-pesadas"); container.innerHTML = "";
+      const itemsProv = pesadas.filter(p => p.proveedor === proveedorActivo.nombre);
+      let subtotalNeto = 0, subtotalUSD = 0, subtotalBS = 0;
+      document.getElementById("m-count-pesadas").textContent = itemsProv.length;
+
+      if (itemsProv.length === 0) {
+        container.innerHTML = `<div style="text-align:center;padding:14px;color:var(--text-muted);font-size:0.82rem;">Sin compras registradas para ${proveedorActivo.nombre}.</div>`;
+      } else {
+        itemsProv.forEach(p => {
+          subtotalNeto += p.neto; subtotalUSD += p.totalUSD; subtotalBS += p.totalBS;
+          const card = document.createElement("div"); card.className = "pesada-item-card";
+          const lotesTxt = p.lotes && p.lotes.length ? `<div class="pesada-lotes-breakdown">Lotes: ${p.lotes.map(l => `${l.cantidad} a ${p.moneda === "USD" ? "$" : "Bs"}${l.precio}`).join(" • ")}</div>` : "";
+          const syncBadge = p.synced ? `<span class="badge-sync-ok">✅ Enviado</span>` : `<span class="badge-sync-pend">⏳ Pendiente</span>`;
+          card.innerHTML = `
+            <div class="pesada-item-left">
+              <div class="p-rubro"><span>${p.rubro}</span><span class="badge-modalidad">${p.tipoCobro.toUpperCase()}</span>${syncBadge}</div>
+              <div class="p-details">${p.cestas} cestas (-${fmt(p.tara)}k) • Neto: ${fmt(p.neto)} kg • Merma: -${p.pctMerma}%</div>
+              ${lotesTxt}
+              <div style="font-size:0.65rem;color:#94a3b8;margin-top:2px;">${p.fecha || ""} ${p.hora}</div>
+            </div>
+            <div class="pesada-item-right">
+              <div class="p-monto-usd">$${fmt(p.totalUSD)}</div>
+              <div class="p-monto-bs">${fmt(p.totalBS)} Bs</div>
+              <button class="btn-del-mini" onclick="eliminarPesada(${p.id})">Eliminar</button>
+            </div>`;
+          container.appendChild(card);
+        });
+      }
+      document.getElementById("modal-prov-sub").textContent = `Total: $${fmt(subtotalUSD)} | ${fmt(subtotalBS)} Bs (${fmt(subtotalNeto)} kg)`;
+    }
+
+    function actualizarTotalesGlobales() {
+      let totalNeto = 0, totalUSD = 0, totalBS = 0, pendientes = 0;
+      pesadas.forEach(p => { totalNeto += p.neto; totalUSD += p.totalUSD; totalBS += p.totalBS; if (!p.synced) pendientes++; });
+      document.getElementById("bar-total-neto").textContent = fmt(totalNeto, 1);
+      document.getElementById("bar-total-usd").textContent = fmt(totalUSD);
+      document.getElementById("bar-total-bs").textContent = fmt(totalBS);
+      document.getElementById("count-pend-btn").textContent = pendientes;
+      document.getElementById("txt-pendientes-sync").textContent = pendientes > 0 ? `${pendientes} compra(s) offline por subir` : (pesadas.length > 0 ? "Todo sincronizado ✅" : "Sin compras registradas");
+    }
+
+    function abrirModalEnvio() {
+      const pendientes = pesadas.filter(p => !p.synced);
+      if (pendientes.length === 0) return mostrarToast("ℹ️ No hay compras pendientes por enviar.");
+      if (!navigator.onLine) { mostrarToast("🔴 Sin internet. Sigue registrando offline y envía al tener señal."); vibrar(80); return; }
+      document.getElementById("envio-cant-txt").textContent = pendientes.length;
+      document.getElementById("modal-confirmar-envio").classList.add("active");
+    }
+    function cerrarModalEnvio() { document.getElementById("modal-confirmar-envio").classList.remove("active"); }
+
+    async function ejecutarEnvioSheets(enviarACxP) {
+      cerrarModalEnvio();
+      const pendientes = pesadas.filter(p => !p.synced);
+      if (pendientes.length === 0) return;
+
+      const btn = document.getElementById("btn-enviar-sheets");
+      btn.disabled = true; btn.textContent = "⏳ Enviando...";
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ module: "compras", action: "saveComprasBatch", items: pendientes, enviarACxP: enviarACxP })
+        });
+        const json = await res.json();
+        if (json && json.status === "ok") {
+          const syncedSet = new Set(json.syncedIds || []);
+          pesadas.forEach(p => { if (syncedSet.has(p.clientId) || !p.synced) p.synced = true; });
+          localStorage.setItem(KEY_PESADAS, JSON.stringify(pesadas));
+          actualizarTotalesGlobales(); actualizarListaPesadasModal();
+          vibrar([40, 60, 40]);
+          const msgExtra = json.facturasCreadas > 0 ? ` y ${json.facturasCreadas} factura(s) en CxP` : "";
+          mostrarToast(`✅ ${json.guardados} compra(s) guardadas${msgExtra}`);
+        } else {
+          throw new Error(json && json.message ? json.message : "Error del servidor");
+        }
+      } catch (err) {
+        mostrarToast("❌ Falló el envío (conexión inestable). Tus datos siguen seguros en el teléfono.");
+        vibrar(100);
+      } finally {
+        btn.disabled = false;
+        const rest = pesadas.filter(p => !p.synced).length;
+        btn.innerHTML = `☁️ Enviar (<span id="count-pend-btn">${rest}</span>)`;
+      }
+    }
+
+    function calcularResumenPorRubro() {
+      const map = {};
+      pesadas.forEach(p => {
+        const r = p.rubro || "Varios";
+        if (!map[r]) map[r] = { rubro: r, pesoNeto: 0, totalUSD: 0, totalBS: 0 };
+        map[r].pesoNeto += Number(p.neto || 0); map[r].totalUSD += Number(p.totalUSD || 0); map[r].totalBS += Number(p.totalBS || 0);
+      });
+      return Object.values(map).sort((a, b) => a.rubro.localeCompare(b.rubro, "es"));
+    }
+
+    function abrirResumenRubros() {
+      vibrar(20);
+      const lista = calcularResumenPorRubro(), tbody = document.getElementById("tbody-resumen-rubros"), tfoot = document.getElementById("tfoot-resumen-rubros");
+      let sumKg = 0, sumUsd = 0, sumBs = 0;
+      if (!lista.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:16px;">No hay compras registradas aún.</td></tr>`; tfoot.innerHTML = "";
+      } else {
+        tbody.innerHTML = lista.map(x => { sumKg += x.pesoNeto; sumUsd += x.totalUSD; sumBs += x.totalBS; return `<tr><td><strong>${x.rubro}</strong></td><td class="num">${fmt(x.pesoNeto)} kg</td><td class="num"><strong>$${fmt(x.totalUSD)}</strong></td><td class="num">${fmt(x.totalBS)} Bs</td></tr>`; }).join("");
+        tfoot.innerHTML = `<tr><td>TOTAL GENERAL</td><td class="num">${fmt(sumKg)} kg</td><td class="num">$${fmt(sumUsd)}</td><td class="num">${fmt(sumBs)} Bs</td></tr>`;
+      }
+      document.getElementById("modal-resumen-rubros").classList.add("active");
+    }
+    function cerrarResumenRubros() { document.getElementById("modal-resumen-rubros").classList.remove("active"); }
+
+    function limpiarJornadaSincronizada() {
+      const sinEnviar = pesadas.filter(p => !p.synced).length;
+      if (sinEnviar > 0) {
+        if (!confirm(`⚠️ Aún tienes ${sinEnviar} compra(s) SIN enviar a Google Sheets. ¿Borrar solo las ya enviadas?`)) return;
+        pesadas = pesadas.filter(p => !p.synced);
+      } else {
+        if (!confirm("¿Limpiar la lista actual para iniciar una nueva jornada? (Tus datos ya están en Google Sheets)")) return;
+        pesadas = [];
+      }
+      localStorage.setItem(KEY_PESADAS, JSON.stringify(pesadas));
+      cerrarResumenRubros(); actualizarTotalesGlobales(); renderizarProveedores(document.getElementById("input-buscar-prov").value);
+      mostrarToast("🧹 Lista actualizada");
+    }
+
+    function enviarWhatsAppResumenRubros() {
+      const lista = calcularResumenPorRubro();
+      if (!lista.length) return mostrarToast("⚠️ No hay compras registradas");
+      let sumKg = 0, sumUsd = 0, sumBs = 0;
+      let texto = `*RESUMEN FINAL DE COMPRAS POR RUBRO - HYPERMARKET SLWA*%0AFecha: ${new Date().toLocaleDateString("es-ES")}%0ATasa BCV: ${fmt(tasaBDV, 2)} Bs/$%0A========================================%0A`;
+      lista.forEach(x => { sumKg += x.pesoNeto; sumUsd += x.totalUSD; sumBs += x.totalBS; texto += `• *${x.rubro}*: ${fmt(x.pesoNeto)} kg — *$${fmt(x.totalUSD)}* (${fmt(x.totalBS)} Bs)%0A`; });
+      texto += `========================================%0A*PESO NETO TOTAL:* ${fmt(sumKg)} kg%0A*COSTO TOTAL ($):* *$${fmt(sumUsd)}*%0A*COSTO TOTAL (Bs):* *${fmt(sumBs)} Bs*`;
+      window.open(`https://api.whatsapp.com/send?text=${texto}`, "_blank");
+    }
+
+    function exportarResumenRubrosCSV() {
+      const lista = calcularResumenPorRubro();
+      if (!lista.length) return mostrarToast("⚠️ No hay datos");
+      let csv = "\uFEFFRubro;Peso_Neto_kg;Total_USD;Total_BS\r\n";
+      lista.forEach(x => { csv += `"${x.rubro}";${x.pesoNeto.toFixed(2).replace(".", ",")};${x.totalUSD.toFixed(2).replace(".", ",")};${x.totalBS.toFixed(2).replace(".", ",")}\r\n`; });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = `Resumen_Rubros_Mercabar_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    }
+
+    function cerrarModal() { vibrar(20); document.getElementById("modal-proveedor").classList.remove("active"); }
+    function cerrarModalSiClickFuera(e) { if (e.target.id === "modal-proveedor") cerrarModal(); }
+    function abrirConfigTasa() { vibrar(20); document.getElementById("input-edit-tasa").value = tasaBDV; document.getElementById("modal-tasa-config").classList.add("active"); }
+    function cerrarConfigTasa() { document.getElementById("modal-tasa-config").classList.remove("active"); }
+    function guardarTasaManual() {
+      const val = parseFloat(document.getElementById("input-edit-tasa").value);
+      if (isNaN(val) || val <= 0) return mostrarToast("⚠️ Tasa no válida");
+      tasaBDV = val; localStorage.setItem(KEY_TASA, tasaBDV); document.getElementById("txt-tasa-bdv").textContent = fmt(tasaBDV, 2);
+      cerrarConfigTasa(); calcularEnModal(); actualizarTotalesGlobales(); mostrarToast(`✅ Tasa guardada: ${fmt(tasaBDV, 2)} Bs/$`);
+    }
+
+    function mostrarToast(msg) { const t = document.getElementById("toast"); document.getElementById("toast-msg").textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2500); }
+
+    function enviarWhatsAppProveedor() {
+      if (!proveedorActivo) return;
+      const itemsProv = pesadas.filter(p => p.proveedor === proveedorActivo.nombre);
+      if (!itemsProv.length) return mostrarToast("⚠️ No hay compras registradas");
+
+      let acumNeto = 0, acumUSD = 0, acumBS = 0, acumCestas = 0;
+      let texto = `*LIQUIDACIÓN DE COMPRA - HYPERMARKET SLWA*%0A*PROV:* ${proveedorActivo.nombre.toUpperCase()}%0AFecha: ${new Date().toLocaleDateString("es-ES")}%0ATasa BCV: ${fmt(tasaBDV, 2)} Bs/$%0A========================================%0A`;
+      itemsProv.forEach((p, i) => {
+        acumNeto += p.neto; acumUSD += p.totalUSD; acumBS += p.totalBS; acumCestas += p.cestas;
+        texto += `*${i + 1}. ${p.rubro.toUpperCase()}* [${p.tipoCobro.toUpperCase()}]:%0A`;
+        if (p.lotes) p.lotes.forEach(l => { texto += `   • ${l.cantidad} a ${p.moneda === "USD" ? "$" : "Bs"}${l.precio} = ${p.moneda === "USD" ? "$" : "Bs"}${fmt((parseFloat(l.cantidad)||0)*(parseFloat(l.precio)||0))}%0A`; });
+        texto += `   Total cestas: ${p.cestas} (-${fmt(p.tara)} kg tara)%0A`;
+        if (p.bruto > 0) texto += `   Bruto: ${fmt(p.bruto)} kg | Merma: -${p.pctMerma}%% | *Neto:* ${fmt(p.neto)} kg%0A`;
+        texto += `   *Total Rubro:* *$${fmt(p.totalUSD)}* (${fmt(p.totalBS)} Bs)%0A----------------------------------------%0A`;
+      });
+      texto += `*TOTAL CESTAS:* ${acumCestas}%0A*TOTAL KILOS NETOS:* ${fmt(acumNeto)} kg%0A*TOTAL USD:* *$${fmt(acumUSD)}*%0A*TOTAL BS:* *${fmt(acumBS)} Bs*`;
+
+      const phone = whatsappToVePhone(proveedorActivo.whatsapp);
+      const url = phone ? `https://api.whatsapp.com/send?phone=${phone}&text=${texto}` : `https://api.whatsapp.com/send?text=${texto}`;
+      window.open(url, "_blank");
+    }
+
+    function compartirResumenGlobalWhatsApp() {
+      if (!pesadas.length) return mostrarToast("⚠️ No hay compras registradas hoy");
+      let granTotalNeto = 0, granTotalUSD = 0, granTotalBS = 0;
+      let texto = `*RESUMEN DE COMPRAS MERCABAR - HYPERMARKET SLWA*%0AFecha: ${new Date().toLocaleDateString("es-ES")}%0ATasa BCV: ${fmt(tasaBDV, 2)} Bs/$%0A========================================%0A`;
+      CATALOGO_PROVEEDORES.forEach(p => {
+        const items = pesadas.filter(x => x.proveedor === p.nombre);
+        if (items.length > 0) {
+          const netoProv = items.reduce((a, c) => a + c.neto, 0), usdProv = items.reduce((a, c) => a + c.totalUSD, 0), bsProv = items.reduce((a, c) => a + c.totalBS, 0);
+          granTotalNeto += netoProv; granTotalUSD += usdProv; granTotalBS += bsProv;
+          texto += `*${p.nombre}*: $${fmt(usdProv)} (${fmt(bsProv)} Bs) | ${fmt(netoProv)} kg%0A`;
+        }
+      });
+      texto += `========================================%0A*TOTAL KILOS:* ${fmt(granTotalNeto)} kg%0A*GRAN TOTAL USD:* *$${fmt(granTotalUSD)}*%0A*GRAN TOTAL BS:* *${fmt(granTotalBS)} Bs*`;
+      window.open(`https://api.whatsapp.com/send?text=${texto}`, "_blank");
+    }
+
+    function exportarExcelGlobal() {
+      if (!pesadas.length) return mostrarToast("⚠️ No hay datos para exportar");
+      let csv = "\uFEFFFecha;Hora;Proveedor;Rubro;Modalidad;Desglose_Lotes;Peso_Bruto_kg;Cestas;Tara_kg;Peso_Neto_kg;Porcentaje_Merma;Total_USD;Total_BS;Tasa_BDV\r\n";
+      pesadas.forEach(p => {
+        const lotesStr = p.lotes ? p.lotes.map(l => `${l.cantidad}@${l.precio}`).join(" | ") : "";
+        csv += `"${p.fecha || ""}";"${p.hora}";"${p.proveedor}";"${p.rubro}";"${p.tipoCobro}";"${lotesStr}";${p.bruto};${p.cestas};${p.tara};${p.neto};${p.pctMerma};${p.totalUSD.toFixed(2)};${p.totalBS.toFixed(2)};${p.tasaBDV}\r\n`;
+      });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = `Compras_Mercabar_SLWA_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    }
+  </script>
+</body>
+</html>
