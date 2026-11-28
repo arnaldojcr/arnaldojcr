@@ -22,8 +22,8 @@
     .text-hm-light-gold { color: var(--hm-light-gold); }
 
     .input-hm {
-      width: 100%; padding: 0.42rem 0.6rem; border: 1.5px solid #cbd5e1;
-      border-radius: 0.45rem; font-size: 0.82rem; background: #fff;
+      width: 100%; padding: 0.38rem 0.55rem; border: 1.5px solid #cbd5e1;
+      border-radius: 0.45rem; font-size: 0.8rem; background: #fff;
     }
     .input-hm:focus { outline: none; border-color: var(--hm-med); }
     .card-hm { background: #fff; border-radius: 0.8rem; box-shadow: 0 2px 8px rgba(27,77,46,0.06); border-top: 4px solid var(--hm-dark); }
@@ -41,14 +41,9 @@
       margin: 0 auto 20px auto;
     }
     .recibo-paper .r-title {
-      text-align: center;
-      font-weight: 900;
-      font-size: 15px;
-      letter-spacing: 1px;
-      border-top: 2px solid #111827;
-      border-bottom: 2px solid #111827;
-      padding: 5px 0;
-      margin-bottom: 10px;
+      text-align: center; font-weight: 900; font-size: 15px; letter-spacing: 1px;
+      border-top: 2px solid #111827; border-bottom: 2px solid #111827;
+      padding: 5px 0; margin-bottom: 10px;
     }
     .recibo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; margin-bottom: 10px; }
     .recibo-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 11.5px; }
@@ -103,7 +98,7 @@
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="text-base sm:text-lg font-extrabold">HyperMarket SLWA C.A. — Nómina Semanal y Recibos (LOTTT)</h1>
-        <p class="text-[11px] text-hm-light-gold">Capta Empleados + Asistencia + Permisos + Configuración desde HyperMarket_SLWA</p>
+        <p class="text-[11px] text-hm-light-gold">Conceptos 100% Editables &bull; Enlazado a Empleados, Asistencia, Permisos y Configuración</p>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
@@ -113,7 +108,10 @@
             class="w-20 px-1.5 py-0.5 rounded bg-white text-hm-dark font-mono font-extrabold text-right text-xs" />
           <button onclick="fetchBcv()" class="px-2 py-0.5 rounded bg-hm-gold text-hm-dark font-bold text-[11px] cursor-pointer" title="Consultar DolarApi">🔄</button>
         </div>
-        <button onclick="loadData()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold cursor-pointer">🔄 Sincronizar Sheets</button>
+        <button onclick="openConceptosModal()" class="px-3 py-1.5 rounded-lg bg-hm-gold hover:bg-amber-400 text-hm-dark text-xs font-extrabold cursor-pointer">
+          ⚙️ Configurar Conceptos
+        </button>
+        <button onclick="loadData()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold cursor-pointer">🔄 Sincronizar</button>
       </div>
     </div>
   </header>
@@ -126,9 +124,9 @@
     <div class="card-hm p-4 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-2">
         <h2 class="text-xs font-extrabold uppercase text-hm-dark">
-          <i class="fa-solid fa-building mr-1.5 text-[#C59B27]"></i>Configuración Semanal y Datos Fiscales (Sincronizados en Sheets)
+          <i class="fa-solid fa-building mr-1.5 text-[#C59B27]"></i>Configuración Semanal y Datos Fiscales
         </h2>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <span id="semanaRangeBadge" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[11px] font-bold">Semana: --</span>
           <span id="lunesBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-hm-dark text-[11px] font-bold">Lunes: 1</span>
           <button onclick="guardarDatosEmpresaEnSheets()" class="px-2.5 py-1 rounded bg-hm-dark text-white text-[11px] font-bold cursor-pointer hover:bg-hm-med">
@@ -194,21 +192,24 @@
       <div class="flex flex-wrap items-center gap-2">
         <select id="filtSucursal" class="input-hm !w-52" onchange="renderTabla()"><option value="">Todas las sucursales</option></select>
         <input type="text" id="filtSearch" placeholder="Buscar trabajador o C.I..." class="input-hm !w-52" oninput="renderTabla()" />
-        <div class="flex items-center gap-1.5 text-xs text-gray-600 ml-2">
+        <div class="flex items-center gap-1.5 text-xs text-gray-600 ml-1">
           <label class="font-bold">Bono Domingo ($):</label>
-          <input type="number" id="sundayUsd" value="10" step="0.5" min="0" class="input-hm !w-16 font-mono text-center" onchange="construirFilasSemanal()" />
+          <input type="number" id="sundayUsd" value="10" step="0.5" min="0" class="input-hm !w-16 font-mono text-center" onchange="recalcularNomina()" />
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <button onclick="openConceptosModal()" class="px-3.5 py-2 rounded-lg border border-hm-dark bg-white hover:bg-emerald-50 text-hm-dark text-xs font-bold cursor-pointer">
+          <i class="fa-solid fa-sliders mr-1 text-[#C59B27]"></i>Conceptos (<span id="countConceptosActivos">9</span>)
+        </button>
         <button onclick="guardarNominaSheets()" class="px-3.5 py-2 rounded-lg bg-hm-gold hover:bg-amber-600 text-hm-dark text-xs font-extrabold cursor-pointer">
-          <i class="fa-solid fa-floppy-disk mr-1"></i>Guardar Cierre en Sheets
+          <i class="fa-solid fa-floppy-disk mr-1"></i>Guardar en Sheets
         </button>
         <button onclick="exportarExcel()" class="px-3.5 py-2 rounded-lg bg-hm-med hover:bg-hm-dark text-white text-xs font-bold cursor-pointer">
-          <i class="fa-solid fa-file-excel mr-1"></i>Exportar Excel
+          <i class="fa-solid fa-file-excel mr-1"></i>Excel
         </button>
         <button onclick="imprimirTodosRecibos()" class="px-4 py-2 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-xs font-bold cursor-pointer">
-          <i class="fa-solid fa-print mr-1 text-[#E5C558]"></i>Imprimir Todos los Recibos
+          <i class="fa-solid fa-print mr-1 text-[#E5C558]"></i>Imprimir Todos
         </button>
       </div>
     </div>
@@ -221,37 +222,70 @@
       <div class="card-hm p-3.5 border-t-[#C59B27]"><span class="text-xs text-gray-500 font-semibold">Neto Semanal a Pagar</span><b id="kpiNeto" class="block text-xl font-black text-hm-dark">Bs. 0,00</b></div>
     </div>
 
-    <!-- TABLA EDITABLE DE NÓMINA SEMANAL -->
+    <!-- TABLA DINÁMICA EDITABLE DE NÓMINA SEMANAL -->
     <div class="card-hm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-xs text-left">
-          <thead class="bg-hm-dark text-white uppercase">
-            <tr>
-              <th class="px-3 py-2.5">Trabajador / Asistencia Real</th>
-              <th class="px-2 py-2.5 text-right">Base Sem. (Bs.)</th>
-              <th class="px-2 py-2.5 text-center">Días L-S</th>
-              <th class="px-2 py-2.5 text-center">Horas L-S</th>
-              <th class="px-2 py-2.5 text-center">H.Ext (002)</th>
-              <th class="px-2 py-2.5 text-center">B.Noc (003)</th>
-              <th class="px-2 py-2.5 text-center">Cesta d (004)</th>
-              <th class="px-2 py-2.5 text-right">Bono/Dom Bs (005)</th>
-              <th class="px-2 py-2.5 text-center">ISLR %</th>
-              <th class="px-2 py-2.5 text-right">Asignaciones</th>
-              <th class="px-2 py-2.5 text-right">Deducciones</th>
-              <th class="px-2 py-2.5 text-right">Neto a Pagar</th>
-              <th class="px-3 py-2.5 text-center">Recibo</th>
-            </tr>
-          </thead>
+          <thead id="theadNomina" class="bg-hm-dark text-white uppercase"></thead>
           <tbody id="tbodyNomina" class="divide-y divide-gray-100"></tbody>
         </table>
       </div>
     </div>
   </main>
 
+  <!-- MODAL PANEL DE CONFIGURACIÓN DE CONCEPTOS (ASIGNACIONES Y DEDUCCIONES) -->
+  <div id="conceptosModal" class="hidden fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border-t-4 border-[#C59B27]">
+      <div class="bg-hm-dark text-white px-5 py-3.5 flex justify-between items-center">
+        <div>
+          <h3 class="font-bold text-sm"><i class="fa-solid fa-sliders mr-2 text-[#E5C558]"></i>Configurar Asignaciones y Deducciones del Recibo</h3>
+          <p class="text-[11px] text-hm-light-gold">Agrega, quita, activa/desactiva o edita cualquier concepto. Se guarda en Google Sheets.</p>
+        </div>
+        <button onclick="closeConceptosModal()" class="text-white/80 hover:text-white text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-6 flex-1">
+        <!-- SECCIÓN ASIGNACIONES -->
+        <div>
+          <div class="flex justify-between items-center mb-2 border-b pb-1.5">
+            <h4 class="font-extrabold text-sm text-emerald-800"><i class="fa-solid fa-circle-plus mr-1.5"></i>Asignaciones</h4>
+            <button onclick="addConcepto('asignacion')" class="px-3 py-1.5 rounded-lg bg-hm-med hover:bg-hm-dark text-white text-xs font-bold cursor-pointer">
+              + Anexar Asignación
+            </button>
+          </div>
+          <div id="cfgAsigList" class="space-y-2"></div>
+        </div>
+
+        <!-- SECCIÓN DEDUCCIONES -->
+        <div>
+          <div class="flex justify-between items-center mb-2 border-b pb-1.5">
+            <h4 class="font-extrabold text-sm text-red-700"><i class="fa-solid fa-circle-minus mr-1.5"></i>Deducciones / Retenciones</h4>
+            <button onclick="addConcepto('deduccion')" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold cursor-pointer">
+              + Anexar Deducción
+            </button>
+          </div>
+          <div id="cfgDedList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 bg-gray-50 border-t flex flex-wrap justify-between items-center gap-2">
+        <button onclick="restaurarConceptosDefault()" class="px-3.5 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 text-xs font-bold cursor-pointer">
+          ↺ Restaurar Conceptos LOTTT por Defecto
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeConceptosModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-xs font-bold cursor-pointer">Cerrar</button>
+          <button onclick="guardarConceptosConfig()" class="px-5 py-2 rounded-lg bg-hm-dark hover:bg-hm-med text-white text-xs font-bold cursor-pointer">
+            💾 Aplicar y Guardar en Sheets
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL PREVISUALIZACIÓN INDIVIDUAL DE RECIBO -->
   <div id="reciboModal" class="hidden fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
-      <div class="bg-hm-dark text-white px-4 py-3 flex justify-between items-center">
+      <div class="bg-hm-dark text-white px-4 py-3 flex flex-wrap justify-between items-center gap-2">
         <span class="font-bold text-sm">Vista Previa — Recibo de Pago Semanal</span>
         <div class="flex gap-2">
           <button onclick="enviarReciboWhatsApp()" class="px-3 py-1.5 rounded bg-[#25d366] text-white text-xs font-bold cursor-pointer"><i class="fa-brands fa-whatsapp mr-1"></i>WhatsApp</button>
@@ -269,9 +303,44 @@
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
   const KEY_BCV = "hm_slwa_recibo_bcv_v1";
+  const KEY_CONCEPTOS = "hm_slwa_conceptos_recibo_v1";
+
+  const DEFAULT_CONCEPTOS = [
+    { uid: "c001", codigo: "001", nombre: "Sueldo Básico (Semanal)", tipo: "asignacion", salarial: true, modo: "sueldo_basico", param: 0, activo: true },
+    { uid: "c002", codigo: "002", nombre: "Horas Extras Diurnas (50%)", tipo: "asignacion", salarial: true, modo: "horas_extras_50", param: 0, activo: true },
+    { uid: "c003", codigo: "003", nombre: "Bono Nocturno (30%)", tipo: "asignacion", salarial: true, modo: "bono_nocturno_30", param: 0, activo: true },
+    { uid: "c004", codigo: "004", nombre: "Cestaticket Socialista (No sal.)", tipo: "asignacion", salarial: false, modo: "cestaticket_prorrateo", param: 7, activo: true },
+    { uid: "c005", codigo: "005", nombre: "Bono Asistencia / Domingo (No sal.)", tipo: "asignacion", salarial: false, modo: "bono_domingo", param: 0, activo: true },
+    { uid: "c101", codigo: "101", nombre: "Retención IVSS (4%)", tipo: "deduccion", salarial: false, modo: "ivss_semanal", param: 4, activo: true },
+    { uid: "c102", codigo: "102", nombre: "Retención RPE / Paro Forzoso (0,5%)", tipo: "deduccion", salarial: false, modo: "rpe_semanal", param: 0.5, activo: true },
+    { uid: "c103", codigo: "103", nombre: "Retención FAOV (1%)", tipo: "deduccion", salarial: false, modo: "faov_salarial", param: 1, activo: true },
+    { uid: "c104", codigo: "104", nombre: "Retención ISLR (Según AR-I)", tipo: "deduccion", salarial: false, modo: "islr_salarial", param: 0, activo: true }
+  ];
+
+  const MODOS_ASIG = [
+    ["sueldo_basico", "Sueldo Base Semanal (Asistencia)"],
+    ["horas_extras_50", "Horas Extras Diurnas (50%)"],
+    ["bono_nocturno_30", "Bono Nocturno (30%)"],
+    ["cestaticket_prorrateo", "Cestaticket ($/mes prorrateado)"],
+    ["bono_domingo", "Bono Domingo ($/día si marcó Dom)"],
+    ["porcentaje_salarial", "% sobre Asignaciones Salariales"],
+    ["monto_fijo_bs", "Monto Fijo / Manual en Bs."],
+    ["monto_fijo_usd", "Monto Fijo / Manual en $ (× BCV)"]
+  ];
+
+  const MODOS_DED = [
+    ["ivss_semanal", "IVSS (% × Salario Semanal × Lunes)"],
+    ["rpe_semanal", "RPE / Paro Forzoso (% × Sem. × Lunes)"],
+    ["faov_salarial", "FAOV (% sobre Salarial)"],
+    ["islr_salarial", "ISLR (% configurable AR-I)"],
+    ["porcentaje_salarial", "% sobre Asignaciones Salariales"],
+    ["monto_fijo_bs", "Monto Fijo / Manual en Bs."],
+    ["monto_fijo_usd", "Monto Fijo / Manual en $ (× BCV)"]
+  ];
 
   let ADMIN_PIN = "";
   let APP_CONFIG = {};
+  let CONCEPTOS = JSON.parse(JSON.stringify(DEFAULT_CONCEPTOS));
   let RAW_EMPLEADOS = [];
   let RAW_ASISTENCIA = [];
   let RAW_PERMISOS = [];
@@ -288,6 +357,7 @@
     if (s.includes(",")) return parseFloat(s.replace(",", ".")) || 0;
     return parseFloat(s) || 0;
   };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
 
   function ddmmyyyyToIso(str) {
     const m = String(str || "").trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
@@ -296,25 +366,21 @@
 
   function normalizeTimeTo24h(str) {
     if (!str) return "";
-    const s = String(str).trim().toLowerCase();
-    const isPM = s.includes("p"), isAM = s.includes("a");
+    const s = String(str).trim().toLowerCase(), isPM = s.includes("p"), isAM = s.includes("a");
     const m = s.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
     if (!m) return "";
     let h = parseInt(m[1], 10);
-    const min = m[2].padStart(2, "0"), sec = (m[3] || "00").padStart(2, "0");
     if (isPM && h < 12) h += 12;
     if (isAM && h === 12) h = 0;
-    return `${String(h).padStart(2, "0")}:${min}:${sec}`;
+    return `${String(h).padStart(2, "0")}:${m[2].padStart(2, "0")}:${(m[3] || "00").padStart(2, "0")}`;
   }
 
   function timeToHours(str24) {
     const m = String(str24 || "").match(/^(\d{2}):(\d{2}):(\d{2})$/);
-    if (!m) return null;
-    return parseInt(m[1], 10) + parseInt(m[2], 10) / 60 + parseInt(m[3], 10) / 3600;
+    return m ? (parseInt(m[1], 10) + parseInt(m[2], 10) / 60 + parseInt(m[3], 10) / 3600) : null;
   }
 
   function calcNocturnalOverlap(entH, salH) {
-    // Jornada nocturna LOTTT: 19:00 a 05:00 (19..29 en línea continua)
     let end = salH < entH ? salH + 24 : salH;
     const overlap = (a1, a2, b1, b2) => Math.max(0, Math.min(a2, b2) - Math.max(a1, b1));
     return overlap(entH, end, 0, 5) + overlap(entH, end, 19, 29);
@@ -325,6 +391,11 @@
     if (savedBcv && parseFloat(savedBcv) > 0) document.getElementById("bcvRate").value = parseFloat(savedBcv).toFixed(2);
     else fetchBcv(true);
 
+    try {
+      const cachedC = JSON.parse(localStorage.getItem(KEY_CONCEPTOS) || "null");
+      if (Array.isArray(cachedC) && cachedC.length > 0) CONCEPTOS = cachedC;
+    } catch (e) {}
+
     document.getElementById("fechaPago").value = new Date().toISOString().slice(0, 10);
     goCurrentWeek(false);
   });
@@ -332,8 +403,7 @@
   function computeWeek(refIso) {
     const p = refIso.split("-").map(Number);
     const d = new Date(Date.UTC(p[0], p[1] - 1, p[2]));
-    const diff = (d.getUTCDay() + 6) % 7;
-    d.setUTCDate(d.getUTCDate() - diff);
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
     WEEK_ISOS = []; WEEK_DDMM = [];
     for (let i = 0; i < 7; i++) {
       const cur = new Date(d.getTime() + i * 86400000);
@@ -412,12 +482,16 @@
       if (APP_CONFIG.empresaRif) document.getElementById("empRif").value = APP_CONFIG.empresaRif;
       if (APP_CONFIG.empresaDir) document.getElementById("empDir").value = APP_CONFIG.empresaDir;
       if (APP_CONFIG.cestaMensualUsd !== undefined) document.getElementById("cestaUsd").value = APP_CONFIG.cestaMensualUsd;
+      if (Array.isArray(APP_CONFIG.conceptosRecibo) && APP_CONFIG.conceptosRecibo.length > 0) {
+        CONCEPTOS = APP_CONFIG.conceptosRecibo;
+        localStorage.setItem(KEY_CONCEPTOS, JSON.stringify(CONCEPTOS));
+      }
 
       const sucs = [...new Set(RAW_EMPLEADOS.map(e => e.Sucursal).filter(Boolean))];
       document.getElementById("filtSucursal").innerHTML = `<option value="">Todas las sucursales</option>` + sucs.map(s => `<option value="${s}">${s}</option>`).join("");
 
       construirFilasSemanal();
-      showToast("Todos los datos sincronizados con HyperMarket_SLWA.", "success");
+      showToast("Datos y conceptos sincronizados con HyperMarket_SLWA.", "success");
       return { ok: true };
     } catch (e) {
       return { ok: false, message: "Error de conexión: " + e.message };
@@ -429,18 +503,113 @@
       empresaNombre: document.getElementById("empEmpresa").value.trim(),
       empresaRif: document.getElementById("empRif").value.trim(),
       empresaDir: document.getElementById("empDir").value.trim(),
-      cestaMensualUsd: parseFloat(document.getElementById("cestaUsd").value) || 40
+      cestaMensualUsd: parseFloat(document.getElementById("cestaUsd").value) || 40,
+      conceptosRecibo: CONCEPTOS
     });
     await fetch(SCRIPT_URL, {
       method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ module: "admin", adminPin: ADMIN_PIN, action: "saveConfig", config: updatedCfg })
     });
     APP_CONFIG = updatedCfg;
-    showToast("Datos fiscales guardados en la hoja Configuracion de Sheets.", "success");
+    showToast("Configuración guardada en HyperMarket_SLWA.", "success");
   }
 
   // ---------------------------------------------------------------------------
-  // CONSTRUCCIÓN SEMANAL DESDE EMPLEADOS + ASISTENCIA + PERMISOS
+  // PANEL DE CONFIGURACIÓN DE CONCEPTOS (ASIGNACIONES / DEDUCCIONES)
+  // ---------------------------------------------------------------------------
+  function openConceptosModal() {
+    renderConceptosEditor();
+    document.getElementById("conceptosModal").classList.remove("hidden");
+  }
+  function closeConceptosModal() { document.getElementById("conceptosModal").classList.add("hidden"); }
+
+  function renderConceptosEditor() {
+    const renderList = (tipo, containerId) => {
+      const modos = tipo === "asignacion" ? MODOS_ASIG : MODOS_DED;
+      const items = CONCEPTOS.map((c, idx) => ({ c, idx })).filter(x => x.c.tipo === tipo);
+
+      document.getElementById(containerId).innerHTML = items.length ? items.map(({ c, idx }) => `
+        <div class="grid grid-cols-12 gap-2 items-center p-2.5 rounded-lg border ${c.activo ? "bg-white border-gray-200" : "bg-gray-100 border-gray-200 opacity-65"}">
+          <div class="col-span-1 flex items-center justify-center" title="Activar / Desactivar">
+            <input type="checkbox" ${c.activo ? "checked" : ""} onchange="updateConceptoProp(${idx},'activo',this.checked)" class="w-4 h-4 accent-[#1B4D2E] cursor-pointer" />
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <input type="text" value="${esc(c.codigo)}" onchange="updateConceptoProp(${idx},'codigo',this.value)" placeholder="Cód." class="input-hm font-mono text-center" />
+          </div>
+          <div class="col-span-9 sm:col-span-3">
+            <input type="text" value="${esc(c.nombre)}" onchange="updateConceptoProp(${idx},'nombre',this.value)" placeholder="Nombre del concepto" class="input-hm font-semibold" />
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <select onchange="updateConceptoProp(${idx},'modo',this.value)" class="input-hm">
+              ${modos.map(m => `<option value="${m[0]}" ${c.modo === m[0] ? "selected" : ""}>${m[1]}</option>`).join("")}
+            </select>
+          </div>
+          <div class="col-span-3 sm:col-span-2">
+            <input type="number" step="0.01" value="${c.param}" onchange="updateConceptoProp(${idx},'param',parseFloat(this.value)||0)" placeholder="Valor / %" class="input-hm font-mono text-right" title="Porcentaje (%) o Monto Fijo según el modo" />
+          </div>
+          <div class="col-span-2 sm:col-span-1 text-center">
+            ${tipo === "asignacion"
+              ? `<label class="inline-flex items-center gap-1 text-[10px] font-bold text-gray-600 cursor-pointer"><input type="checkbox" ${c.salarial ? "checked" : ""} onchange="updateConceptoProp(${idx},'salarial',this.checked)" class="accent-[#1B4D2E]" />Sal.</label>`
+              : `<span class="text-[10px] text-gray-400">Ded.</span>`}
+          </div>
+          <div class="col-span-1 text-right">
+            <button onclick="deleteConcepto(${idx})" class="p-1.5 rounded bg-red-50 hover:bg-red-100 text-red-600 text-xs cursor-pointer" title="Quitar concepto">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>`).join("") : `<p class="text-xs text-gray-400 italic py-2">Sin conceptos en esta sección.</p>`;
+    };
+
+    renderList("asignacion", "cfgAsigList");
+    renderList("deduccion", "cfgDedList");
+  }
+
+  function updateConceptoProp(idx, prop, val) {
+    if (CONCEPTOS[idx]) CONCEPTOS[idx][prop] = val;
+    if (prop === "activo") renderConceptosEditor();
+  }
+
+  function addConcepto(tipo) {
+    const existingNums = CONCEPTOS.filter(c => c.tipo === tipo).map(c => parseInt(c.codigo, 10)).filter(n => !isNaN(n));
+    const nextCode = existingNums.length ? String(Math.max(...existingNums) + 1).padStart(3, "0") : (tipo === "asignacion" ? "001" : "101");
+    CONCEPTOS.push({
+      uid: "c_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4),
+      codigo: nextCode,
+      nombre: tipo === "asignacion" ? "Nueva Asignación" : "Nueva Deducción",
+      tipo: tipo,
+      salarial: tipo === "asignacion",
+      modo: "monto_fijo_bs",
+      param: 0,
+      activo: true
+    });
+    renderConceptosEditor();
+  }
+
+  function deleteConcepto(idx) {
+    if (!confirm("¿Eliminar este concepto del recibo?")) return;
+    CONCEPTOS.splice(idx, 1);
+    renderConceptosEditor();
+  }
+
+  function restaurarConceptosDefault() {
+    if (!confirm("¿Restaurar los 9 conceptos LOTTT originales?")) return;
+    CONCEPTOS = JSON.parse(JSON.stringify(DEFAULT_CONCEPTOS));
+    renderConceptosEditor();
+  }
+
+  async function guardarConceptosConfig() {
+    localStorage.setItem(KEY_CONCEPTOS, JSON.stringify(CONCEPTOS));
+    closeConceptosModal();
+    recalcularNomina();
+    if (ADMIN_PIN) {
+      await guardarDatosEmpresaEnSheets();
+    } else {
+      showToast("Conceptos aplicados localmente.", "success");
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // CONSTRUCCIÓN Y CÁLCULO DINÁMICO SEMANAL
   // ---------------------------------------------------------------------------
   function construirFilasSemanal() {
     const bcv = parseFloat(document.getElementById("bcvRate").value) || 60;
@@ -453,7 +622,6 @@
       const rawBase = parseNum(e.Salario_Base_Bs);
       const salarioSemanalBs = baseMode === "semanal_usd" ? (rawBase * bcv) : rawBase;
 
-      // Agrupar marcajes de esta semana (Lun..Dom)
       const dayPunches = [[], [], [], [], [], [], []];
       let tardanzas = 0;
 
@@ -468,25 +636,18 @@
 
         const h24 = normalizeTimeTo24h(a.Hora);
         if (!h24) return;
-        dayPunches[dIdx].push({ acc: String(a.Accion || "").toUpperCase(), h24, est: String(a.Estado || "") });
+        dayPunches[dIdx].push({ acc: String(a.Accion || "").toUpperCase(), h24 });
         if (a.Accion === "ENTRADA" && String(a.Estado || "").includes("Tarde")) tardanzas++;
       });
 
-      // Contar días remunerados de permisos aprobados en la semana
-      let diasPermisoLunSab = 0;
-      let diasAsistLunSab = 0;
-      let horasLunSab = 0;
-      let horasExtrasTotal = 0;
-      let horasNocturnasTotal = 0;
-      let domingoTrabajado = false;
+      let diasPermisoLunSab = 0, diasAsistLunSab = 0, horasLunSab = 0, horasExtrasTotal = 0, horasNocturnasTotal = 0, domingoTrabajado = false;
 
       for (let d = 0; d < 7; d++) {
         const list = dayPunches[d].sort((x, y) => x.h24.localeCompare(y.h24));
         const firstIn = list.find(x => x.acc === "ENTRADA");
         const lastOut = [...list].reverse().find(x => x.acc === "SALIDA");
+        let hDia = 0, hNoc = 0;
 
-        let hDia = 0;
-        let hNoc = 0;
         if (firstIn && lastOut) {
           const h1 = timeToHours(firstIn.h24), h2 = timeToHours(lastOut.h24);
           if (h1 !== null && h2 !== null) {
@@ -500,29 +661,21 @@
         if (d < 6) {
           if (firstIn) diasAsistLunSab++;
           else {
-            // Verificar si tiene permiso remunerado ese día
             const isoDia = WEEK_ISOS[d];
             const tienePermiso = RAW_PERMISOS.some(p =>
               p.Estado === "Aprobado" && p.Remunerado === "Sí" &&
               (p.ID_Unico === e.ID_Unico || normStr(p.Empleado) === nNorm) &&
               isoDia >= p.Fecha_Inicio && isoDia <= p.Fecha_Fin
             );
-            if (tienePermiso) {
-              diasPermisoLunSab++;
-              hDia = 8;
-            }
+            if (tienePermiso) { diasPermisoLunSab++; hDia = 8; }
           }
           horasLunSab += hDia;
           if (hDia > 8) horasExtrasTotal += (hDia - 8);
           horasNocturnasTotal += hNoc;
         } else {
-          // Domingo: si trabajó >= 4h (o marcó entrada/salida)
           if (hDia >= 4 || (firstIn && lastOut)) domingoTrabajado = true;
         }
       }
-
-      const diasPagables = Math.min(6, diasAsistLunSab + diasPermisoLunSab);
-      const bonoDomBs = domingoTrabajado ? (sundayUsd * bcv) : 0;
 
       return {
         id: e.ID_Unico || "",
@@ -532,9 +685,8 @@
         cargo: e.Cargo || "Trabajador",
         sucursal: e.Sucursal || "",
         fechaIngreso: e.Fecha_Ingreso || "",
-        rawBaseUsd: rawBase,
         salarioSemanalBs: salarioSemanalBs,
-        dias: diasPagables,
+        dias: Math.min(6, diasAsistLunSab + diasPermisoLunSab),
         horasLS: Number(horasLunSab.toFixed(2)),
         asistenciasReales: diasAsistLunSab,
         diasPermiso: diasPermisoLunSab,
@@ -542,9 +694,9 @@
         tardanzas: tardanzas,
         horasExtras: Number(horasExtrasTotal.toFixed(2)),
         bonoNocturnoHoras: Number(horasNocturnasTotal.toFixed(2)),
-        diasCesta: 7,
-        bonoAsistenciaBs: Number(bonoDomBs.toFixed(2)),
-        islrPct: 0
+        cantOverrides: {},  // ej: horas extras o % ISLR manuales por trabajador
+        montoOverrides: {}, // monto directo en Bs. por trabajador si lo edita manualmente
+        lineItems: []
       };
     });
 
@@ -554,42 +706,99 @@
   function recalcularNomina() {
     const bcv = parseFloat(document.getElementById("bcvRate").value) || 60;
     const cestaMensualUsd = parseFloat(document.getElementById("cestaUsd").value) || 0;
+    const sundayUsd = parseFloat(document.getElementById("sundayUsd").value) || 10;
     const calcMode = document.getElementById("calcMode").value;
+    const activos = CONCEPTOS.filter(c => c.activo);
 
-    const ivssPct = (Number(APP_CONFIG.ivssPct) || 4) / 100;
-    const rpePct = (Number(APP_CONFIG.rpePct) || 0.5) / 100;
-    const faovPct = (Number(APP_CONFIG.faovPct) || 1) / 100;
+    document.getElementById("countConceptosActivos").innerText = activos.length;
 
     NOMINA_ROWS.forEach(r => {
       r.salarioMensualRef = (r.salarioSemanalBs * 52) / 12;
       r.salarioDiario = r.salarioSemanalBs / 6;
       const horaDiurna = r.salarioSemanalBs / 48;
 
-      // 001: Sueldo Básico Semanal
-      r.m001 = calcMode === "horas"
-        ? horaDiurna * (Number(r.horasLS) || 0)
-        : r.salarioDiario * (Number(r.dias) || 0);
+      const computedMap = {};
+      let totalSalarial = 0;
 
-      // 002 y 003
-      r.m002 = (Number(r.horasExtras) || 0) * horaDiurna * 1.5;
-      r.m003 = (Number(r.bonoNocturnoHoras) || 0) * horaDiurna * 0.30;
+      // PASO 1: Asignaciones base (no porcentuales)
+      activos.filter(c => c.tipo === "asignacion" && c.modo !== "porcentaje_salarial").forEach(c => {
+        let monto = 0, cantText = "1", cantInputVal = null, cantInputType = null;
 
-      // 004 y 005 (No salariales)
-      const cestaMensualBs = cestaMensualUsd * bcv;
-      r.m004 = (cestaMensualBs / 30) * (Number(r.diasCesta) || 0);
-      r.m005 = Number(r.bonoAsistenciaBs) || 0;
+        if (c.modo === "sueldo_basico") {
+          cantText = calcMode === "horas" ? `${r.horasLS} h` : `${r.dias} d`;
+          monto = calcMode === "horas" ? (horaDiurna * r.horasLS) : (r.salarioDiario * r.dias);
+        } else if (c.modo === "horas_extras_50") {
+          const hrs = r.cantOverrides[c.uid] !== undefined ? r.cantOverrides[c.uid] : r.horasExtras;
+          cantInputVal = hrs; cantInputType = "h";
+          cantText = `${hrs} h`;
+          monto = hrs * horaDiurna * 1.5;
+        } else if (c.modo === "bono_nocturno_30") {
+          const hrs = r.cantOverrides[c.uid] !== undefined ? r.cantOverrides[c.uid] : r.bonoNocturnoHoras;
+          cantInputVal = hrs; cantInputType = "h";
+          cantText = `${hrs} h`;
+          monto = hrs * horaDiurna * 0.30;
+        } else if (c.modo === "cestaticket_prorrateo") {
+          const d = r.cantOverrides[c.uid] !== undefined ? r.cantOverrides[c.uid] : (Number(c.param) || 7);
+          cantText = `${d} d`;
+          monto = ((cestaMensualUsd * bcv) / 30) * d;
+        } else if (c.modo === "bono_domingo") {
+          cantText = r.domingoTrabajado ? "1" : "0";
+          monto = r.domingoTrabajado ? (sundayUsd * bcv) : 0;
+        } else if (c.modo === "monto_fijo_bs") {
+          cantText = "1";
+          monto = Number(c.param) || 0;
+        } else if (c.modo === "monto_fijo_usd") {
+          const usd = Number(c.param) || 0;
+          cantText = `$${fmtVE(usd)}`;
+          monto = usd * bcv;
+        }
 
-      const totalSalarial = r.m001 + r.m002 + r.m003;
+        if (r.montoOverrides[c.uid] !== undefined) monto = r.montoOverrides[c.uid];
+        if (c.salarial) totalSalarial += monto;
+        computedMap[c.uid] = { ...c, monto, cantText, cantInputVal, cantInputType };
+      });
 
-      // Deducciones LOTTT (1 lunes por semana)
-      r.numLunes = 1;
-      r.m101 = r.salarioSemanalBs * r.numLunes * ivssPct;
-      r.m102 = r.salarioSemanalBs * r.numLunes * rpePct;
-      r.m103 = totalSalarial * faovPct;
-      r.m104 = totalSalarial * ((Number(r.islrPct) || 0) / 100);
+      // PASO 1B: Asignaciones porcentuales sobre totalSalarial
+      activos.filter(c => c.tipo === "asignacion" && c.modo === "porcentaje_salarial").forEach(c => {
+        const pct = r.cantOverrides[c.uid] !== undefined ? r.cantOverrides[c.uid] : (Number(c.param) || 0);
+        let monto = totalSalarial * (pct / 100);
+        if (r.montoOverrides[c.uid] !== undefined) monto = r.montoOverrides[c.uid];
+        if (c.salarial) totalSalarial += monto;
+        computedMap[c.uid] = { ...c, monto, cantText: `${pct} %`, cantInputVal: pct, cantInputType: "%" };
+      });
 
-      r.totalAsig = r.m001 + r.m002 + r.m003 + r.m004 + r.m005;
-      r.totalDed = r.m101 + r.m102 + r.m103 + r.m104;
+      // PASO 2: Deducciones
+      activos.filter(c => c.tipo === "deduccion").forEach(c => {
+        let monto = 0, cantText = "1", cantInputVal = null, cantInputType = null;
+        if (c.modo === "ivss_semanal" || c.modo === "rpe_semanal") {
+          const pct = Number(c.param) || 0;
+          cantText = "1 lun";
+          monto = r.salarioSemanalBs * 1 * (pct / 100);
+        } else if (c.modo === "faov_salarial") {
+          const pct = Number(c.param) || 1;
+          cantText = `${pct} %`;
+          monto = totalSalarial * (pct / 100);
+        } else if (c.modo === "islr_salarial" || c.modo === "porcentaje_salarial") {
+          const pct = r.cantOverrides[c.uid] !== undefined ? r.cantOverrides[c.uid] : (Number(c.param) || 0);
+          cantInputVal = pct; cantInputType = "%";
+          cantText = `${pct} %`;
+          monto = totalSalarial * (pct / 100);
+        } else if (c.modo === "monto_fijo_bs") {
+          cantText = "1";
+          monto = Number(c.param) || 0;
+        } else if (c.modo === "monto_fijo_usd") {
+          const usd = Number(c.param) || 0;
+          cantText = `$${fmtVE(usd)}`;
+          monto = usd * bcv;
+        }
+
+        if (r.montoOverrides[c.uid] !== undefined) monto = r.montoOverrides[c.uid];
+        computedMap[c.uid] = { ...c, monto, cantText, cantInputVal, cantInputType };
+      });
+
+      r.lineItems = activos.map(c => computedMap[c.uid]);
+      r.totalAsig = r.lineItems.filter(x => x.tipo === "asignacion").reduce((s, x) => s + x.monto, 0);
+      r.totalDed = r.lineItems.filter(x => x.tipo === "deduccion").reduce((s, x) => s + x.monto, 0);
       r.neto = Math.max(0, r.totalAsig - r.totalDed);
     });
 
@@ -607,34 +816,65 @@
   }
 
   function renderTabla() {
+    const activos = CONCEPTOS.filter(c => c.activo);
     const list = getFilteredRows();
+
+    // Cabecera dinámica según conceptos activos
+    document.getElementById("theadNomina").innerHTML = `
+      <tr>
+        <th class="px-3 py-2.5 sticky left-0 bg-hm-dark z-10">Trabajador / Asistencia</th>
+        <th class="px-2 py-2.5 text-right">Base Sem. Bs</th>
+        <th class="px-2 py-2.5 text-center">Días / Horas</th>
+        ${activos.map(c => `
+          <th class="px-2 py-2.5 text-center ${c.tipo === "asignacion" ? "bg-[#235d3a]" : "bg-[#7c2d12]"}" title="${esc(c.nombre)}">
+            <span class="block text-[10px] text-[#E5C558]">${esc(c.codigo)}</span>
+            <span class="block text-[10px] truncate max-w-[95px]">${esc(c.nombre)}</span>
+          </th>`).join("")}
+        <th class="px-2 py-2.5 text-right">Asignaciones</th>
+        <th class="px-2 py-2.5 text-right">Deducciones</th>
+        <th class="px-2 py-2.5 text-right">Neto Pagar</th>
+        <th class="px-3 py-2.5 text-center">Recibo</th>
+      </tr>`;
+
     let sumAsig = 0, sumDed = 0, sumNeto = 0;
 
     document.getElementById("tbodyNomina").innerHTML = list.map(({ r, idx }) => {
       sumAsig += r.totalAsig; sumDed += r.totalDed; sumNeto += r.neto;
       return `
         <tr class="hover:bg-gray-50">
-          <td class="px-3 py-2">
-            <div class="font-bold text-hm-dark">${r.nombre}</div>
-            <div class="text-[10px] text-gray-500">
-              ${r.cedula} · ${r.cargo} · Asist: <b>${r.asistenciasReales}d</b>${r.diasPermiso ? ` + ${r.diasPermiso} perm.` : ""}${r.domingoTrabajado ? ` · <span class="text-amber-700 font-bold">Dom✓</span>` : ""}
-            </div>
+          <td class="px-3 py-2 sticky left-0 bg-white border-r">
+            <div class="font-bold text-hm-dark whitespace-nowrap">${esc(r.nombre)}</div>
+            <div class="text-[10px] text-gray-500 whitespace-nowrap">${esc(r.cedula)} · ${esc(r.cargo)} · Asist: <b>${r.asistenciasReales}d</b>${r.domingoTrabajado ? " · Dom✓" : ""}</div>
           </td>
           <td class="px-2 py-2 text-right">
-            <input type="number" step="0.01" value="${r.salarioSemanalBs.toFixed(2)}" onchange="editRow(${idx},'sal',this.value)" class="input-hm !w-24 text-right font-mono" />
+            <input type="number" step="0.01" value="${r.salarioSemanalBs.toFixed(2)}" onchange="editBase(${idx},this.value)" class="input-hm !w-24 text-right font-mono" />
           </td>
-          <td class="px-2 py-2 text-center"><input type="number" step="1" min="0" value="${r.dias}" onchange="editRow(${idx},'dias',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
-          <td class="px-2 py-2 text-center"><input type="number" step="0.1" min="0" value="${r.horasLS}" onchange="editRow(${idx},'hls',this.value)" class="input-hm !w-16 text-center font-mono" /></td>
-          <td class="px-2 py-2 text-center"><input type="number" step="0.5" min="0" value="${r.horasExtras}" onchange="editRow(${idx},'he',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
-          <td class="px-2 py-2 text-center"><input type="number" step="0.5" min="0" value="${r.bonoNocturnoHoras}" onchange="editRow(${idx},'bn',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
-          <td class="px-2 py-2 text-center"><input type="number" step="1" min="0" value="${r.diasCesta}" onchange="editRow(${idx},'dc',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
-          <td class="px-2 py-2 text-right"><input type="number" step="0.01" min="0" value="${r.bonoAsistenciaBs}" onchange="editRow(${idx},'ba',this.value)" class="input-hm !w-20 text-right font-mono" /></td>
-          <td class="px-2 py-2 text-center"><input type="number" step="0.5" min="0" max="34" value="${r.islrPct}" onchange="editRow(${idx},'islr',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
-          <td class="px-2 py-2 text-right font-mono text-emerald-700 font-bold">Bs. ${fmtVE(r.totalAsig)}</td>
-          <td class="px-2 py-2 text-right font-mono text-red-700 font-bold">Bs. ${fmtVE(r.totalDed)}</td>
-          <td class="px-2 py-2 text-right font-mono text-hm-dark font-extrabold">Bs. ${fmtVE(r.neto)}</td>
+          <td class="px-2 py-2 text-center whitespace-nowrap">
+            <input type="number" step="1" min="0" value="${r.dias}" onchange="editTiempo(${idx},'dias',this.value)" class="input-hm !w-12 text-center font-mono" title="Días" />
+            <input type="number" step="0.5" min="0" value="${r.horasLS}" onchange="editTiempo(${idx},'hls',this.value)" class="input-hm !w-14 text-center font-mono mt-1" title="Horas" />
+          </td>
+          ${r.lineItems.map(li => {
+            if (li.cantInputType) {
+              return `
+                <td class="px-2 py-2 text-center">
+                  <div class="flex items-center justify-center gap-0.5">
+                    <input type="number" step="0.5" min="0" value="${li.cantInputVal}" onchange="editCantOverride(${idx},'${li.uid}',this.value)" class="input-hm !w-14 text-center font-mono" />
+                    <span class="text-[10px] text-gray-500">${li.cantInputType}</span>
+                  </div>
+                  <div class="text-[10px] font-mono font-bold ${li.tipo === "asignacion" ? "text-emerald-700" : "text-red-700"} mt-0.5">${fmtVE(li.monto)}</div>
+                </td>`;
+            }
+            return `
+              <td class="px-2 py-2 text-right">
+                <input type="number" step="0.01" value="${li.monto.toFixed(2)}" onchange="editMontoOverride(${idx},'${li.uid}',this.value)" class="input-hm !w-22 text-right font-mono ${li.tipo === "deduccion" ? "text-red-700" : ""}" />
+                <div class="text-[9px] text-gray-400 text-center">${esc(li.cantText)}</div>
+              </td>`;
+          }).join("")}
+          <td class="px-2 py-2 text-right font-mono text-emerald-700 font-bold whitespace-nowrap">Bs. ${fmtVE(r.totalAsig)}</td>
+          <td class="px-2 py-2 text-right font-mono text-red-700 font-bold whitespace-nowrap">Bs. ${fmtVE(r.totalDed)}</td>
+          <td class="px-2 py-2 text-right font-mono text-hm-dark font-extrabold whitespace-nowrap">Bs. ${fmtVE(r.neto)}</td>
           <td class="px-3 py-2 text-center">
-            <button onclick="abrirReciboModal(${idx})" class="px-2.5 py-1.5 rounded bg-hm-dark hover:bg-hm-med text-white text-[11px] font-bold cursor-pointer">
+            <button onclick="abrirReciboModal(${idx})" class="px-2.5 py-1.5 rounded bg-hm-dark hover:bg-hm-med text-white text-[11px] font-bold cursor-pointer whitespace-nowrap">
               <i class="fa-solid fa-receipt mr-1 text-[#E5C558]"></i>Ver
             </button>
           </td>
@@ -647,75 +887,66 @@
     document.getElementById("kpiNeto").innerText = "Bs. " + fmtVE(sumNeto);
   }
 
-  function editRow(idx, field, val) {
-    const r = NOMINA_ROWS[idx], n = parseFloat(val) || 0;
-    if (field === "sal") r.salarioSemanalBs = n;
-    if (field === "dias") r.dias = n;
-    if (field === "hls") r.horasLS = n;
-    if (field === "he") r.horasExtras = n;
-    if (field === "bn") r.bonoNocturnoHoras = n;
-    if (field === "dc") r.diasCesta = n;
-    if (field === "ba") r.bonoAsistenciaBs = n;
-    if (field === "islr") r.islrPct = n;
+  function editBase(idx, val) { NOMINA_ROWS[idx].salarioSemanalBs = parseFloat(val) || 0; recalcularNomina(); }
+  function editTiempo(idx, f, val) { const n = parseFloat(val) || 0; if (f === "dias") NOMINA_ROWS[idx].dias = n; else NOMINA_ROWS[idx].horasLS = n; recalcularNomina(); }
+  function editCantOverride(idx, uid, val) {
+    if (val === "") delete NOMINA_ROWS[idx].cantOverrides[uid];
+    else NOMINA_ROWS[idx].cantOverrides[uid] = parseFloat(val) || 0;
+    recalcularNomina();
+  }
+  function editMontoOverride(idx, uid, val) {
+    if (val === "") delete NOMINA_ROWS[idx].montoOverrides[uid];
+    else NOMINA_ROWS[idx].montoOverrides[uid] = parseFloat(val) || 0;
     recalcularNomina();
   }
 
   // ---------------------------------------------------------------------------
-  // GENERACIÓN DEL RECIBO SEMANAL EXACTO (MODELO LOTTT)
+  // RECIBO IMPRIMIBLE DINÁMICO
   // ---------------------------------------------------------------------------
   function buildReciboHTML(r) {
     const empNombre = document.getElementById("empEmpresa").value.trim() || "HyperMarket SLWA, C.A.";
     const empRif = document.getElementById("empRif").value.trim() || "J-00000000-0";
     const empDir = document.getElementById("empDir").value.trim() || "Venezuela";
-    const delStr = WEEK_DDMM[0] || "";
-    const alStr = WEEK_DDMM[6] || "";
     const pPago = document.getElementById("fechaPago").value.split("-");
     const fPagoStr = pPago.length === 3 ? `${pPago[2]}/${pPago[1]}/${pPago[0]}` : "";
     const bcv = parseFloat(document.getElementById("bcvRate").value) || 0;
-    const calcMode = document.getElementById("calcMode").value;
-    const cant001 = calcMode === "horas" ? `${r.horasLS} h` : `${r.dias} d`;
 
     return `
       <div class="recibo-paper">
         <div class="r-title">RECIBO DE PAGO DE NÓMINA</div>
 
         <div class="recibo-grid">
-          <div><strong>EMPRESA:</strong> ${empNombre}</div>
-          <div><strong>RIF:</strong> ${empRif}</div>
-          <div style="grid-column: span 2;"><strong>DIRECCIÓN:</strong> ${empDir}</div>
+          <div><strong>EMPRESA:</strong> ${esc(empNombre)}</div>
+          <div><strong>RIF:</strong> ${esc(empRif)}</div>
+          <div style="grid-column: span 2;"><strong>DIRECCIÓN:</strong> ${esc(empDir)}</div>
         </div>
 
         <div class="recibo-grid" style="border-top:1px dashed #9ca3af; padding-top:8px;">
-          <div><strong>TRABAJADOR:</strong> ${r.nombre}</div>
-          <div><strong>C.I.:</strong> ${r.cedula || "______________"}</div>
-          <div><strong>CARGO:</strong> ${r.cargo}</div>
-          <div><strong>FECHA DE INGRESO:</strong> ${r.fechaIngreso || "__/__/____"}</div>
+          <div><strong>TRABAJADOR:</strong> ${esc(r.nombre)}</div>
+          <div><strong>C.I.:</strong> ${esc(r.cedula || "______________")}</div>
+          <div><strong>CARGO:</strong> ${esc(r.cargo)}</div>
+          <div><strong>FECHA DE INGRESO:</strong> ${esc(r.fechaIngreso || "__/__/____")}</div>
           <div><strong>SALARIO MENSUAL REF.:</strong> Bs. ${fmtVE(r.salarioMensualRef)}</div>
           <div><strong>SALARIO DIARIO:</strong> Bs. ${fmtVE(r.salarioDiario)}</div>
-          <div><strong>PERÍODO DE PAGO:</strong> Del ${delStr} al ${alStr} (Semanal - 7 días)</div>
+          <div><strong>PERÍODO DE PAGO:</strong> Del ${WEEK_DDMM[0]} al ${WEEK_DDMM[6]} (Semanal)</div>
           <div><strong>TASA BCV REFERENCIAL:</strong> Bs. ${fmtVE(bcv)} / USD</div>
         </div>
 
         <table class="recibo-table">
           <thead>
             <tr>
-              <th>CÓD.</th>
-              <th>CONCEPTO</th>
-              <th class="cnt">CANT.</th>
-              <th class="num">ASIGNACIONES</th>
-              <th class="num">DEDUCCIONES</th>
+              <th>CÓD.</th><th>CONCEPTO</th><th class="cnt">CANT.</th><th class="num">ASIGNACIONES</th><th class="num">DEDUCCIONES</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>001</td><td>Sueldo Básico (Semanal)</td><td class="cnt">${cant001}</td><td class="num">${fmtVE(r.m001)}</td><td class="num"></td></tr>
-            <tr><td>002</td><td>Horas Extras Diurnas (50%)</td><td class="cnt">${r.horasExtras} h</td><td class="num">${fmtVE(r.m002)}</td><td class="num"></td></tr>
-            <tr><td>003</td><td>Bono Nocturno (30%)</td><td class="cnt">${r.bonoNocturnoHoras} h</td><td class="num">${fmtVE(r.m003)}</td><td class="num"></td></tr>
-            <tr><td>004</td><td>Cestaticket Socialista (No sal.)</td><td class="cnt">${r.diasCesta} d</td><td class="num">${fmtVE(r.m004)}</td><td class="num"></td></tr>
-            <tr><td>005</td><td>Bono Asistencia / Domingo (No sal.)</td><td class="cnt">${r.m005 > 0 ? 1 : 0}</td><td class="num">${fmtVE(r.m005)}</td><td class="num"></td></tr>
-            <tr><td>101</td><td>Retención IVSS (4%)</td><td class="cnt">${r.numLunes} lun</td><td class="num"></td><td class="num">${fmtVE(r.m101)}</td></tr>
-            <tr><td>102</td><td>Retención RPE / Paro Forzoso (0,5%)</td><td class="cnt">${r.numLunes} lun</td><td class="num"></td><td class="num">${fmtVE(r.m102)}</td></tr>
-            <tr><td>103</td><td>Retención FAOV (1%)</td><td class="cnt">1</td><td class="num"></td><td class="num">${fmtVE(r.m103)}</td></tr>
-            <tr><td>104</td><td>Retención ISLR (Según AR-I)</td><td class="cnt">${r.islrPct} %</td><td class="num"></td><td class="num">${fmtVE(r.m104)}</td></tr>
+            ${r.lineItems.map(li => `
+              <tr>
+                <td>${esc(li.codigo)}</td>
+                <td>${esc(li.nombre)}</td>
+                <td class="cnt">${esc(li.cantText)}</td>
+                <td class="num">${li.tipo === "asignacion" ? fmtVE(li.monto) : ""}</td>
+                <td class="num">${li.tipo === "deduccion" ? fmtVE(li.monto) : ""}</td>
+              </tr>`).join("")}
           </tbody>
           <tfoot>
             <tr class="recibo-totals">
@@ -737,11 +968,11 @@
 
         <div class="recibo-signs">
           <div class="recibo-sign-box">
-            <div class="recibo-sign-line">Firma del Trabajador<br>C.I.: ${r.cedula || "______________"}</div>
+            <div class="recibo-sign-line">Firma del Trabajador<br>C.I.: ${esc(r.cedula || "______________")}</div>
             <div class="huella-box">[Huella<br>Dactilar]</div>
           </div>
           <div class="recibo-sign-box">
-            <div class="recibo-sign-line">Sello y Firma<br>${empNombre}</div>
+            <div class="recibo-sign-line">Sello y Firma<br>${esc(empNombre)}</div>
           </div>
         </div>
       </div>`;
@@ -771,17 +1002,14 @@
     const r = NOMINA_ROWS[CURRENT_RECIBO_IDX];
     const empNombre = document.getElementById("empEmpresa").value.trim();
 
-    let txt = `*RECIBO DE PAGO SEMANAL - ${empNombre}*%0A`;
-    txt += `*Trabajador:* ${r.nombre} (${r.cedula})%0A*Cargo:* ${r.cargo}%0A`;
-    txt += `*Semana:* ${WEEK_DDMM[0]} al ${WEEK_DDMM[6]}%0A--------------------------------%0A`;
-    txt += `• 001 Sueldo Básico: Bs. ${fmtVE(r.m001)}%0A`;
-    if (r.m002 > 0) txt += `• 002 Horas Extras (${r.horasExtras}h): Bs. ${fmtVE(r.m002)}%0A`;
-    if (r.m003 > 0) txt += `• 003 Bono Nocturno (${r.bonoNocturnoHoras}h): Bs. ${fmtVE(r.m003)}%0A`;
-    txt += `• 004 Cestaticket (${r.diasCesta}d): Bs. ${fmtVE(r.m004)}%0A`;
-    if (r.m005 > 0) txt += `• 005 Bono/Domingo: Bs. ${fmtVE(r.m005)}%0A`;
+    let txt = `*RECIBO DE PAGO SEMANAL - ${empNombre}*%0A*Trabajador:* ${r.nombre} (${r.cedula})%0A*Cargo:* ${r.cargo}%0A*Semana:* ${WEEK_DDMM[0]} al ${WEEK_DDMM[6]}%0A--------------------------------%0A`;
+    r.lineItems.filter(x => x.tipo === "asignacion" && x.monto > 0).forEach(li => {
+      txt += `• ${li.codigo} ${li.nombre} (${li.cantText}): Bs. ${fmtVE(li.monto)}%0A`;
+    });
     txt += `*Total Asignaciones:* Bs. ${fmtVE(r.totalAsig)}%0A--------------------------------%0A`;
-    txt += `• 101 IVSS (4%): -Bs. ${fmtVE(r.m101)}%0A• 102 RPE (0,5%): -Bs. ${fmtVE(r.m102)}%0A• 103 FAOV (1%): -Bs. ${fmtVE(r.m103)}%0A`;
-    if (r.m104 > 0) txt += `• 104 ISLR (${r.islrPct}%): -Bs. ${fmtVE(r.m104)}%0A`;
+    r.lineItems.filter(x => x.tipo === "deduccion" && x.monto > 0).forEach(li => {
+      txt += `• ${li.codigo} ${li.nombre}: -Bs. ${fmtVE(li.monto)}%0A`;
+    });
     txt += `*Total Deducciones:* -Bs. ${fmtVE(r.totalDed)}%0A================================%0A*NETO A PAGAR:* *Bs. ${fmtVE(r.neto)}*`;
 
     let tel = String(r.telefono || "").replace(/\D/g, "");
@@ -810,10 +1038,11 @@
   function exportarExcel() {
     const list = getFilteredRows();
     if (!list.length) return;
-    const headers = ["ID", "Trabajador", "Cedula", "Cargo", "Base_Sem_Bs", "Horas_LS", "001_Basico", "002_H_Extras", "003_Bono_Noc", "004_Cestaticket", "005_Bono_Dom", "Total_Asig", "101_IVSS", "102_RPE", "103_FAOV", "104_ISLR", "Total_Ded", "Neto_Pagar_Bs"];
-    const rows = list.map(({ r }) => [r.id, r.nombre, r.cedula, r.cargo, r.salarioSemanalBs.toFixed(2), r.horasLS, r.m001.toFixed(2), r.m002.toFixed(2), r.m003.toFixed(2), r.m004.toFixed(2), r.m005.toFixed(2), r.totalAsig.toFixed(2), r.m101.toFixed(2), r.m102.toFixed(2), r.m103.toFixed(2), r.m104.toFixed(2), r.totalDed.toFixed(2), r.neto.toFixed(2)]);
+    const activos = CONCEPTOS.filter(c => c.activo);
+    const headers = ["ID", "Trabajador", "Cedula", "Cargo", "Base_Sem_Bs", "Horas_LS", ...activos.map(c => `${c.codigo}_${c.nombre}`), "Total_Asig", "Total_Ded", "Neto_Pagar_Bs"];
+    const rows = list.map(({ r }) => [r.id, r.nombre, r.cedula, r.cargo, r.salarioSemanalBs.toFixed(2), r.horasLS, ...r.lineItems.map(li => li.monto.toFixed(2)), r.totalAsig.toFixed(2), r.totalDed.toFixed(2), r.neto.toFixed(2)]);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), "Nomina_Semanal_LOTTT");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), "Recibos_Nomina");
     XLSX.writeFile(wb, `Recibos_Semanal_SLWA_${WEEK_ISOS[0]}_al_${WEEK_ISOS[6]}.xlsx`);
   }
 
