@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Recibos de Nómina (LOTTT) - HyperMarket SLWA C.A.</title>
+  <title>Nómina Semanal y Recibos LOTTT - HyperMarket SLWA C.A.</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -28,7 +28,7 @@
     .input-hm:focus { outline: none; border-color: var(--hm-med); }
     .card-hm { background: #fff; border-radius: 0.8rem; box-shadow: 0 2px 8px rgba(27,77,46,0.06); border-top: 4px solid var(--hm-dark); }
 
-    /* Estilo formal del Recibo de Pago Imprimible */
+    /* Formato oficial del Recibo de Pago */
     .recibo-paper {
       background: #fff;
       border: 1.5px solid #1f2937;
@@ -82,18 +82,18 @@
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border-t-4 border-[#C59B27] space-y-4">
       <div class="text-center">
         <div class="w-12 h-12 mx-auto rounded-xl bg-hm-dark text-[#E5C558] font-black text-xl flex items-center justify-center">HM</div>
-        <h1 class="text-lg font-extrabold text-hm-dark mt-2">Módulo de Nómina y Recibos</h1>
-        <p class="text-xs text-gray-500">HyperMarket SLWA, C.A. &bull; Cumplimiento LOTTT</p>
+        <h1 class="text-lg font-extrabold text-hm-dark mt-2">Nómina Semanal y Recibos</h1>
+        <p class="text-xs text-gray-500">HyperMarket SLWA, C.A. &bull; Sincronizado con Archivo Maestro</p>
       </div>
       <div>
-        <label class="block text-xs font-bold text-gray-700 mb-1">PIN de Administrador / RRHH</label>
+        <label class="block text-xs font-bold text-gray-700 mb-1">PIN de Administrador</label>
         <input type="password" id="pinInput" placeholder="Ingrese PIN (Ej: 1984)"
           class="input-hm text-center font-mono tracking-widest text-base"
           onkeydown="if(event.key==='Enter') loginNomina()" />
         <p id="loginErr" class="hidden text-xs text-red-600 font-semibold mt-1 text-center"></p>
       </div>
       <button onclick="loginNomina()" id="btnLogin" class="w-full py-2.5 rounded-xl bg-hm-dark hover:bg-hm-med text-white font-bold text-sm cursor-pointer">
-        Ingresar
+        Sincronizar e Ingresar
       </button>
     </div>
   </div>
@@ -102,8 +102,8 @@
   <header class="bg-hm-dark text-white shadow-md border-b-4 border-[#C59B27] sticky top-0 z-30 no-print">
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="text-base sm:text-lg font-extrabold">HyperMarket SLWA C.A. — Nómina Formal y Recibos (LOTTT)</h1>
-        <p class="text-[11px] text-hm-light-gold">Asignaciones (001–005) &bull; Retenciones IVSS / RPE / FAOV / ISLR (101–104) &bull; Recibo Imprimible</p>
+        <h1 class="text-base sm:text-lg font-extrabold">HyperMarket SLWA C.A. — Nómina Semanal y Recibos (LOTTT)</h1>
+        <p class="text-[11px] text-hm-light-gold">Capta Empleados + Asistencia + Permisos + Configuración desde HyperMarket_SLWA</p>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
@@ -111,9 +111,9 @@
           <span class="text-[10px] font-bold text-[#E5C558] uppercase">BCV Bs/$</span>
           <input type="number" id="bcvRate" step="0.01" min="0.01" value="60.00" oninput="onBcvChanged()"
             class="w-20 px-1.5 py-0.5 rounded bg-white text-hm-dark font-mono font-extrabold text-right text-xs" />
-          <button onclick="fetchBcv()" class="px-2 py-0.5 rounded bg-hm-gold text-hm-dark font-bold text-[11px] cursor-pointer">🔄</button>
+          <button onclick="fetchBcv()" class="px-2 py-0.5 rounded bg-hm-gold text-hm-dark font-bold text-[11px] cursor-pointer" title="Consultar DolarApi">🔄</button>
         </div>
-        <button onclick="loadData()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold cursor-pointer">🔄 Sincronizar</button>
+        <button onclick="loadData()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold cursor-pointer">🔄 Sincronizar Sheets</button>
       </div>
     </div>
   </header>
@@ -122,56 +122,68 @@
 
   <main class="max-w-7xl mx-auto w-full px-4 py-5 flex-1 space-y-4 no-print">
 
-    <!-- DATOS FISCALES EMPRESA Y PARÁMETROS DEL PERÍODO -->
+    <!-- DATOS DE EMPRESA Y SEMANA DE PAGO -->
     <div class="card-hm p-4 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-2">
-        <h2 class="text-xs font-extrabold uppercase text-hm-dark"><i class="fa-solid fa-building mr-1.5 text-[#C59B27]"></i>Datos de la Empresa y Período de Nómina</h2>
-        <span id="lunesBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-hm-dark text-[11px] font-bold">Lunes en período: 2</span>
+        <h2 class="text-xs font-extrabold uppercase text-hm-dark">
+          <i class="fa-solid fa-building mr-1.5 text-[#C59B27]"></i>Configuración Semanal y Datos Fiscales (Sincronizados en Sheets)
+        </h2>
+        <div class="flex items-center gap-2">
+          <span id="semanaRangeBadge" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[11px] font-bold">Semana: --</span>
+          <span id="lunesBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-hm-dark text-[11px] font-bold">Lunes: 1</span>
+          <button onclick="guardarDatosEmpresaEnSheets()" class="px-2.5 py-1 rounded bg-hm-dark text-white text-[11px] font-bold cursor-pointer hover:bg-hm-med">
+            💾 Guardar Config. en Sheets
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
         <div class="lg:col-span-2">
           <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Razón Social Empresa</label>
-          <input type="text" id="empEmpresa" value="HyperMarket SLWA, C.A." class="input-hm" onchange="saveEmpresaLocal()" />
+          <input type="text" id="empEmpresa" value="HyperMarket SLWA, C.A." class="input-hm" />
         </div>
         <div>
           <label class="block text-[11px] font-bold text-gray-600 mb-0.5">RIF Empresa</label>
-          <input type="text" id="empRif" value="J-00000000-0" class="input-hm font-mono" onchange="saveEmpresaLocal()" />
+          <input type="text" id="empRif" value="J-00000000-0" class="input-hm font-mono" />
         </div>
         <div class="lg:col-span-3">
           <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Dirección Fiscal de la Empresa</label>
-          <input type="text" id="empDir" value="Boraure, Municipio La Trinidad, Estado Yaracuy" class="input-hm" onchange="saveEmpresaLocal()" />
+          <input type="text" id="empDir" value="Boraure, Municipio La Trinidad, Estado Yaracuy" class="input-hm" />
         </div>
 
-        <div>
-          <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Período Del</label>
-          <input type="date" id="perDesde" class="input-hm" onchange="recalcularNomina()" />
+        <div class="lg:col-span-2">
+          <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Semana de Nómina (Lunes a Domingo)</label>
+          <div class="flex gap-1">
+            <button type="button" onclick="shiftWeek(-7)" class="px-2.5 rounded bg-gray-200 hover:bg-gray-300 text-xs font-bold cursor-pointer">◀</button>
+            <input type="date" id="weekRefDate" class="input-hm" onchange="onWeekChanged()" />
+            <button type="button" onclick="shiftWeek(7)" class="px-2.5 rounded bg-gray-200 hover:bg-gray-300 text-xs font-bold cursor-pointer">▶</button>
+            <button type="button" onclick="goCurrentWeek()" class="px-2.5 rounded bg-hm-dark text-white text-xs font-bold cursor-pointer">Hoy</button>
+          </div>
         </div>
-        <div>
-          <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Al</label>
-          <input type="date" id="perHasta" class="input-hm" onchange="recalcularNomina()" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Tipo Período</label>
-          <select id="perTipo" class="input-hm" onchange="onTipoPeriodoChange()">
-            <option value="15">Quincenal (15 días)</option>
-            <option value="30">Mensual (30 días)</option>
-          </select>
-        </div>
+
         <div>
           <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Fecha de Pago</label>
           <input type="date" id="fechaPago" class="input-hm" />
         </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Modo Sueldo Básico (001)</label>
+          <select id="calcMode" class="input-hm" onchange="recalcularNomina()">
+            <option value="horas">Por Horas Reales (Base ÷ 48 × h)</option>
+            <option value="dias">Por Días Asistidos (Base ÷ 6 × d)</option>
+          </select>
+        </div>
+
         <div>
           <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Cestaticket Mensual ($)</label>
           <input type="number" id="cestaUsd" value="40" step="1" min="0" class="input-hm font-mono" onchange="recalcularNomina()" />
         </div>
+
         <div>
           <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Base en hoja Empleados es:</label>
-          <select id="baseMode" class="input-hm" onchange="recalcularNomina()">
-            <option value="mensual_bs">Mensual en Bs.</option>
-            <option value="semanal_usd">Semanal en USD ($ × 4 × BCV)</option>
-            <option value="mensual_usd">Mensual en USD ($ × BCV)</option>
+          <select id="baseCurrency" class="input-hm" onchange="construirFilasSemanal()">
+            <option value="semanal_usd">Semanal en USD ($)</option>
+            <option value="semanal_bs">Semanal en Bs.</option>
           </select>
         </div>
       </div>
@@ -182,11 +194,15 @@
       <div class="flex flex-wrap items-center gap-2">
         <select id="filtSucursal" class="input-hm !w-52" onchange="renderTabla()"><option value="">Todas las sucursales</option></select>
         <input type="text" id="filtSearch" placeholder="Buscar trabajador o C.I..." class="input-hm !w-52" oninput="renderTabla()" />
+        <div class="flex items-center gap-1.5 text-xs text-gray-600 ml-2">
+          <label class="font-bold">Bono Domingo ($):</label>
+          <input type="number" id="sundayUsd" value="10" step="0.5" min="0" class="input-hm !w-16 font-mono text-center" onchange="construirFilasSemanal()" />
+        </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
         <button onclick="guardarNominaSheets()" class="px-3.5 py-2 rounded-lg bg-hm-gold hover:bg-amber-600 text-hm-dark text-xs font-extrabold cursor-pointer">
-          <i class="fa-solid fa-floppy-disk mr-1"></i>Guardar en Sheets
+          <i class="fa-solid fa-floppy-disk mr-1"></i>Guardar Cierre en Sheets
         </button>
         <button onclick="exportarExcel()" class="px-3.5 py-2 rounded-lg bg-hm-med hover:bg-hm-dark text-white text-xs font-bold cursor-pointer">
           <i class="fa-solid fa-file-excel mr-1"></i>Exportar Excel
@@ -202,23 +218,24 @@
       <div class="card-hm p-3.5"><span class="text-xs text-gray-500 font-semibold">Trabajadores</span><b id="kpiTrab" class="block text-xl font-black text-hm-dark">0</b></div>
       <div class="card-hm p-3.5"><span class="text-xs text-gray-500 font-semibold">Total Asignaciones</span><b id="kpiAsig" class="block text-xl font-black text-emerald-700">Bs. 0,00</b></div>
       <div class="card-hm p-3.5 border-t-red-600"><span class="text-xs text-gray-500 font-semibold">Total Deducciones</span><b id="kpiDed" class="block text-xl font-black text-red-700">Bs. 0,00</b></div>
-      <div class="card-hm p-3.5 border-t-[#C59B27]"><span class="text-xs text-gray-500 font-semibold">Neto Total a Pagar</span><b id="kpiNeto" class="block text-xl font-black text-hm-dark">Bs. 0,00</b></div>
+      <div class="card-hm p-3.5 border-t-[#C59B27]"><span class="text-xs text-gray-500 font-semibold">Neto Semanal a Pagar</span><b id="kpiNeto" class="block text-xl font-black text-hm-dark">Bs. 0,00</b></div>
     </div>
 
-    <!-- TABLA EDITABLE DE NÓMINA -->
+    <!-- TABLA EDITABLE DE NÓMINA SEMANAL -->
     <div class="card-hm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-xs text-left">
           <thead class="bg-hm-dark text-white uppercase">
             <tr>
-              <th class="px-3 py-2.5">Trabajador / C.I.</th>
-              <th class="px-2 py-2.5 text-right">Sal. Mensual (Bs.)</th>
-              <th class="px-2 py-2.5 text-center">Días (001)</th>
+              <th class="px-3 py-2.5">Trabajador / Asistencia Real</th>
+              <th class="px-2 py-2.5 text-right">Base Sem. (Bs.)</th>
+              <th class="px-2 py-2.5 text-center">Días L-S</th>
+              <th class="px-2 py-2.5 text-center">Horas L-S</th>
               <th class="px-2 py-2.5 text-center">H.Ext (002)</th>
               <th class="px-2 py-2.5 text-center">B.Noc (003)</th>
-              <th class="px-2 py-2.5 text-center">Cestat. d (004)</th>
-              <th class="px-2 py-2.5 text-right">Bono Asist. Bs (005)</th>
-              <th class="px-2 py-2.5 text-center">ISLR % (104)</th>
+              <th class="px-2 py-2.5 text-center">Cesta d (004)</th>
+              <th class="px-2 py-2.5 text-right">Bono/Dom Bs (005)</th>
+              <th class="px-2 py-2.5 text-center">ISLR %</th>
               <th class="px-2 py-2.5 text-right">Asignaciones</th>
               <th class="px-2 py-2.5 text-right">Deducciones</th>
               <th class="px-2 py-2.5 text-right">Neto a Pagar</th>
@@ -235,7 +252,7 @@
   <div id="reciboModal" class="hidden fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="bg-hm-dark text-white px-4 py-3 flex justify-between items-center">
-        <span class="font-bold text-sm">Vista Previa — Recibo de Pago de Nómina</span>
+        <span class="font-bold text-sm">Vista Previa — Recibo de Pago Semanal</span>
         <div class="flex gap-2">
           <button onclick="enviarReciboWhatsApp()" class="px-3 py-1.5 rounded bg-[#25d366] text-white text-xs font-bold cursor-pointer"><i class="fa-brands fa-whatsapp mr-1"></i>WhatsApp</button>
           <button onclick="imprimirReciboActual()" class="px-3 py-1.5 rounded bg-hm-gold text-hm-dark text-xs font-bold cursor-pointer"><i class="fa-solid fa-print mr-1"></i>Imprimir / PDF</button>
@@ -246,35 +263,61 @@
     </div>
   </div>
 
-  <!-- CONTENEDOR OCULTO SOLO PARA IMPRESIÓN -->
+  <!-- CONTENEDOR PARA IMPRESIÓN -->
   <div id="printAllContainer" class="hidden p-4"></div>
 
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPIuIEEgfzPrpM1OKNIFX_K3Oku8Qj9f3PiQXG80e7lj1n3cBX12NDe0mP-H2copQ/exec";
-  const KEY_EMPRESA = "hm_slwa_empresa_fiscal_v1";
   const KEY_BCV = "hm_slwa_recibo_bcv_v1";
 
   let ADMIN_PIN = "";
+  let APP_CONFIG = {};
   let RAW_EMPLEADOS = [];
   let RAW_ASISTENCIA = [];
   let RAW_PERMISOS = [];
   let NOMINA_ROWS = [];
+  let WEEK_ISOS = [];
+  let WEEK_DDMM = [];
   let CURRENT_RECIBO_IDX = -1;
 
   const fmtVE = n => (Number(n) || 0).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const normStr = s => String(s || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
   const parseNum = v => {
     const s = String(v || "0").trim();
     if (s.includes(",") && s.includes(".")) return parseFloat(s.replace(/\./g, "").replace(",", ".")) || 0;
     if (s.includes(",")) return parseFloat(s.replace(",", ".")) || 0;
     return parseFloat(s) || 0;
   };
+
   function ddmmyyyyToIso(str) {
-    const m = String(str || "").match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-    return m ? `${m[3]}-${m[2]}-${m[1]}` : "";
+    const m = String(str || "").trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    return m ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : "";
   }
-  function isoToDdmmyyyy(iso) {
-    const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
-    return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
+
+  function normalizeTimeTo24h(str) {
+    if (!str) return "";
+    const s = String(str).trim().toLowerCase();
+    const isPM = s.includes("p"), isAM = s.includes("a");
+    const m = s.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (!m) return "";
+    let h = parseInt(m[1], 10);
+    const min = m[2].padStart(2, "0"), sec = (m[3] || "00").padStart(2, "0");
+    if (isPM && h < 12) h += 12;
+    if (isAM && h === 12) h = 0;
+    return `${String(h).padStart(2, "0")}:${min}:${sec}`;
+  }
+
+  function timeToHours(str24) {
+    const m = String(str24 || "").match(/^(\d{2}):(\d{2}):(\d{2})$/);
+    if (!m) return null;
+    return parseInt(m[1], 10) + parseInt(m[2], 10) / 60 + parseInt(m[3], 10) / 3600;
+  }
+
+  function calcNocturnalOverlap(entH, salH) {
+    // Jornada nocturna LOTTT: 19:00 a 05:00 (19..29 en línea continua)
+    let end = salH < entH ? salH + 24 : salH;
+    const overlap = (a1, a2, b1, b2) => Math.max(0, Math.min(a2, b2) - Math.max(a1, b1));
+    return overlap(entH, end, 0, 5) + overlap(entH, end, 19, 29);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -282,41 +325,50 @@
     if (savedBcv && parseFloat(savedBcv) > 0) document.getElementById("bcvRate").value = parseFloat(savedBcv).toFixed(2);
     else fetchBcv(true);
 
-    try {
-      const emp = JSON.parse(localStorage.getItem(KEY_EMPRESA) || "null");
-      if (emp) {
-        document.getElementById("empEmpresa").value = emp.nombre || "HyperMarket SLWA, C.A.";
-        document.getElementById("empRif").value = emp.rif || "J-00000000-0";
-        document.getElementById("empDir").value = emp.dir || "";
-      }
-    } catch (e) {}
-
-    const now = new Date();
-    const yyyy = now.getFullYear(), mm = String(now.getMonth() + 1).padStart(2, "0");
-    const day = now.getDate();
-    if (day <= 15) {
-      document.getElementById("perDesde").value = `${yyyy}-${mm}-01`;
-      document.getElementById("perHasta").value = `${yyyy}-${mm}-15`;
-    } else {
-      const lastDay = new Date(yyyy, now.getMonth() + 1, 0).getDate();
-      document.getElementById("perDesde").value = `${yyyy}-${mm}-16`;
-      document.getElementById("perHasta").value = `${yyyy}-${mm}-${String(lastDay).padStart(2, "0")}`;
-    }
-    document.getElementById("fechaPago").value = now.toISOString().slice(0, 10);
+    document.getElementById("fechaPago").value = new Date().toISOString().slice(0, 10);
+    goCurrentWeek(false);
   });
 
-  function saveEmpresaLocal() {
-    localStorage.setItem(KEY_EMPRESA, JSON.stringify({
-      nombre: document.getElementById("empEmpresa").value.trim(),
-      rif: document.getElementById("empRif").value.trim(),
-      dir: document.getElementById("empDir").value.trim()
-    }));
+  function computeWeek(refIso) {
+    const p = refIso.split("-").map(Number);
+    const d = new Date(Date.UTC(p[0], p[1] - 1, p[2]));
+    const diff = (d.getUTCDay() + 6) % 7;
+    d.setUTCDate(d.getUTCDate() - diff);
+    WEEK_ISOS = []; WEEK_DDMM = [];
+    for (let i = 0; i < 7; i++) {
+      const cur = new Date(d.getTime() + i * 86400000);
+      const y = cur.getUTCFullYear(), m = String(cur.getUTCMonth() + 1).padStart(2, "0"), dd = String(cur.getUTCDate()).padStart(2, "0");
+      WEEK_ISOS.push(`${y}-${m}-${dd}`);
+      WEEK_DDMM.push(`${dd}/${m}/${y}`);
+    }
+    document.getElementById("semanaRangeBadge").innerText = `Semana: ${WEEK_DDMM[0]} al ${WEEK_DDMM[6]}`;
+    document.getElementById("lunesBadge").innerText = `Lunes: 1`;
+  }
+
+  function goCurrentWeek(rebuild = true) {
+    const now = new Date();
+    document.getElementById("weekRefDate").value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    onWeekChanged(rebuild);
+  }
+
+  function shiftWeek(delta) {
+    const cur = document.getElementById("weekRefDate").value;
+    if (!cur) return;
+    const p = cur.split("-").map(Number);
+    const d = new Date(p[0], p[1] - 1, p[2] + delta);
+    document.getElementById("weekRefDate").value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    onWeekChanged(true);
+  }
+
+  function onWeekChanged(rebuild = true) {
+    computeWeek(document.getElementById("weekRefDate").value);
+    if (rebuild && RAW_EMPLEADOS.length) construirFilasSemanal();
   }
 
   function onBcvChanged() {
     const v = parseFloat(document.getElementById("bcvRate").value);
     if (v > 0) localStorage.setItem(KEY_BCV, String(v));
-    recalcularNomina();
+    if (RAW_EMPLEADOS.length) construirFilasSemanal();
   }
 
   async function fetchBcv(silent = false) {
@@ -327,7 +379,7 @@
       if (rate > 0) {
         document.getElementById("bcvRate").value = rate.toFixed(2);
         localStorage.setItem(KEY_BCV, String(rate));
-        if (NOMINA_ROWS.length) recalcularNomina();
+        if (RAW_EMPLEADOS.length) construirFilasSemanal();
         if (!silent) showToast(`Tasa BCV: Bs. ${fmtVE(rate)}`, "success");
       }
     } catch (e) { if (!silent) showToast("No se pudo consultar DolarApi.", "error"); }
@@ -337,17 +389,12 @@
     const pin = document.getElementById("pinInput").value.trim();
     if (!pin) return;
     const btn = document.getElementById("btnLogin"), err = document.getElementById("loginErr");
-    btn.disabled = true; btn.innerText = "Verificando..."; err.classList.add("hidden");
+    btn.disabled = true; btn.innerText = "Sincronizando..."; err.classList.add("hidden");
     ADMIN_PIN = pin;
     const res = await loadData();
-    if (res.ok) {
-      document.getElementById("loginOverlay").classList.add("hidden");
-    } else {
-      ADMIN_PIN = "";
-      err.innerText = res.message || "PIN incorrecto.";
-      err.classList.remove("hidden");
-    }
-    btn.disabled = false; btn.innerText = "Ingresar";
+    if (res.ok) document.getElementById("loginOverlay").classList.add("hidden");
+    else { ADMIN_PIN = ""; err.innerText = res.message || "PIN incorrecto."; err.classList.remove("hidden"); }
+    btn.disabled = false; btn.innerText = "Sincronizar e Ingresar";
   }
 
   async function loadData() {
@@ -356,64 +403,126 @@
       const json = await res.json();
       if (json.status !== "ok") return { ok: false, message: json.message };
 
+      APP_CONFIG = json.config || {};
       RAW_EMPLEADOS = json.empleados || [];
       RAW_ASISTENCIA = json.asistencia || [];
       RAW_PERMISOS = json.permisos || [];
 
-      const sucs = [...new Set(RAW_EMPLEADOS.map(e => e.Sucursal).filter(Boolean))];
-      const selSuc = document.getElementById("filtSucursal");
-      selSuc.innerHTML = `<option value="">Todas las sucursales</option>` + sucs.map(s => `<option value="${s}">${s}</option>`).join("");
+      if (APP_CONFIG.empresaNombre) document.getElementById("empEmpresa").value = APP_CONFIG.empresaNombre;
+      if (APP_CONFIG.empresaRif) document.getElementById("empRif").value = APP_CONFIG.empresaRif;
+      if (APP_CONFIG.empresaDir) document.getElementById("empDir").value = APP_CONFIG.empresaDir;
+      if (APP_CONFIG.cestaMensualUsd !== undefined) document.getElementById("cestaUsd").value = APP_CONFIG.cestaMensualUsd;
 
-      construirFilasNomina();
-      showToast("Empleados y asistencias cargados desde HyperMarket_SLWA.", "success");
+      const sucs = [...new Set(RAW_EMPLEADOS.map(e => e.Sucursal).filter(Boolean))];
+      document.getElementById("filtSucursal").innerHTML = `<option value="">Todas las sucursales</option>` + sucs.map(s => `<option value="${s}">${s}</option>`).join("");
+
+      construirFilasSemanal();
+      showToast("Todos los datos sincronizados con HyperMarket_SLWA.", "success");
       return { ok: true };
     } catch (e) {
       return { ok: false, message: "Error de conexión: " + e.message };
     }
   }
 
-  function countMondaysInRange(isoA, isoB) {
-    if (!isoA || !isoB || isoB < isoA) return 2;
-    let d = new Date(isoA + "T12:00:00Z"), end = new Date(isoB + "T12:00:00Z"), count = 0;
-    while (d <= end) {
-      if (d.getUTCDay() === 1) count++;
-      d.setUTCDate(d.getUTCDate() + 1);
-    }
-    return count;
+  async function guardarDatosEmpresaEnSheets() {
+    const updatedCfg = Object.assign({}, APP_CONFIG, {
+      empresaNombre: document.getElementById("empEmpresa").value.trim(),
+      empresaRif: document.getElementById("empRif").value.trim(),
+      empresaDir: document.getElementById("empDir").value.trim(),
+      cestaMensualUsd: parseFloat(document.getElementById("cestaUsd").value) || 40
+    });
+    await fetch(SCRIPT_URL, {
+      method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ module: "admin", adminPin: ADMIN_PIN, action: "saveConfig", config: updatedCfg })
+    });
+    APP_CONFIG = updatedCfg;
+    showToast("Datos fiscales guardados en la hoja Configuracion de Sheets.", "success");
   }
 
-  function onTipoPeriodoChange() {
-    const dias = parseInt(document.getElementById("perTipo").value, 10) || 15;
-    NOMINA_ROWS.forEach(r => { r.dias = dias; r.diasCesta = dias; });
-    recalcularNomina();
-  }
-
-  function construirFilasNomina() {
-    const desde = document.getElementById("perDesde").value;
-    const hasta = document.getElementById("perHasta").value;
-    const diasPer = parseInt(document.getElementById("perTipo").value, 10) || 15;
+  // ---------------------------------------------------------------------------
+  // CONSTRUCCIÓN SEMANAL DESDE EMPLEADOS + ASISTENCIA + PERMISOS
+  // ---------------------------------------------------------------------------
+  function construirFilasSemanal() {
     const bcv = parseFloat(document.getElementById("bcvRate").value) || 60;
-    const baseMode = document.getElementById("baseMode").value;
+    const baseMode = document.getElementById("baseCurrency").value;
+    const sundayUsd = parseFloat(document.getElementById("sundayUsd").value) || 10;
 
     NOMINA_ROWS = RAW_EMPLEADOS.map(e => {
       const nombre = `${e.Nombres || ""} ${e.Apellidos || ""}`.trim();
+      const nNorm = normStr(nombre);
       const rawBase = parseNum(e.Salario_Base_Bs);
-      let salMensual = rawBase;
-      if (baseMode === "semanal_usd") salMensual = rawBase * 4 * bcv;
-      else if (baseMode === "mensual_usd") salMensual = rawBase * bcv;
+      const salarioSemanalBs = baseMode === "semanal_usd" ? (rawBase * bcv) : rawBase;
 
-      // Contar asistencias reales en rango
-      const diasSet = new Set();
+      // Agrupar marcajes de esta semana (Lun..Dom)
+      const dayPunches = [[], [], [], [], [], [], []];
       let tardanzas = 0;
+
       RAW_ASISTENCIA.forEach(a => {
         const iso = ddmmyyyyToIso(a.Fecha);
-        if (a.Accion === "ENTRADA" && (a.ID_Unico === e.ID_Unico || a.Empleado === nombre)) {
-          if ((!desde || iso >= desde) && (!hasta || iso <= hasta)) {
-            diasSet.add(a.Fecha);
-            if (String(a.Estado).includes("Tarde")) tardanzas++;
+        const dIdx = WEEK_ISOS.indexOf(iso);
+        if (dIdx < 0) return;
+
+        const matchId = e.ID_Unico && a.ID_Unico && a.ID_Unico.toLowerCase() === e.ID_Unico.toLowerCase();
+        const matchName = normStr(a.Empleado) === nNorm;
+        if (!matchId && !matchName) return;
+
+        const h24 = normalizeTimeTo24h(a.Hora);
+        if (!h24) return;
+        dayPunches[dIdx].push({ acc: String(a.Accion || "").toUpperCase(), h24, est: String(a.Estado || "") });
+        if (a.Accion === "ENTRADA" && String(a.Estado || "").includes("Tarde")) tardanzas++;
+      });
+
+      // Contar días remunerados de permisos aprobados en la semana
+      let diasPermisoLunSab = 0;
+      let diasAsistLunSab = 0;
+      let horasLunSab = 0;
+      let horasExtrasTotal = 0;
+      let horasNocturnasTotal = 0;
+      let domingoTrabajado = false;
+
+      for (let d = 0; d < 7; d++) {
+        const list = dayPunches[d].sort((x, y) => x.h24.localeCompare(y.h24));
+        const firstIn = list.find(x => x.acc === "ENTRADA");
+        const lastOut = [...list].reverse().find(x => x.acc === "SALIDA");
+
+        let hDia = 0;
+        let hNoc = 0;
+        if (firstIn && lastOut) {
+          const h1 = timeToHours(firstIn.h24), h2 = timeToHours(lastOut.h24);
+          if (h1 !== null && h2 !== null) {
+            let diff = h2 - h1;
+            if (diff < 0) diff += 24;
+            hDia = diff;
+            hNoc = calcNocturnalOverlap(h1, h2);
           }
         }
-      });
+
+        if (d < 6) {
+          if (firstIn) diasAsistLunSab++;
+          else {
+            // Verificar si tiene permiso remunerado ese día
+            const isoDia = WEEK_ISOS[d];
+            const tienePermiso = RAW_PERMISOS.some(p =>
+              p.Estado === "Aprobado" && p.Remunerado === "Sí" &&
+              (p.ID_Unico === e.ID_Unico || normStr(p.Empleado) === nNorm) &&
+              isoDia >= p.Fecha_Inicio && isoDia <= p.Fecha_Fin
+            );
+            if (tienePermiso) {
+              diasPermisoLunSab++;
+              hDia = 8;
+            }
+          }
+          horasLunSab += hDia;
+          if (hDia > 8) horasExtrasTotal += (hDia - 8);
+          horasNocturnasTotal += hNoc;
+        } else {
+          // Domingo: si trabajó >= 4h (o marcó entrada/salida)
+          if (hDia >= 4 || (firstIn && lastOut)) domingoTrabajado = true;
+        }
+      }
+
+      const diasPagables = Math.min(6, diasAsistLunSab + diasPermisoLunSab);
+      const bonoDomBs = domingoTrabajado ? (sundayUsd * bcv) : 0;
 
       return {
         id: e.ID_Unico || "",
@@ -423,15 +532,18 @@
         cargo: e.Cargo || "Trabajador",
         sucursal: e.Sucursal || "",
         fechaIngreso: e.Fecha_Ingreso || "",
-        rawBase: rawBase,
-        salarioMensual: salMensual,
-        dias: diasPer,
-        asistenciasReales: diasSet.size,
+        rawBaseUsd: rawBase,
+        salarioSemanalBs: salarioSemanalBs,
+        dias: diasPagables,
+        horasLS: Number(horasLunSab.toFixed(2)),
+        asistenciasReales: diasAsistLunSab,
+        diasPermiso: diasPermisoLunSab,
+        domingoTrabajado: domingoTrabajado,
         tardanzas: tardanzas,
-        horasExtras: 0,
-        bonoNocturnoHoras: 0,
-        diasCesta: diasPer,
-        bonoAsistenciaBs: 0,
+        horasExtras: Number(horasExtrasTotal.toFixed(2)),
+        bonoNocturnoHoras: Number(horasNocturnasTotal.toFixed(2)),
+        diasCesta: 7,
+        bonoAsistenciaBs: Number(bonoDomBs.toFixed(2)),
         islrPct: 0
       };
     });
@@ -440,41 +552,40 @@
   }
 
   function recalcularNomina() {
-    const desde = document.getElementById("perDesde").value;
-    const hasta = document.getElementById("perHasta").value;
     const bcv = parseFloat(document.getElementById("bcvRate").value) || 60;
     const cestaMensualUsd = parseFloat(document.getElementById("cestaUsd").value) || 0;
-    const baseMode = document.getElementById("baseMode").value;
-    const numLunes = countMondaysInRange(desde, hasta);
+    const calcMode = document.getElementById("calcMode").value;
 
-    document.getElementById("lunesBadge").innerText = `Lunes en período: ${numLunes}`;
+    const ivssPct = (Number(APP_CONFIG.ivssPct) || 4) / 100;
+    const rpePct = (Number(APP_CONFIG.rpePct) || 0.5) / 100;
+    const faovPct = (Number(APP_CONFIG.faovPct) || 1) / 100;
 
     NOMINA_ROWS.forEach(r => {
-      if (r._manualSal === undefined) {
-        if (baseMode === "mensual_bs") r.salarioMensual = r.rawBase;
-        else if (baseMode === "semanal_usd") r.salarioMensual = r.rawBase * 4 * bcv;
-        else if (baseMode === "mensual_usd") r.salarioMensual = r.rawBase * bcv;
-      }
+      r.salarioMensualRef = (r.salarioSemanalBs * 52) / 12;
+      r.salarioDiario = r.salarioSemanalBs / 6;
+      const horaDiurna = r.salarioSemanalBs / 48;
 
-      r.salarioDiario = r.salarioMensual / 30;
-      const horaDiurna = r.salarioDiario / 8;
+      // 001: Sueldo Básico Semanal
+      r.m001 = calcMode === "horas"
+        ? horaDiurna * (Number(r.horasLS) || 0)
+        : r.salarioDiario * (Number(r.dias) || 0);
 
-      // Asignaciones
-      r.m001 = r.salarioDiario * (Number(r.dias) || 0);
+      // 002 y 003
       r.m002 = (Number(r.horasExtras) || 0) * horaDiurna * 1.5;
       r.m003 = (Number(r.bonoNocturnoHoras) || 0) * horaDiurna * 0.30;
+
+      // 004 y 005 (No salariales)
       const cestaMensualBs = cestaMensualUsd * bcv;
       r.m004 = (cestaMensualBs / 30) * (Number(r.diasCesta) || 0);
       r.m005 = Number(r.bonoAsistenciaBs) || 0;
 
       const totalSalarial = r.m001 + r.m002 + r.m003;
 
-      // Deducciones LOTTT
-      const salarioSemanal = (r.salarioMensual * 12) / 52;
-      r.numLunes = numLunes;
-      r.m101 = salarioSemanal * numLunes * 0.04;   // IVSS 4%
-      r.m102 = salarioSemanal * numLunes * 0.005;  // RPE 0.5%
-      r.m103 = totalSalarial * 0.01;               // FAOV 1%
+      // Deducciones LOTTT (1 lunes por semana)
+      r.numLunes = 1;
+      r.m101 = r.salarioSemanalBs * r.numLunes * ivssPct;
+      r.m102 = r.salarioSemanalBs * r.numLunes * rpePct;
+      r.m103 = totalSalarial * faovPct;
       r.m104 = totalSalarial * ((Number(r.islrPct) || 0) / 100);
 
       r.totalAsig = r.m001 + r.m002 + r.m003 + r.m004 + r.m005;
@@ -505,12 +616,15 @@
         <tr class="hover:bg-gray-50">
           <td class="px-3 py-2">
             <div class="font-bold text-hm-dark">${r.nombre}</div>
-            <div class="text-[10px] text-gray-500">${r.cedula} · ${r.cargo} · Asist. reales: <b>${r.asistenciasReales}</b></div>
+            <div class="text-[10px] text-gray-500">
+              ${r.cedula} · ${r.cargo} · Asist: <b>${r.asistenciasReales}d</b>${r.diasPermiso ? ` + ${r.diasPermiso} perm.` : ""}${r.domingoTrabajado ? ` · <span class="text-amber-700 font-bold">Dom✓</span>` : ""}
+            </div>
           </td>
           <td class="px-2 py-2 text-right">
-            <input type="number" step="0.01" value="${r.salarioMensual.toFixed(2)}" onchange="editRow(${idx},'sal',this.value)" class="input-hm !w-24 text-right font-mono" />
+            <input type="number" step="0.01" value="${r.salarioSemanalBs.toFixed(2)}" onchange="editRow(${idx},'sal',this.value)" class="input-hm !w-24 text-right font-mono" />
           </td>
           <td class="px-2 py-2 text-center"><input type="number" step="1" min="0" value="${r.dias}" onchange="editRow(${idx},'dias',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
+          <td class="px-2 py-2 text-center"><input type="number" step="0.1" min="0" value="${r.horasLS}" onchange="editRow(${idx},'hls',this.value)" class="input-hm !w-16 text-center font-mono" /></td>
           <td class="px-2 py-2 text-center"><input type="number" step="0.5" min="0" value="${r.horasExtras}" onchange="editRow(${idx},'he',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
           <td class="px-2 py-2 text-center"><input type="number" step="0.5" min="0" value="${r.bonoNocturnoHoras}" onchange="editRow(${idx},'bn',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
           <td class="px-2 py-2 text-center"><input type="number" step="1" min="0" value="${r.diasCesta}" onchange="editRow(${idx},'dc',this.value)" class="input-hm !w-14 text-center font-mono" /></td>
@@ -535,8 +649,9 @@
 
   function editRow(idx, field, val) {
     const r = NOMINA_ROWS[idx], n = parseFloat(val) || 0;
-    if (field === "sal") { r.salarioMensual = n; r._manualSal = true; }
+    if (field === "sal") r.salarioSemanalBs = n;
     if (field === "dias") r.dias = n;
+    if (field === "hls") r.horasLS = n;
     if (field === "he") r.horasExtras = n;
     if (field === "bn") r.bonoNocturnoHoras = n;
     if (field === "dc") r.diasCesta = n;
@@ -546,18 +661,19 @@
   }
 
   // ---------------------------------------------------------------------------
-  // GENERACIÓN DEL RECIBO EXACTO (MODELO LOTTT)
+  // GENERACIÓN DEL RECIBO SEMANAL EXACTO (MODELO LOTTT)
   // ---------------------------------------------------------------------------
   function buildReciboHTML(r) {
     const empNombre = document.getElementById("empEmpresa").value.trim() || "HyperMarket SLWA, C.A.";
     const empRif = document.getElementById("empRif").value.trim() || "J-00000000-0";
     const empDir = document.getElementById("empDir").value.trim() || "Venezuela";
-    const delStr = isoToDdmmyyyy(document.getElementById("perDesde").value);
-    const alStr = isoToDdmmyyyy(document.getElementById("perHasta").value);
-    const fPagoStr = isoToDdmmyyyy(document.getElementById("fechaPago").value);
+    const delStr = WEEK_DDMM[0] || "";
+    const alStr = WEEK_DDMM[6] || "";
+    const pPago = document.getElementById("fechaPago").value.split("-");
+    const fPagoStr = pPago.length === 3 ? `${pPago[2]}/${pPago[1]}/${pPago[0]}` : "";
     const bcv = parseFloat(document.getElementById("bcvRate").value) || 0;
-    const perTipo = parseInt(document.getElementById("perTipo").value, 10) || 15;
-    const labelSueldo = perTipo === 15 ? "Sueldo Básico (Quincenal)" : "Sueldo Básico (Mensual)";
+    const calcMode = document.getElementById("calcMode").value;
+    const cant001 = calcMode === "horas" ? `${r.horasLS} h` : `${r.dias} d`;
 
     return `
       <div class="recibo-paper">
@@ -574,9 +690,9 @@
           <div><strong>C.I.:</strong> ${r.cedula || "______________"}</div>
           <div><strong>CARGO:</strong> ${r.cargo}</div>
           <div><strong>FECHA DE INGRESO:</strong> ${r.fechaIngreso || "__/__/____"}</div>
-          <div><strong>SALARIO MENSUAL:</strong> Bs. ${fmtVE(r.salarioMensual)}</div>
+          <div><strong>SALARIO MENSUAL REF.:</strong> Bs. ${fmtVE(r.salarioMensualRef)}</div>
           <div><strong>SALARIO DIARIO:</strong> Bs. ${fmtVE(r.salarioDiario)}</div>
-          <div><strong>PERÍODO DE PAGO:</strong> Del ${delStr} al ${alStr} (${r.dias} días)</div>
+          <div><strong>PERÍODO DE PAGO:</strong> Del ${delStr} al ${alStr} (Semanal - 7 días)</div>
           <div><strong>TASA BCV REFERENCIAL:</strong> Bs. ${fmtVE(bcv)} / USD</div>
         </div>
 
@@ -591,11 +707,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>001</td><td>${labelSueldo}</td><td class="cnt">${r.dias} d</td><td class="num">${fmtVE(r.m001)}</td><td class="num"></td></tr>
+            <tr><td>001</td><td>Sueldo Básico (Semanal)</td><td class="cnt">${cant001}</td><td class="num">${fmtVE(r.m001)}</td><td class="num"></td></tr>
             <tr><td>002</td><td>Horas Extras Diurnas (50%)</td><td class="cnt">${r.horasExtras} h</td><td class="num">${fmtVE(r.m002)}</td><td class="num"></td></tr>
             <tr><td>003</td><td>Bono Nocturno (30%)</td><td class="cnt">${r.bonoNocturnoHoras} h</td><td class="num">${fmtVE(r.m003)}</td><td class="num"></td></tr>
             <tr><td>004</td><td>Cestaticket Socialista (No sal.)</td><td class="cnt">${r.diasCesta} d</td><td class="num">${fmtVE(r.m004)}</td><td class="num"></td></tr>
-            <tr><td>005</td><td>Bono de Asistencia (No salarial)</td><td class="cnt">${r.m005 > 0 ? 1 : 0}</td><td class="num">${fmtVE(r.m005)}</td><td class="num"></td></tr>
+            <tr><td>005</td><td>Bono Asistencia / Domingo (No sal.)</td><td class="cnt">${r.m005 > 0 ? 1 : 0}</td><td class="num">${fmtVE(r.m005)}</td><td class="num"></td></tr>
             <tr><td>101</td><td>Retención IVSS (4%)</td><td class="cnt">${r.numLunes} lun</td><td class="num"></td><td class="num">${fmtVE(r.m101)}</td></tr>
             <tr><td>102</td><td>Retención RPE / Paro Forzoso (0,5%)</td><td class="cnt">${r.numLunes} lun</td><td class="num"></td><td class="num">${fmtVE(r.m102)}</td></tr>
             <tr><td>103</td><td>Retención FAOV (1%)</td><td class="cnt">1</td><td class="num"></td><td class="num">${fmtVE(r.m103)}</td></tr>
@@ -633,20 +749,16 @@
 
   function abrirReciboModal(idx) {
     CURRENT_RECIBO_IDX = idx;
-    const r = NOMINA_ROWS[idx];
-    if (!r) return;
+    const r = NOMINA_ROWS[idx]; if (!r) return;
     document.getElementById("modalReciboBody").innerHTML = buildReciboHTML(r);
     document.getElementById("reciboModal").classList.remove("hidden");
   }
-
   function cerrarReciboModal() { document.getElementById("reciboModal").classList.add("hidden"); }
-
   function imprimirReciboActual() {
     if (CURRENT_RECIBO_IDX < 0) return;
     document.getElementById("printAllContainer").innerHTML = buildReciboHTML(NOMINA_ROWS[CURRENT_RECIBO_IDX]);
     window.print();
   }
-
   function imprimirTodosRecibos() {
     const list = getFilteredRows();
     if (!list.length) return showToast("No hay trabajadores para imprimir.", "error");
@@ -657,46 +769,34 @@
   function enviarReciboWhatsApp() {
     if (CURRENT_RECIBO_IDX < 0) return;
     const r = NOMINA_ROWS[CURRENT_RECIBO_IDX];
-    const delStr = isoToDdmmyyyy(document.getElementById("perDesde").value);
-    const alStr = isoToDdmmyyyy(document.getElementById("perHasta").value);
     const empNombre = document.getElementById("empEmpresa").value.trim();
 
-    let txt = `*RECIBO DE PAGO DE NÓMINA - ${empNombre}*%0A`;
-    txt += `*Trabajador:* ${r.nombre} (${r.cedula})%0A`;
-    txt += `*Cargo:* ${r.cargo}%0A`;
-    txt += `*Período:* ${delStr} al ${alStr} (${r.dias} días)%0A`;
-    txt += `--------------------------------%0A`;
-    txt += `• 001 Sueldo Básico (${r.dias}d): Bs. ${fmtVE(r.m001)}%0A`;
+    let txt = `*RECIBO DE PAGO SEMANAL - ${empNombre}*%0A`;
+    txt += `*Trabajador:* ${r.nombre} (${r.cedula})%0A*Cargo:* ${r.cargo}%0A`;
+    txt += `*Semana:* ${WEEK_DDMM[0]} al ${WEEK_DDMM[6]}%0A--------------------------------%0A`;
+    txt += `• 001 Sueldo Básico: Bs. ${fmtVE(r.m001)}%0A`;
     if (r.m002 > 0) txt += `• 002 Horas Extras (${r.horasExtras}h): Bs. ${fmtVE(r.m002)}%0A`;
     if (r.m003 > 0) txt += `• 003 Bono Nocturno (${r.bonoNocturnoHoras}h): Bs. ${fmtVE(r.m003)}%0A`;
     txt += `• 004 Cestaticket (${r.diasCesta}d): Bs. ${fmtVE(r.m004)}%0A`;
-    if (r.m005 > 0) txt += `• 005 Bono Asistencia: Bs. ${fmtVE(r.m005)}%0A`;
-    txt += `*Total Asignaciones:* Bs. ${fmtVE(r.totalAsig)}%0A`;
-    txt += `--------------------------------%0A`;
-    txt += `• 101 IVSS (4% - ${r.numLunes} lun): -Bs. ${fmtVE(r.m101)}%0A`;
-    txt += `• 102 RPE (0,5% - ${r.numLunes} lun): -Bs. ${fmtVE(r.m102)}%0A`;
-    txt += `• 103 FAOV (1%): -Bs. ${fmtVE(r.m103)}%0A`;
+    if (r.m005 > 0) txt += `• 005 Bono/Domingo: Bs. ${fmtVE(r.m005)}%0A`;
+    txt += `*Total Asignaciones:* Bs. ${fmtVE(r.totalAsig)}%0A--------------------------------%0A`;
+    txt += `• 101 IVSS (4%): -Bs. ${fmtVE(r.m101)}%0A• 102 RPE (0,5%): -Bs. ${fmtVE(r.m102)}%0A• 103 FAOV (1%): -Bs. ${fmtVE(r.m103)}%0A`;
     if (r.m104 > 0) txt += `• 104 ISLR (${r.islrPct}%): -Bs. ${fmtVE(r.m104)}%0A`;
-    txt += `*Total Deducciones:* -Bs. ${fmtVE(r.totalDed)}%0A`;
-    txt += `================================%0A`;
-    txt += `*NETO A PAGAR:* *Bs. ${fmtVE(r.neto)}*`;
+    txt += `*Total Deducciones:* -Bs. ${fmtVE(r.totalDed)}%0A================================%0A*NETO A PAGAR:* *Bs. ${fmtVE(r.neto)}*`;
 
     let tel = String(r.telefono || "").replace(/\D/g, "");
     if (tel.startsWith("0") && tel.length === 11) tel = "58" + tel.slice(1);
-    const url = tel.length >= 11 ? `https://api.whatsapp.com/send?phone=${tel}&text=${txt}` : `https://api.whatsapp.com/send?text=${txt}`;
-    window.open(url, "_blank");
+    window.open(tel.length >= 11 ? `https://api.whatsapp.com/send?phone=${tel}&text=${txt}` : `https://api.whatsapp.com/send?text=${txt}`, "_blank");
   }
 
   async function guardarNominaSheets() {
     const list = getFilteredRows();
     if (!list.length) return showToast("No hay datos para guardar.", "error");
-    const periodo = `${isoToDdmmyyyy(document.getElementById("perDesde").value)} al ${isoToDdmmyyyy(document.getElementById("perHasta").value)}`;
-    const diasBase = parseInt(document.getElementById("perTipo").value, 10) || 15;
-
+    const periodo = `${WEEK_DDMM[0]} al ${WEEK_DDMM[6]} (Semanal)`;
     const filas = list.map(({ r }) => ({
       ID_Unico: r.id, Empleado: r.nombre, Cedula: r.cedula, Cargo: r.cargo, Sucursal: r.sucursal,
-      Salario_Base_Bs: fmtVE(r.salarioMensual), Dias_Periodo: diasBase, Dias_Trabajados: r.dias,
-      Dias_Permiso: 0, Tardanzas: r.tardanzas,
+      Salario_Base_Bs: fmtVE(r.salarioSemanalBs), Dias_Periodo: 7, Dias_Trabajados: r.asistenciasReales,
+      Dias_Permiso: r.diasPermiso, Tardanzas: r.tardanzas,
       Asignaciones_Bs: fmtVE(r.totalAsig), Deducciones_Bs: fmtVE(r.totalDed), Neto_Pagar_Bs: fmtVE(r.neto)
     }));
 
@@ -704,17 +804,17 @@
       method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ module: "admin", adminPin: ADMIN_PIN, action: "saveNomina", periodo, filas })
     });
-    showToast("Nómina guardada en la hoja 'Nomina' de HyperMarket_SLWA.", "success");
+    showToast("Cierre semanal guardado en la hoja 'Nomina' de HyperMarket_SLWA.", "success");
   }
 
   function exportarExcel() {
     const list = getFilteredRows();
     if (!list.length) return;
-    const headers = ["ID", "Trabajador", "Cedula", "Cargo", "Sal_Mensual", "001_Basico", "002_H_Extras", "003_Bono_Noc", "004_Cestaticket", "005_Bono_Asist", "Total_Asig", "101_IVSS", "102_RPE", "103_FAOV", "104_ISLR", "Total_Ded", "Neto_Pagar_Bs"];
-    const rows = list.map(({ r }) => [r.id, r.nombre, r.cedula, r.cargo, r.salarioMensual.toFixed(2), r.m001.toFixed(2), r.m002.toFixed(2), r.m003.toFixed(2), r.m004.toFixed(2), r.m005.toFixed(2), r.totalAsig.toFixed(2), r.m101.toFixed(2), r.m102.toFixed(2), r.m103.toFixed(2), r.m104.toFixed(2), r.totalDed.toFixed(2), r.neto.toFixed(2)]);
+    const headers = ["ID", "Trabajador", "Cedula", "Cargo", "Base_Sem_Bs", "Horas_LS", "001_Basico", "002_H_Extras", "003_Bono_Noc", "004_Cestaticket", "005_Bono_Dom", "Total_Asig", "101_IVSS", "102_RPE", "103_FAOV", "104_ISLR", "Total_Ded", "Neto_Pagar_Bs"];
+    const rows = list.map(({ r }) => [r.id, r.nombre, r.cedula, r.cargo, r.salarioSemanalBs.toFixed(2), r.horasLS, r.m001.toFixed(2), r.m002.toFixed(2), r.m003.toFixed(2), r.m004.toFixed(2), r.m005.toFixed(2), r.totalAsig.toFixed(2), r.m101.toFixed(2), r.m102.toFixed(2), r.m103.toFixed(2), r.m104.toFixed(2), r.totalDed.toFixed(2), r.neto.toFixed(2)]);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), "Recibos_Nomina");
-    XLSX.writeFile(wb, `Nomina_LOTTT_SLWA_${document.getElementById("perHasta").value}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...rows]), "Nomina_Semanal_LOTTT");
+    XLSX.writeFile(wb, `Recibos_Semanal_SLWA_${WEEK_ISOS[0]}_al_${WEEK_ISOS[6]}.xlsx`);
   }
 
   function showToast(msg, type = "info") {
